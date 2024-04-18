@@ -85,8 +85,14 @@ public class VideoEncoder
         }
 
         string directory = Path.GetDirectoryName(InputFilePath);
+        string outputSubdirectory = Path.Combine(directory, "output");
         string fileName = Path.GetFileNameWithoutExtension(InputFilePath);
-        string newFilePath = Path.Combine(directory, $"_out_{fileName}.mkv");
+        string newFilePath = Path.Combine(outputSubdirectory, $"{fileName}.mkv");
+
+        // Create the output directory if it doesn't exist
+        if (!Directory.Exists(outputSubdirectory))
+            Directory.CreateDirectory(outputSubdirectory);
+
         Process = new Process
         {
             StartInfo = new ProcessStartInfo
@@ -118,6 +124,7 @@ public class VideoEncoder
     private void OnProcessOnExited(object? sender, EventArgs args)
     {
         State = Process.ExitCode == 0 ? EncodingState.Success : EncodingState.Error;
+        InfoUpdate?.Invoke(this);
 
         Process.OutputDataReceived -= OnStreamDataReceivedEvent;
         Process.ErrorDataReceived -= OnStreamDataReceivedEvent;

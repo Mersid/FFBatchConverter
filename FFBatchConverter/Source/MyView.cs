@@ -72,24 +72,16 @@ public partial class MyView
 
 	private void OnEncoderInfoUpdate(VideoEncoder encoder)
 	{
-
 		Application.MainLoop.Invoke(() =>
 		{
 			encoder.DataRow[3] = $"{encoder.CurrentDuration / encoder.Duration * 100:F2}%";
 
+			if (encoder.State is EncodingState.Error or EncodingState.Success)
+			{
+				encoder.DataRow[3] = encoder.State.ToString();
+			}
+
 			SetNeedsDisplay();
 		});
-
-		// filesTableView.Update();
-		// Driver.UpdateOffScreen ();
-		// View last = this;
-		// Rect r = new Rect(0, 0, 300, 300);
-		// var v = last;
-		//
-		// 	if (v.Visible) {
-		// 		// v.SetNeedsDisplay ();
-		// 		Redraw (r);
-		// 	}
-		// Driver.Refresh ();
 	}
 }

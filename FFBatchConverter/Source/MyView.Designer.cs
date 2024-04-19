@@ -16,16 +16,60 @@ public partial class MyView : Window
 	private Label ffprobePathLabel;
 	private TextField ffprobePathTextField;
 
-	private Label selectedLabel;
-	private TextField selectedTextField;
+	private Label commandLabel;
+	private TextField commandTextField;
+
+	private Label concurrencyLabel;
+	private TextField concurrencyTextField;
+
+	private Label extensionLabel;
+	private TextField extensionTextField;
 
 	private Button startButton;
 	private Button addFilesButton;
 
-	private DataRow tr;
-
 	private void InitializeComponent()
 	{
+		this.extensionLabel = new Label
+		{
+			X = 20,
+			Y = Pos.AnchorEnd(2),
+			Width = 6,
+			Height = 1,
+			Data = "label4",
+			Text = "Extension",
+			TextAlignment = TextAlignment.Left,
+		};
+
+		this.extensionTextField = new TextField
+		{
+			X = 32,
+			Y = Pos.AnchorEnd(2),
+			Width = 6,
+			Height = 1,
+			Text = "mkv",
+		};
+
+		this.concurrencyLabel = new Label
+		{
+			X = 0,
+			Y = Pos.AnchorEnd(2),
+			Width = 4,
+			Height = 1,
+			Data = "label3",
+			Text = "Concurrency",
+			TextAlignment = TextAlignment.Left,
+		};
+
+		this.concurrencyTextField = new TextField
+		{
+			X = 14,
+			Y = Pos.AnchorEnd(2),
+			Width = 3,
+			Height = 1,
+			Text = "1",
+		};
+
 		this.addFilesButton = new Button
 		{
 			Y = Pos.AnchorEnd(1),
@@ -95,10 +139,6 @@ public partial class MyView : Window
 		FilesDataTable.Columns.Add("Size", typeof(string));
 		FilesDataTable.Columns.Add("Status", typeof(string));
 
-		// tr = FilesDataTable.NewRow();
-		// tr[0] = "asdf: ";
-		// FilesDataTable.Rows.Add(tr);
-
 		this.filesTableView = new TableView
 		{
 			Width = Dim.Fill(),
@@ -110,18 +150,18 @@ public partial class MyView : Window
 			Table = FilesDataTable,
 		};
 
-		this.selectedLabel = new Label
+		this.commandLabel = new Label
 		{
 			X = 0,
 			Y = Pos.AnchorEnd(1),
 			Width = 4,
 			Height = 1,
 			Data = "label2",
-			Text = "Selected",
+			Text = "FFmpeg Command",
 			TextAlignment = TextAlignment.Left,
 		};
 
-		this.selectedTextField = new TextField
+		this.commandTextField = new TextField
 		{
 			X = 14,
 			Y = Pos.AnchorEnd(1),
@@ -151,8 +191,14 @@ public partial class MyView : Window
 		this.Add(ffprobePathLabel);
 		this.Add(ffprobePathTextField);
 
-		this.Add(selectedLabel);
-		this.Add(selectedTextField);
+		this.Add(concurrencyLabel);
+		this.Add(concurrencyTextField);
+
+		this.Add(extensionLabel);
+		this.Add(extensionTextField);
+
+		this.Add(commandLabel);
+		this.Add(commandTextField);
 
 		this.Add(startButton);
 		this.Add(addFilesButton);

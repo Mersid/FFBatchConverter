@@ -10,6 +10,21 @@ public partial class MyView
 	private DataTable FilesDataTable { get; set; }
 	private List<VideoEncoder> Encoders { get; } = [];
 	private object EncodersLock { get; } = new object();
+	private bool _running;
+
+	private new bool Running
+	{
+		get => _running;
+		set
+		{
+			Application.MainLoop.Invoke(() =>
+			{
+				_running = value;
+				startButton.Width = 1; // Needed to force right-align when new text is smaller than the one at start.
+				startButton.Text = Running ? "Stop" : "Start";
+			});
+		}
+	}
 
 	public MyView()
 	{
@@ -42,6 +57,11 @@ public partial class MyView
 		// an event loop will trigger the next video to start encoding. We can't do that here, because it would cause
 		// a race condition.
 		Encoders.FirstOrDefault(t => t.State == EncodingState.Pending)?.Start(commandTextField.Text.ToString(), subdirectoryTextField.Text.ToString(), extensionTextField.Text.ToString());
+
+		if (Encoders.Count == 0)
+			return;
+
+		Running = !Running;
 	}
 
 	private void OnAddFilesButtonOnClicked()
@@ -96,10 +116,15 @@ public partial class MyView
 			if (!result)
 				concurrency = 1;
 
-			if (Encoders.Count(e => e.State == EncodingState.Encoding) < concurrency)
+			if (Running && Encoders.Count(e => e.State == EncodingState.Encoding) < concurrency)
 			{
 				VideoEncoder? next = Encoders.FirstOrDefault(e => e.State == EncodingState.Pending);
 				next?.Start(commandTextField.Text.ToString(), subdirectoryTextField.Text.ToString(), extensionTextField.Text.ToString());
+			}
+
+			if (Encoders.Count(e => e.State == EncodingState.Encoding) == 0)
+			{
+				Running = false;
 			}
 		}
 	}

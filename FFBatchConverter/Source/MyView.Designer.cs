@@ -31,8 +31,32 @@ public partial class MyView : Window
 	private Button startButton;
 	private Button addFilesButton;
 
+	private TextView logTextView;
+	private View color;
+
 	private void InitializeComponent()
 	{
+		this.color = new View
+		{
+			X = 0,
+			Y = 30,
+			Width = Dim.Fill(),
+			Height = 1,
+			ColorScheme = new ColorScheme
+			{
+				Normal = Application.Driver.MakeAttribute(Color.White, Color.BrightCyan),
+			}
+		};
+
+		this.logTextView = new TextView
+		{
+			X = 0,
+			Y = 23,
+			Width = Dim.Fill(),
+			Height = 5,
+			Text = "Hello, world!",
+		};
+
 		this.subdirectoryLabel = new Label
 		{
 			X = 20,
@@ -111,7 +135,7 @@ public partial class MyView : Window
 			IsDefault = false
 		};
 
-		// Right-aling buttons
+		// Right-align buttons
 		this.addFilesButton.X = Pos.AnchorEnd() - (Pos.Right(addFilesButton) - Pos.Left(addFilesButton));
 		this.startButton.X = Pos.AnchorEnd() - (Pos.Right(startButton) - Pos.Left(startButton));
 
@@ -170,6 +194,10 @@ public partial class MyView : Window
 			FullRowSelect = true,
 			MultiSelect = true,
 			Table = FilesDataTable,
+			ColorScheme = new ColorScheme
+			{
+				Normal = Application.Driver.MakeAttribute(Color.Cyan, Color.Green),
+			}
 		};
 
 		this.commandLabel = new Label
@@ -228,5 +256,7 @@ public partial class MyView : Window
 		this.Add(startButton);
 		this.Add(addFilesButton);
 
+		this.Add(logTextView);
+		this.Add(color);
 	}
 }

@@ -25,15 +25,38 @@ public partial class MyView : Window
 	private Label extensionLabel;
 	private TextField extensionTextField;
 
+	private Label subdirectoryLabel;
+	private TextField subdirectoryTextField;
+
 	private Button startButton;
 	private Button addFilesButton;
 
 	private void InitializeComponent()
 	{
-		this.extensionLabel = new Label
+		this.subdirectoryLabel = new Label
 		{
 			X = 20,
-			Y = Pos.AnchorEnd(2),
+			Y = Pos.AnchorEnd(4),
+			Width = 10,
+			Height = 1,
+			Data = "label5",
+			Text = "Subdir",
+			TextAlignment = TextAlignment.Left,
+		};
+
+		this.subdirectoryTextField = new TextField
+		{
+			X = 28,
+			Y = Pos.AnchorEnd(4),
+			Width = 30,
+			Height = 1,
+			Text = "FFBatch",
+		};
+
+		this.extensionLabel = new Label
+		{
+			X = 61,
+			Y = Pos.AnchorEnd(4),
 			Width = 6,
 			Height = 1,
 			Data = "label4",
@@ -43,8 +66,8 @@ public partial class MyView : Window
 
 		this.extensionTextField = new TextField
 		{
-			X = 32,
-			Y = Pos.AnchorEnd(2),
+			X = 72,
+			Y = Pos.AnchorEnd(4),
 			Width = 6,
 			Height = 1,
 			Text = "mkv",
@@ -53,7 +76,7 @@ public partial class MyView : Window
 		this.concurrencyLabel = new Label
 		{
 			X = 0,
-			Y = Pos.AnchorEnd(2),
+			Y = Pos.AnchorEnd(4),
 			Width = 4,
 			Height = 1,
 			Data = "label3",
@@ -64,7 +87,7 @@ public partial class MyView : Window
 		this.concurrencyTextField = new TextField
 		{
 			X = 14,
-			Y = Pos.AnchorEnd(2),
+			Y = Pos.AnchorEnd(4),
 			Width = 3,
 			Height = 1,
 			Text = "1",
@@ -73,7 +96,6 @@ public partial class MyView : Window
 		this.addFilesButton = new Button
 		{
 			Y = Pos.AnchorEnd(1),
-			Width = 12,
 			Data = "button1",
 			Text = "Add files",
 			TextAlignment = TextAlignment.Centered,
@@ -83,20 +105,20 @@ public partial class MyView : Window
 		this.startButton = new Button
 		{
 			Y = Pos.AnchorEnd(2),
-			Width = 12,
 			Data = "button2",
 			Text = "Start",
 			TextAlignment = TextAlignment.Centered,
 			IsDefault = false
 		};
 
-		this.addFilesButton.X = Pos.AnchorEnd(addFilesButton.Text.Length + 4);
-		this.startButton.X = Pos.AnchorEnd(startButton.Text.Length + 6);
+		// Right-aling buttons
+		this.addFilesButton.X = Pos.AnchorEnd() - (Pos.Right(addFilesButton) - Pos.Left(addFilesButton));
+		this.startButton.X = Pos.AnchorEnd() - (Pos.Right(startButton) - Pos.Left(startButton));
 
 		this.ffmpegPathLabel = new Label
 		{
 			X = 0,
-			Y = Pos.AnchorEnd(4),
+			Y = Pos.AnchorEnd(3),
 			Width = 4,
 			Height = 1,
 			Data = "label1",
@@ -107,7 +129,7 @@ public partial class MyView : Window
 		this.ffmpegPathTextField = new TextField
 		{
 			X = 14,
-			Y = Pos.AnchorEnd(4),
+			Y = Pos.AnchorEnd(3),
 			Width = 64,
 			Text = Helpers.GetFFmpegPath() ?? "",
 			Height = 1,
@@ -116,7 +138,7 @@ public partial class MyView : Window
 		this.ffprobePathLabel = new Label
 		{
 			X = 0,
-			Y = Pos.AnchorEnd(3),
+			Y = Pos.AnchorEnd(2),
 			Width = 4,
 			Height = 1,
 			Data = "label1",
@@ -127,7 +149,7 @@ public partial class MyView : Window
 		this.ffprobePathTextField = new TextField
 		{
 			X = 14,
-			Y = Pos.AnchorEnd(3),
+			Y = Pos.AnchorEnd(2),
 			Width = 64,
 			Text = Helpers.GetFFprobePath() ?? "",
 			Height = 1,
@@ -157,7 +179,7 @@ public partial class MyView : Window
 			Width = 4,
 			Height = 1,
 			Data = "label2",
-			Text = "FFmpeg Command",
+			Text = "Arguments",
 			TextAlignment = TextAlignment.Left,
 		};
 
@@ -167,7 +189,7 @@ public partial class MyView : Window
 			Y = Pos.AnchorEnd(1),
 			Width = 64,
 			Height = 1,
-			Enabled = false,
+			Text = "-c:v libx265 -c:a aac"
 		};
 
 		this.Width = Dim.Fill(0);
@@ -196,6 +218,9 @@ public partial class MyView : Window
 
 		this.Add(extensionLabel);
 		this.Add(extensionTextField);
+
+		this.Add(subdirectoryLabel);
+		this.Add(subdirectoryTextField);
 
 		this.Add(commandLabel);
 		this.Add(commandTextField);

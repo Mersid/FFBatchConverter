@@ -76,7 +76,7 @@ public class VideoEncoder
         DataRow[3] = State.ToString();
     }
 
-    public void Start()
+    public void Start(string ffmpegArguments, string outputDirectoryRelative, string extension)
     {
         if (State != EncodingState.Pending)
         {
@@ -85,9 +85,9 @@ public class VideoEncoder
         }
 
         string directory = Path.GetDirectoryName(InputFilePath);
-        string outputSubdirectory = Path.Combine(directory, "output");
+        string outputSubdirectory = Path.Combine(directory, outputDirectoryRelative);
         string fileName = Path.GetFileNameWithoutExtension(InputFilePath);
-        string newFilePath = Path.Combine(outputSubdirectory, $"{fileName}.mkv");
+        string newFilePath = Path.Combine(outputSubdirectory, $"{fileName}.{extension}");
 
         // Create the output directory if it doesn't exist
         if (!Directory.Exists(outputSubdirectory))
@@ -98,7 +98,7 @@ public class VideoEncoder
             StartInfo = new ProcessStartInfo
             {
                 FileName = Helpers.GetFFmpegPath(),
-                Arguments = $"-i \"{InputFilePath}\" -c:v libx265 -c:a aac -y \"{newFilePath}\"",
+                Arguments = $"-i \"{InputFilePath}\" -y {ffmpegArguments} \"{newFilePath}\"",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,

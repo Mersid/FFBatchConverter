@@ -9,6 +9,7 @@ public partial class MyView
 {
 	private DataTable FilesDataTable { get; set; }
 	private List<VideoEncoder> Encoders { get; } = [];
+	private object EncodersLock { get; } = new object();
 
 	public MyView()
 	{
@@ -37,10 +38,10 @@ public partial class MyView
 
 	private void OnStartButtonOnClicked()
 	{
-		foreach (VideoEncoder e in Encoders)
-		{
-			e.Start();
-		}
+		// Kick-start the encoding process. As soon as the first video receives update data or is instantly completed/failed,
+		// an event loop will trigger the next video to start encoding. We can't do that here, because it would cause
+		// a race condition.
+		Encoders.FirstOrDefault(t => t.State == EncodingState.Pending)?.Start(commandTextField.Text.ToString(), subdirectoryTextField.Text.ToString(), extensionTextField.Text.ToString());
 	}
 
 	private void OnAddFilesButtonOnClicked()
@@ -72,16 +73,34 @@ public partial class MyView
 
 	private void OnEncoderInfoUpdate(VideoEncoder encoder)
 	{
+		// Update gui display
 		Application.MainLoop.Invoke(() =>
 		{
 			encoder.DataRow[3] = $"{encoder.CurrentDuration / encoder.Duration * 100:F2}%";
 
 			if (encoder.State is EncodingState.Error or EncodingState.Success)
 			{
+				// Video encoder has finished
 				encoder.DataRow[3] = encoder.State.ToString();
 			}
 
 			SetNeedsDisplay();
 		});
+
+		// This could be called from different threads, but if an encoder gets started twice, the program will crash.
+		lock (EncodersLock)
+		{
+			// Begin encoding videos if current count allows it
+			bool result = int.TryParse(concurrencyTextField.Text.ToString(), out int concurrency);
+
+			if (!result)
+				concurrency = 1;
+
+			if (Encoders.Count(e => e.State == EncodingState.Encoding) < concurrency)
+			{
+				VideoEncoder? next = Encoders.FirstOrDefault(e => e.State == EncodingState.Pending);
+				next?.Start(commandTextField.Text.ToString(), subdirectoryTextField.Text.ToString(), extensionTextField.Text.ToString());
+			}
+		}
 	}
 }

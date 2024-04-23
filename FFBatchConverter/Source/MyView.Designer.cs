@@ -32,29 +32,22 @@ public partial class MyView : Window
 	private Button addFilesButton;
 
 	private TextView logTextView;
-	private View color;
+
+	private View container;
 
 	private void InitializeComponent()
 	{
-		this.color = new View
+		// Holds the list and text box
+		this.container = new View
 		{
 			X = 0,
-			Y = 30,
+			Y = 0,
 			Width = Dim.Fill(),
-			Height = 1,
-			ColorScheme = new ColorScheme
-			{
-				Normal = Application.Driver.MakeAttribute(Color.White, Color.BrightCyan),
-			}
-		};
-
-		this.logTextView = new TextView
-		{
-			X = 0,
-			Y = 23,
-			Width = Dim.Fill(),
-			Height = 5,
-			Text = "Hello, world!",
+			Height = Dim.Fill() - 4,
+			// ColorScheme = new ColorScheme
+			// {
+			// 	Normal = Application.Driver.MakeAttribute(Color.Cyan, Color.Green),
+			// }
 		};
 
 		this.subdirectoryLabel = new Label
@@ -188,7 +181,7 @@ public partial class MyView : Window
 		this.filesTableView = new TableView
 		{
 			Width = Dim.Fill(),
-			Height = 20,
+			Height = Dim.Percent(50),
 			X = 0,
 			Y = 0,
 			FullRowSelect = true,
@@ -198,6 +191,15 @@ public partial class MyView : Window
 			{
 				Normal = Application.Driver.MakeAttribute(Color.Cyan, Color.Green),
 			}
+		};
+
+		this.logTextView = new TextView
+		{
+			X = 0,
+			Y = Pos.Bottom(filesTableView),
+			Width = Dim.Fill(),
+			Height = Dim.Fill(),
+			Text = "Hello, world!",
 		};
 
 		this.commandLabel = new Label
@@ -233,7 +235,8 @@ public partial class MyView : Window
 		this.Title = "Press Ctrl+Q to quit";
 		this.ColorScheme.Normal = Application.Driver.MakeAttribute(Color.Green, Color.Black);
 
-		this.Add(filesTableView);
+		container.Add(filesTableView);
+		container.Add(logTextView);
 
 		this.Add(ffmpegPathLabel);
 		this.Add(ffmpegPathTextField);
@@ -256,7 +259,6 @@ public partial class MyView : Window
 		this.Add(startButton);
 		this.Add(addFilesButton);
 
-		this.Add(logTextView);
-		this.Add(color);
+		this.Add(container);
 	}
 }

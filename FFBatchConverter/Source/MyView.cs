@@ -1,4 +1,5 @@
 using System.Data;
+using System.Diagnostics;
 using NStack;
 
 namespace FFBatchConverter;
@@ -48,7 +49,7 @@ public partial class MyView
 
 	private void OnFilesTableViewOnSelectedCellChanged(TableView.SelectedCellChangedEventArgs args)
 	{
-		// selectedTextField.Text = (string)args.Table.Rows[args.NewRow][0];
+		logTextView.Text = Encoders[args.NewRow].Log.ToString();
 	}
 
 	private void OnStartButtonOnClicked()
@@ -91,7 +92,7 @@ public partial class MyView
 		filesTableView.Update();
 	}
 
-	private void OnEncoderInfoUpdate(VideoEncoder encoder)
+	private void OnEncoderInfoUpdate(VideoEncoder encoder, DataReceivedEventArgs? e)
 	{
 		// Update gui display
 		Application.MainLoop.Invoke(() =>
@@ -102,6 +103,19 @@ public partial class MyView
 			{
 				// Video encoder has finished
 				encoder.DataRow[3] = encoder.State.ToString();
+			}
+
+			if (Encoders[filesTableView.SelectedRow] == encoder)
+			{
+				// If the update occurred from the selected encoder, write the new line to the log.
+				// Selecting must be set to false, or the new line will overwrite the selected contents.
+				// The InsertText() command writes to the end of the text view, so we need to move the cursor there first.
+				// We also need to set ReadOnly to false before writing, and then back to true after writing.
+				logTextView.Selecting = false;
+				logTextView.MoveEnd();
+				logTextView.ReadOnly = false;
+				logTextView.InsertText(e?.Data + "\n" ?? "");
+				logTextView.ReadOnly = true;
 			}
 
 			SetNeedsDisplay();

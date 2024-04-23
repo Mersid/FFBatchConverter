@@ -22,7 +22,7 @@ public class VideoEncoder
     public EncodingState State { get; private set; } = EncodingState.Pending;
     public DataRow DataRow { get; }
 
-    public event Action<VideoEncoder>? InfoUpdate;
+    public event Action<VideoEncoder, DataReceivedEventArgs?>? InfoUpdate;
 
     public VideoEncoder(string inputFilePath, DataRow dataRow)
     {
@@ -124,7 +124,7 @@ public class VideoEncoder
     private void OnProcessOnExited(object? sender, EventArgs args)
     {
         State = Process.ExitCode == 0 ? EncodingState.Success : EncodingState.Error;
-        InfoUpdate?.Invoke(this);
+        InfoUpdate?.Invoke(this, null);
 
         Process.OutputDataReceived -= OnStreamDataReceivedEvent;
         Process.ErrorDataReceived -= OnStreamDataReceivedEvent;
@@ -158,6 +158,6 @@ public class VideoEncoder
         }
 
         Log.AppendLine(args.Data);
-        InfoUpdate?.Invoke(this);
+        InfoUpdate?.Invoke(this, args);
     }
 }

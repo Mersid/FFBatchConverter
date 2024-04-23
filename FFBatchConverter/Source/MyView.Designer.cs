@@ -185,12 +185,12 @@ public partial class MyView : Window
 			X = 0,
 			Y = 0,
 			FullRowSelect = true,
-			MultiSelect = true,
+			MultiSelect = false,
 			Table = FilesDataTable,
-			ColorScheme = new ColorScheme
-			{
-				Normal = Application.Driver.MakeAttribute(Color.Cyan, Color.Green),
-			}
+			// ColorScheme = new ColorScheme
+			// {
+			// 	Normal = Application.Driver.MakeAttribute(Color.Cyan, Color.Green),
+			// }
 		};
 
 		this.logTextView = new TextView
@@ -199,7 +199,8 @@ public partial class MyView : Window
 			Y = Pos.Bottom(filesTableView),
 			Width = Dim.Fill(),
 			Height = Dim.Fill(),
-			Text = "Hello, world!",
+			Text = "",
+			ReadOnly = true
 		};
 
 		this.commandLabel = new Label

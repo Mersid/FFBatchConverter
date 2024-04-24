@@ -32,6 +32,7 @@ public partial class MyView : Window
 
 	private Button startButton;
 	private Button addFilesButton;
+	private Button aboutButton;
 
 	private void InitializeComponent()
 	{
@@ -46,7 +47,7 @@ public partial class MyView : Window
 		this.Border.DrawMarginFrame = true;
 		this.TextAlignment = TextAlignment.Left;
 		this.Title = "Press Ctrl+Q to quit";
-		this.ColorScheme.Normal = Application.Driver.MakeAttribute(Color.Green, Color.Black);
+		this.ColorScheme.Normal = Application.Driver.MakeAttribute(Color.Cyan, Color.Black);
 
 
 		// Holds the list and text box
@@ -215,7 +216,7 @@ public partial class MyView : Window
 
 		this.startButton = new Button
 		{
-			Y = Pos.AnchorEnd(2),
+			Y = Pos.AnchorEnd(3),
 			Data = "button2",
 			Text = "Start",
 			TextAlignment = TextAlignment.Centered,
@@ -224,9 +225,18 @@ public partial class MyView : Window
 
 		this.addFilesButton = new Button
 		{
-			Y = Pos.AnchorEnd(1),
+			Y = Pos.AnchorEnd(2),
 			Data = "button1",
 			Text = "Add files",
+			TextAlignment = TextAlignment.Centered,
+			IsDefault = false
+		};
+
+		this.aboutButton = new Button
+		{
+			Y = Pos.AnchorEnd(1),
+			Data = "button3",
+			Text = "About",
 			TextAlignment = TextAlignment.Centered,
 			IsDefault = false
 		};
@@ -234,6 +244,7 @@ public partial class MyView : Window
 		// Right-align buttons
 		this.addFilesButton.X = Pos.AnchorEnd() - (Pos.Right(addFilesButton) - Pos.Left(addFilesButton));
 		this.startButton.X = Pos.AnchorEnd() - (Pos.Right(startButton) - Pos.Left(startButton));
+		this.aboutButton.X = Pos.AnchorEnd() - (Pos.Right(aboutButton) - Pos.Left(aboutButton));
 
 		container.Add(filesTableView);
 		container.Add(logTextView);
@@ -258,5 +269,6 @@ public partial class MyView : Window
 
 		this.Add(startButton);
 		this.Add(addFilesButton);
+		this.Add(aboutButton);
 	}
 }

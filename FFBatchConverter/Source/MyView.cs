@@ -43,6 +43,10 @@ public partial class MyView
 
 		addFilesButton.Clicked += OnAddFilesButtonOnClicked;
 		startButton.Clicked += OnStartButtonOnClicked;
+		aboutButton.Clicked += () => MessageBox.Query("About", "Version 1.0.0\n" +
+		                                                       "By Mersid\n" +
+		                                                       "https://github.com/Mersid/FFBatchConverter\n" +
+		                                                       "This program is released in the hope that it will be useful.", "Continue");
 
 		filesTableView.SelectedCellChanged += OnFilesTableViewOnSelectedCellChanged;
 	}

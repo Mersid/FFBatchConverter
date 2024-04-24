@@ -62,12 +62,23 @@ public partial class MyView
 		// Kick-start the encoding process. As soon as the first video receives update data or is instantly completed/failed,
 		// an event loop will trigger the next video to start encoding. We can't do that here, because it would cause
 		// a race condition.
-		Encoders.FirstOrDefault(t => t.State == EncodingState.Pending)?.Start(argumentsTextField.Text.ToString()!, subdirectoryTextField.Text.ToString()!, extensionTextField.Text.ToString()!);
+		lock (EncodersLock)
+		{
+			// Do nothing if there's no videos to encode
+			if (Encoders.Count == 0)
+				return;
 
-		if (Encoders.Count == 0)
-			return;
+			// Begin encoding videos if current count allows it
+			bool result = int.TryParse(concurrencyTextField.Text.ToString(), out int concurrency);
 
-		Running = !Running;
+			if (!result)
+				concurrency = 1;
+
+			if (Encoders.Count(e2 => e2.State == EncodingState.Encoding) < concurrency)
+				Encoders.FirstOrDefault(t => t.State == EncodingState.Pending)?.Start(argumentsTextField.Text.ToString()!, subdirectoryTextField.Text.ToString()!, extensionTextField.Text.ToString()!);
+
+			Running = !Running;
+		}
 	}
 
 	private void OnAddFilesButtonOnClicked()

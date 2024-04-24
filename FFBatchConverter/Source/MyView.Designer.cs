@@ -8,7 +8,18 @@ using Terminal.Gui;
 
 public partial class MyView : Window
 {
+	private View container;
 	private TableView filesTableView;
+	private TextView logTextView;
+
+	private Label concurrencyLabel;
+	private TextField concurrencyTextField;
+
+	private Label subdirectoryLabel;
+	private TextField subdirectoryTextField;
+
+	private Label extensionLabel;
+	private TextField extensionTextField;
 
 	private Label ffmpegPathLabel;
 	private TextField ffmpegPathTextField;
@@ -16,27 +27,28 @@ public partial class MyView : Window
 	private Label ffprobePathLabel;
 	private TextField ffprobePathTextField;
 
-	private Label commandLabel;
-	private TextField commandTextField;
-
-	private Label concurrencyLabel;
-	private TextField concurrencyTextField;
-
-	private Label extensionLabel;
-	private TextField extensionTextField;
-
-	private Label subdirectoryLabel;
-	private TextField subdirectoryTextField;
+	private Label argumentsLabel;
+	private TextField argumentsTextField;
 
 	private Button startButton;
 	private Button addFilesButton;
 
-	private TextView logTextView;
-
-	private View container;
-
 	private void InitializeComponent()
 	{
+		this.Width = Dim.Fill(0);
+		this.Height = Dim.Fill(0);
+		this.X = 0;
+		this.Y = 0;
+		this.Modal = false;
+		this.Text = "";
+		this.Border.BorderStyle = BorderStyle.Single;
+		this.Border.Effect3D = false;
+		this.Border.DrawMarginFrame = true;
+		this.TextAlignment = TextAlignment.Left;
+		this.Title = "Press Ctrl+Q to quit";
+		this.ColorScheme.Normal = Application.Driver.MakeAttribute(Color.Green, Color.Black);
+
+
 		// Holds the list and text box
 		this.container = new View
 		{
@@ -48,6 +60,57 @@ public partial class MyView : Window
 			// {
 			// 	Normal = Application.Driver.MakeAttribute(Color.Cyan, Color.Green),
 			// }
+		};
+
+		FilesDataTable = new DataTable();
+		FilesDataTable.Columns.Add("File name", typeof(string));
+		FilesDataTable.Columns.Add("Duration", typeof(string));
+		FilesDataTable.Columns.Add("Size", typeof(string));
+		FilesDataTable.Columns.Add("Status", typeof(string));
+
+		this.filesTableView = new TableView
+		{
+			Width = Dim.Fill(),
+			Height = Dim.Percent(50),
+			X = 0,
+			Y = 0,
+			FullRowSelect = true,
+			MultiSelect = false,
+			Table = FilesDataTable,
+			// ColorScheme = new ColorScheme
+			// {
+			// 	Normal = Application.Driver.MakeAttribute(Color.Cyan, Color.Green),
+			// }
+		};
+
+		this.logTextView = new TextView
+		{
+			X = 0,
+			Y = Pos.Bottom(filesTableView),
+			Width = Dim.Fill(),
+			Height = Dim.Fill(),
+			Text = "",
+			ReadOnly = true
+		};
+
+		this.concurrencyLabel = new Label
+		{
+			X = 0,
+			Y = Pos.AnchorEnd(4),
+			Width = 4,
+			Height = 1,
+			Data = "label3",
+			Text = "Concurrency",
+			TextAlignment = TextAlignment.Left,
+		};
+
+		this.concurrencyTextField = new TextField
+		{
+			X = 14,
+			Y = Pos.AnchorEnd(4),
+			Width = 3,
+			Height = 1,
+			Text = "1",
 		};
 
 		this.subdirectoryLabel = new Label
@@ -90,48 +153,6 @@ public partial class MyView : Window
 			Text = "mkv",
 		};
 
-		this.concurrencyLabel = new Label
-		{
-			X = 0,
-			Y = Pos.AnchorEnd(4),
-			Width = 4,
-			Height = 1,
-			Data = "label3",
-			Text = "Concurrency",
-			TextAlignment = TextAlignment.Left,
-		};
-
-		this.concurrencyTextField = new TextField
-		{
-			X = 14,
-			Y = Pos.AnchorEnd(4),
-			Width = 3,
-			Height = 1,
-			Text = "1",
-		};
-
-		this.addFilesButton = new Button
-		{
-			Y = Pos.AnchorEnd(1),
-			Data = "button1",
-			Text = "Add files",
-			TextAlignment = TextAlignment.Centered,
-			IsDefault = false
-		};
-
-		this.startButton = new Button
-		{
-			Y = Pos.AnchorEnd(2),
-			Data = "button2",
-			Text = "Start",
-			TextAlignment = TextAlignment.Centered,
-			IsDefault = false
-		};
-
-		// Right-align buttons
-		this.addFilesButton.X = Pos.AnchorEnd() - (Pos.Right(addFilesButton) - Pos.Left(addFilesButton));
-		this.startButton.X = Pos.AnchorEnd() - (Pos.Right(startButton) - Pos.Left(startButton));
-
 		this.ffmpegPathLabel = new Label
 		{
 			X = 0,
@@ -172,38 +193,7 @@ public partial class MyView : Window
 			Height = 1,
 		};
 
-		FilesDataTable = new DataTable();
-		FilesDataTable.Columns.Add("File name", typeof(string));
-		FilesDataTable.Columns.Add("Duration", typeof(string));
-		FilesDataTable.Columns.Add("Size", typeof(string));
-		FilesDataTable.Columns.Add("Status", typeof(string));
-
-		this.filesTableView = new TableView
-		{
-			Width = Dim.Fill(),
-			Height = Dim.Percent(50),
-			X = 0,
-			Y = 0,
-			FullRowSelect = true,
-			MultiSelect = false,
-			Table = FilesDataTable,
-			// ColorScheme = new ColorScheme
-			// {
-			// 	Normal = Application.Driver.MakeAttribute(Color.Cyan, Color.Green),
-			// }
-		};
-
-		this.logTextView = new TextView
-		{
-			X = 0,
-			Y = Pos.Bottom(filesTableView),
-			Width = Dim.Fill(),
-			Height = Dim.Fill(),
-			Text = "",
-			ReadOnly = true
-		};
-
-		this.commandLabel = new Label
+		this.argumentsLabel = new Label
 		{
 			X = 0,
 			Y = Pos.AnchorEnd(1),
@@ -214,7 +204,7 @@ public partial class MyView : Window
 			TextAlignment = TextAlignment.Left,
 		};
 
-		this.commandTextField = new TextField
+		this.argumentsTextField = new TextField
 		{
 			X = 14,
 			Y = Pos.AnchorEnd(1),
@@ -223,21 +213,39 @@ public partial class MyView : Window
 			Text = "-c:v libx265 -c:a aac"
 		};
 
-		this.Width = Dim.Fill(0);
-		this.Height = Dim.Fill(0);
-		this.X = 0;
-		this.Y = 0;
-		this.Modal = false;
-		this.Text = "";
-		this.Border.BorderStyle = BorderStyle.Single;
-		this.Border.Effect3D = false;
-		this.Border.DrawMarginFrame = true;
-		this.TextAlignment = TextAlignment.Left;
-		this.Title = "Press Ctrl+Q to quit";
-		this.ColorScheme.Normal = Application.Driver.MakeAttribute(Color.Green, Color.Black);
+		this.startButton = new Button
+		{
+			Y = Pos.AnchorEnd(2),
+			Data = "button2",
+			Text = "Start",
+			TextAlignment = TextAlignment.Centered,
+			IsDefault = false
+		};
+
+		this.addFilesButton = new Button
+		{
+			Y = Pos.AnchorEnd(1),
+			Data = "button1",
+			Text = "Add files",
+			TextAlignment = TextAlignment.Centered,
+			IsDefault = false
+		};
+
+		// Right-align buttons
+		this.addFilesButton.X = Pos.AnchorEnd() - (Pos.Right(addFilesButton) - Pos.Left(addFilesButton));
+		this.startButton.X = Pos.AnchorEnd() - (Pos.Right(startButton) - Pos.Left(startButton));
 
 		container.Add(filesTableView);
 		container.Add(logTextView);
+
+		this.Add(container);
+
+		this.Add(concurrencyLabel);
+		this.Add(concurrencyTextField);
+		this.Add(subdirectoryLabel);
+		this.Add(subdirectoryTextField);
+		this.Add(extensionLabel);
+		this.Add(extensionTextField);
 
 		this.Add(ffmpegPathLabel);
 		this.Add(ffmpegPathTextField);
@@ -245,21 +253,10 @@ public partial class MyView : Window
 		this.Add(ffprobePathLabel);
 		this.Add(ffprobePathTextField);
 
-		this.Add(concurrencyLabel);
-		this.Add(concurrencyTextField);
-
-		this.Add(extensionLabel);
-		this.Add(extensionTextField);
-
-		this.Add(subdirectoryLabel);
-		this.Add(subdirectoryTextField);
-
-		this.Add(commandLabel);
-		this.Add(commandTextField);
+		this.Add(argumentsLabel);
+		this.Add(argumentsTextField);
 
 		this.Add(startButton);
 		this.Add(addFilesButton);
-
-		this.Add(container);
 	}
 }

@@ -57,7 +57,7 @@ public partial class MyView
 		// Kick-start the encoding process. As soon as the first video receives update data or is instantly completed/failed,
 		// an event loop will trigger the next video to start encoding. We can't do that here, because it would cause
 		// a race condition.
-		Encoders.FirstOrDefault(t => t.State == EncodingState.Pending)?.Start(commandTextField.Text.ToString(), subdirectoryTextField.Text.ToString(), extensionTextField.Text.ToString());
+		Encoders.FirstOrDefault(t => t.State == EncodingState.Pending)?.Start(argumentsTextField.Text.ToString(), subdirectoryTextField.Text.ToString(), extensionTextField.Text.ToString());
 
 		if (Encoders.Count == 0)
 			return;
@@ -133,7 +133,7 @@ public partial class MyView
 			if (Running && Encoders.Count(e => e.State == EncodingState.Encoding) < concurrency)
 			{
 				VideoEncoder? next = Encoders.FirstOrDefault(e => e.State == EncodingState.Pending);
-				next?.Start(commandTextField.Text.ToString(), subdirectoryTextField.Text.ToString(), extensionTextField.Text.ToString());
+				next?.Start(argumentsTextField.Text.ToString(), subdirectoryTextField.Text.ToString(), extensionTextField.Text.ToString());
 			}
 
 			if (Encoders.Count(e => e.State == EncodingState.Encoding) == 0)

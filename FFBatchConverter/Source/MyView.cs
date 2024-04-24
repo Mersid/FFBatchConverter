@@ -8,7 +8,8 @@ using Terminal.Gui;
 
 public partial class MyView
 {
-	private DataTable FilesDataTable { get; set; }
+	// Suppress null as it is initialized in the constructor in a separate method call.
+	private DataTable FilesDataTable { get; set; } = null!;
 	private List<VideoEncoder> Encoders { get; } = [];
 	private object EncodersLock { get; } = new object();
 	private bool _running;
@@ -61,7 +62,7 @@ public partial class MyView
 		// Kick-start the encoding process. As soon as the first video receives update data or is instantly completed/failed,
 		// an event loop will trigger the next video to start encoding. We can't do that here, because it would cause
 		// a race condition.
-		Encoders.FirstOrDefault(t => t.State == EncodingState.Pending)?.Start(argumentsTextField.Text.ToString(), subdirectoryTextField.Text.ToString(), extensionTextField.Text.ToString());
+		Encoders.FirstOrDefault(t => t.State == EncodingState.Pending)?.Start(argumentsTextField.Text.ToString()!, subdirectoryTextField.Text.ToString()!, extensionTextField.Text.ToString()!);
 
 		if (Encoders.Count == 0)
 			return;
@@ -118,7 +119,7 @@ public partial class MyView
 				logTextView.Selecting = false;
 				logTextView.MoveEnd();
 				logTextView.ReadOnly = false;
-				logTextView.InsertText(e?.Data + "\n" ?? "");
+				logTextView.InsertText(e?.Data + "\n");
 				logTextView.ReadOnly = true;
 			}
 
@@ -134,13 +135,13 @@ public partial class MyView
 			if (!result)
 				concurrency = 1;
 
-			if (Running && Encoders.Count(e => e.State == EncodingState.Encoding) < concurrency)
+			if (Running && Encoders.Count(e2 => e2.State == EncodingState.Encoding) < concurrency)
 			{
-				VideoEncoder? next = Encoders.FirstOrDefault(e => e.State == EncodingState.Pending);
-				next?.Start(argumentsTextField.Text.ToString(), subdirectoryTextField.Text.ToString(), extensionTextField.Text.ToString());
+				VideoEncoder? next = Encoders.FirstOrDefault(e2 => e2.State == EncodingState.Pending);
+				next?.Start(argumentsTextField.Text.ToString()!, subdirectoryTextField.Text.ToString()!, extensionTextField.Text.ToString()!);
 			}
 
-			if (Encoders.Count(e => e.State == EncodingState.Encoding) == 0)
+			if (Encoders.Count(e2 => e2.State == EncodingState.Encoding) == 0)
 			{
 				Running = false;
 			}

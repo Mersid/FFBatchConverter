@@ -10,14 +10,18 @@ namespace FFBatchConverter;
 /// </summary>
 public class VideoEncoder
 {
-    public string InputFilePath { get; private set; }
+    public string InputFilePath { get; }
     public StringBuilder Log { get; } = new StringBuilder();
-    private Process Process { get; set; }
+
+    /// <summary>
+    /// Null when Start() has not yet been called.
+    /// </summary>
+    private Process? Process { get; set; }
 
     /// <summary>
     /// Duration of the video in seconds.
     /// </summary>
-    public double Duration { get; private set; }
+    public double Duration { get; }
     public double CurrentDuration { get; private set; }
     public EncodingState State { get; private set; } = EncodingState.Pending;
     public DataRow DataRow { get; }
@@ -84,7 +88,7 @@ public class VideoEncoder
             return;
         }
 
-        string directory = Path.GetDirectoryName(InputFilePath);
+        string directory = Path.GetDirectoryName(InputFilePath) ?? ".";
         string outputSubdirectory = Path.Combine(directory, outputDirectoryRelative);
         string fileName = Path.GetFileNameWithoutExtension(InputFilePath);
         string newFilePath = Path.Combine(outputSubdirectory, $"{fileName}.{extension}");
@@ -123,6 +127,8 @@ public class VideoEncoder
 
     private void OnProcessOnExited(object? sender, EventArgs args)
     {
+        Debug.Assert(Process != null, nameof(Process) + " != null");
+
         State = Process.ExitCode == 0 ? EncodingState.Success : EncodingState.Error;
         InfoUpdate?.Invoke(this, null);
 

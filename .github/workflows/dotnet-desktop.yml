@@ -14,7 +14,7 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest]
-        arch: [x86, x64, arm, arm64]
+        arch: [x64, arm64]
         
 
     runs-on: ${{matrix.os}}  # For a list of available runner types, refer to

@@ -19,7 +19,7 @@ jobs:
                              # https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
 
     env:
-      placeholder: Placeholder environment variable. This doesn't do anything.
+      target: ${{ matrix.os == 'windows-latest' && 'win-x64' || matrix.os == 'ubuntu-latest' && 'linux-x64' }}
 
     steps:
     - name: Checkout
@@ -47,11 +47,11 @@ jobs:
 
     # Build
     - name: Publish for Windows x64
-      run: dotnet publish -r win-x64 --self-contained true -p:PublishTrimmed=true -p:PublishAot=true
+      run: dotnet publish -r ${{ env.target }} --self-contained true -p:PublishTrimmed=true -p:PublishAot=true
 
     # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
       with:
         name: Output
-        path: ./FFBatchConverter/bin/Release/net8.0/win-x64/publish
+        path: ./FFBatchConverter/bin/Release/net8.0/${{ env.target }}/publish

@@ -22,7 +22,7 @@ jobs:
 
     env:
       rid_os: ${{ contains(matrix.os, 'windows') && 'win' || contains(matrix.os, 'ubuntu') && 'linux' }}
-      rid: ${{ rid_os }}-${{ matrix.arch }}
+      rid: ${{ env.rid_os }}-${{ matrix.arch }}
 
     steps:
     - name: Checkout

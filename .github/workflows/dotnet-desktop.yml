@@ -46,7 +46,7 @@ jobs:
       run: dotnet restore
 
     # Build
-    - name: Publish for Windows x64
+    - name: Publish
       run: dotnet publish -r ${{ env.target }} --self-contained true -p:PublishTrimmed=true -p:PublishAot=true
 
     # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact

@@ -90,5 +90,5 @@ jobs:
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: MSIX Package
-        path: ${{ env.Wap_Project_Directory }}\AppPackages
+        name: Output
+        path: ./FFBatchConverter/bin/Release/net8.0/win-x64/publish

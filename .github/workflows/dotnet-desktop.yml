@@ -38,7 +38,7 @@ jobs:
     # For Linux, we'll need to install tools to compile for ARM from x64
     - name: Setup ARM compilation toolchain
       if:
-        ${{ matrix.os }} == 'ubuntu-latest' && ${{ matrix.arch }} == 'arm64'
+        ${{ matrix.os == 'ubuntu-latest' && matrix.arch == 'arm64' }}
       run: |
         sudo dpkg --add-architecture arm64
         sudo bash -c 'cat > /etc/apt/sources.list.d/arm64.list <<EOF

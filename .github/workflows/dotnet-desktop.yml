@@ -13,13 +13,15 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest]
+        arch: [x86, x64, arm, arm64]
         
 
     runs-on: ${{matrix.os}}  # For a list of available runner types, refer to
                              # https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
 
     env:
-      target: ${{ matrix.os == 'windows-latest' && 'win-x64' || matrix.os == 'ubuntu-latest' && 'linux-x64' }}
+      rid_os: ${{ contains(matrix.os, "windows") && 'win' || contains(matrix.os, "ubuntu") && 'linux' }}
+      rid: ${{ rid_os }}-${{ matrix.arch }}
 
     steps:
     - name: Checkout
@@ -47,11 +49,13 @@ jobs:
 
     # Build
     - name: Publish
-      run: dotnet publish -r ${{ env.target }} --self-contained true -p:PublishTrimmed=true -p:PublishAot=true
+      run: dotnet publish -r ${{ env.rid }} --self-contained true -p:PublishTrimmed=true -p:PublishAot=true
 
     # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
       with:
         name: Output
-        path: ./FFBatchConverter/bin/Release/net8.0/${{ env.target }}/publish
+        path: ./FFBatchConverter/bin/Release/net8.0/${{ env.rid }}/publish
+
+        

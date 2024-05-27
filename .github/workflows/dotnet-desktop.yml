@@ -39,6 +39,7 @@ jobs:
     - name: Setup ARM compilation toolchain
       if:
         ${{ matrix.os == 'ubuntu-latest' && matrix.arch == 'arm64' }}
+      # https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/cross-compile
       run: |
         sudo dpkg --add-architecture arm64
         sudo bash -c 'cat > /etc/apt/sources.list.d/arm64.list <<EOF
@@ -61,13 +62,13 @@ jobs:
 
     # Build
     - name: Publish
-      run: dotnet publish -r ${{ env.rid }} --self-contained true -p:PublishTrimmed=true -p:PublishAot=true
+      run: dotnet publish -r ${{ env.rid }} --self-contained true -p:PublishTrimmed=true -p:PublishAot=true -o build-${{ env.rid }}
 
-    # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
+    # Upload the build artifacts: https://github.com/marketplace/actions/upload-a-build-artifact
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
       with:
         name: Output
-        path: ./FFBatchConverter/bin/Release/net8.0/${{ env.rid }}/publish
+        path: ./build-${{ env.rid }}
 
         

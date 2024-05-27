@@ -71,4 +71,12 @@ jobs:
         name: Build ${{ env.rid }}
         path: ./build-${{ env.rid }}
 
-        
+  merge:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Merge artifacts
+        uses: actions/upload-artifact/merge@v4
+        with:
+          name: Merged artifacts
+          pattern: Build *

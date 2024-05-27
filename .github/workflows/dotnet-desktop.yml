@@ -13,7 +13,7 @@ jobs:
     continue-on-error: true
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest macos-latest]
+        os: [windows-latest, ubuntu-latest, macos-latest]
         arch: [x64, arm64]
         
 
@@ -21,7 +21,7 @@ jobs:
                              # https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
 
     env:
-      rid: ${{ contains(matrix.os, 'windows') && 'win' || contains(matrix.os, 'ubuntu') && 'linux' }}-${{ matrix.arch }}
+      rid: ${{ contains(matrix.os, 'windows') && 'win' || contains(matrix.os, 'ubuntu') && 'linux' || contains(matrix.os, 'macos') && 'macos' }}-${{ matrix.arch }}
 
     steps:
     - name: Checkout

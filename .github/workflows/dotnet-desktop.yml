@@ -21,7 +21,7 @@ jobs:
                              # https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
 
     env:
-      rid: ${{ contains(matrix.os, 'windows') && 'win' || contains(matrix.os, 'ubuntu') && 'linux' || contains(matrix.os, 'macos') && 'macos' }}-${{ matrix.arch }}
+      rid: ${{ contains(matrix.os, 'windows') && 'win' || contains(matrix.os, 'ubuntu') && 'linux' || contains(matrix.os, 'macos') && 'osx' }}-${{ matrix.arch }}
 
     steps:
     - name: Checkout

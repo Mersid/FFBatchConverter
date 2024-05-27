@@ -69,6 +69,6 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: Output
-        path: ./build-${{ env.rid }}
+        path: ./build-${{ env.rid }}/
 
         

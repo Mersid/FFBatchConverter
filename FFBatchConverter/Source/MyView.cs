@@ -89,10 +89,25 @@ public partial class MyView
 
 		IReadOnlyList<string> paths = openDialog.FilePaths;
 
+		// For folders, we need to get all files in the folder. For now, non-recursive.
+		List<string> paths2 = [];
+
+		foreach (string path in paths)
+		{
+			if (Directory.Exists(path))
+			{
+				paths2.AddRange(Directory.GetFiles(path));
+			}
+			else
+			{
+				paths2.Add(path);
+			}
+		}
+
 		if (openDialog.Canceled)
 			return;
 
-		foreach (string path in paths)
+		foreach (string path in paths2)
 		{
 			if (!File.Exists(path))
 				continue;

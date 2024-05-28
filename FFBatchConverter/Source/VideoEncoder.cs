@@ -10,6 +10,7 @@ namespace FFBatchConverter;
 /// </summary>
 public class VideoEncoder
 {
+    // TODO: Minimum size
     public string InputFilePath { get; }
     public StringBuilder Log { get; } = new StringBuilder();
 
@@ -130,6 +131,8 @@ public class VideoEncoder
         Debug.Assert(Process != null, nameof(Process) + " != null");
 
         State = Process.ExitCode == 0 ? EncodingState.Success : EncodingState.Error;
+
+        Log.AppendLine($"Process exited with code {Process.ExitCode}");
         InfoUpdate?.Invoke(this, null);
 
         Process.OutputDataReceived -= OnStreamDataReceivedEvent;

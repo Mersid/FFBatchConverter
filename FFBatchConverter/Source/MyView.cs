@@ -1,6 +1,6 @@
+using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
-using NStack;
 
 namespace FFBatchConverter;
 
@@ -19,10 +19,9 @@ public partial class MyView
 		get => _running;
 		set
 		{
-			Application.MainLoop.Invoke(() =>
+			Application.Invoke(() =>
 			{
 				_running = value;
-				startButton.Width = 1; // Needed to force right-align when new text is smaller than the one at start.
 				startButton.Text = Running ? "Stop" : "Start";
 			});
 		}
@@ -42,22 +41,22 @@ public partial class MyView
 			MessageBox.ErrorQuery("FFprobe not found!", "FFprobe not found. If you have FFprobe installed, make sure it's in the system PATH. Otherwise, you can manually specify the path to the program.", 1, "Continue");
 		}
 
-		addFilesButton.Clicked += OnAddFilesButtonOnClicked;
-		startButton.Clicked += OnStartButtonOnClicked;
-		aboutButton.Clicked += () => MessageBox.Query("About", "Version 1.0.0\n" +
-		                                                       "By Mersid\n" +
-		                                                       "https://github.com/Mersid/FFBatchConverter\n" +
-		                                                       "This program is released in the hope that it will be useful.", "Continue");
+		addFilesButton.Accept += OnAddFilesButtonOnClicked;
+		startButton.Accept += OnStartButtonOnClicked;
+		aboutButton.Accept += (_, _) => MessageBox.Query("About", "Version 1.0.0\n" +
+		                                                      "By Mersid\n" +
+		                                                      "https://github.com/Mersid/FFBatchConverter\n" +
+		                                                      "This program is released in the hope that it will be useful.", "Continue");
 
 		filesTableView.SelectedCellChanged += OnFilesTableViewOnSelectedCellChanged;
 	}
 
-	private void OnFilesTableViewOnSelectedCellChanged(TableView.SelectedCellChangedEventArgs args)
+	private void OnFilesTableViewOnSelectedCellChanged(object? sender, SelectedCellChangedEventArgs args)
 	{
 		logTextView.Text = Encoders[args.NewRow].Log.ToString();
 	}
 
-	private void OnStartButtonOnClicked()
+	private void OnStartButtonOnClicked(object? sender, CancelEventArgs cancelEventArgs)
 	{
 		// Kick-start the encoding process. As soon as the first video receives update data or is instantly completed/failed,
 		// an event loop will trigger the next video to start encoding. We can't do that here, because it would cause
@@ -81,10 +80,12 @@ public partial class MyView
 		}
 	}
 
-	private void OnAddFilesButtonOnClicked()
+	private void OnAddFilesButtonOnClicked(object? sender, CancelEventArgs cancelEventArgs)
 	{
-		OpenDialog openDialog = new OpenDialog("Open File", "Choose a file to open") { CanChooseDirectories = true, CanChooseFiles = true, AllowsMultipleSelection = true, };
-
+		OpenDialog openDialog = new OpenDialog()
+		{
+			AllowsMultipleSelection = true
+		};
 		Application.Run(openDialog);
 
 		IReadOnlyList<string> paths = openDialog.FilePaths;
@@ -126,7 +127,7 @@ public partial class MyView
 	private void OnEncoderInfoUpdate(VideoEncoder encoder, DataReceivedEventArgs? e)
 	{
 		// Update gui display
-		Application.MainLoop.Invoke(() =>
+		Application.Invoke(() =>
 		{
 			encoder.DataRow[3] = $"{encoder.CurrentDuration / encoder.Duration * 100:F2}%";
 

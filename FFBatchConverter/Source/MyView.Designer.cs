@@ -42,12 +42,13 @@ public partial class MyView : Window
 		this.Y = 0;
 		this.Modal = false;
 		this.Text = "";
-		this.Border.BorderStyle = BorderStyle.Single;
-		this.Border.Effect3D = false;
-		this.Border.DrawMarginFrame = true;
-		this.TextAlignment = TextAlignment.Left;
+		this.Border.BorderStyle = LineStyle.Single;
+		this.TextAlignment = Alignment.Start;
 		this.Title = "Press Ctrl+Q to quit";
-		this.ColorScheme.Normal = Application.Driver.MakeAttribute(Color.Cyan, Color.Black);
+		this.ColorScheme = new ColorScheme(this.ColorScheme)
+		{
+			Normal = new Terminal.Gui.Attribute(Color.Cyan, Color.Black),
+		};
 
 
 		// Holds the list and text box
@@ -77,7 +78,7 @@ public partial class MyView : Window
 			Y = 0,
 			FullRowSelect = true,
 			MultiSelect = false,
-			Table = FilesDataTable,
+			Table = new DataTableSource(FilesDataTable),
 			// ColorScheme = new ColorScheme
 			// {
 			// 	Normal = Application.Driver.MakeAttribute(Color.Cyan, Color.Green),
@@ -98,11 +99,7 @@ public partial class MyView : Window
 		{
 			X = 0,
 			Y = Pos.AnchorEnd(4),
-			Width = 4,
-			Height = 1,
-			Data = "label3",
 			Text = "Concurrency",
-			TextAlignment = TextAlignment.Left,
 		};
 
 		this.concurrencyTextField = new TextField
@@ -118,11 +115,7 @@ public partial class MyView : Window
 		{
 			X = 20,
 			Y = Pos.AnchorEnd(4),
-			Width = 10,
-			Height = 1,
-			Data = "label5",
 			Text = "Subdir",
-			TextAlignment = TextAlignment.Left,
 		};
 
 		this.subdirectoryTextField = new TextField
@@ -138,11 +131,7 @@ public partial class MyView : Window
 		{
 			X = 61,
 			Y = Pos.AnchorEnd(4),
-			Width = 6,
-			Height = 1,
-			Data = "label4",
 			Text = "Extension",
-			TextAlignment = TextAlignment.Left,
 		};
 
 		this.extensionTextField = new TextField
@@ -158,11 +147,7 @@ public partial class MyView : Window
 		{
 			X = 0,
 			Y = Pos.AnchorEnd(3),
-			Width = 4,
-			Height = 1,
-			Data = "label1",
 			Text = "FFmpeg Path",
-			TextAlignment = TextAlignment.Left,
 		};
 
 		this.ffmpegPathTextField = new TextField
@@ -178,11 +163,7 @@ public partial class MyView : Window
 		{
 			X = 0,
 			Y = Pos.AnchorEnd(2),
-			Width = 4,
-			Height = 1,
-			Data = "label1",
 			Text = "FFprobe Path",
-			TextAlignment = TextAlignment.Left,
 		};
 
 		this.ffprobePathTextField = new TextField
@@ -198,11 +179,7 @@ public partial class MyView : Window
 		{
 			X = 0,
 			Y = Pos.AnchorEnd(1),
-			Width = 4,
-			Height = 1,
-			Data = "label2",
 			Text = "Arguments",
-			TextAlignment = TextAlignment.Left,
 		};
 
 		this.argumentsTextField = new TextField
@@ -216,35 +193,27 @@ public partial class MyView : Window
 
 		this.startButton = new Button
 		{
+			X = Pos.AnchorEnd(),
 			Y = Pos.AnchorEnd(3),
-			Data = "button2",
 			Text = "Start",
-			TextAlignment = TextAlignment.Centered,
-			IsDefault = false
+			TextAlignment = Alignment.Center,
 		};
 
 		this.addFilesButton = new Button
 		{
+			X = Pos.AnchorEnd(),
 			Y = Pos.AnchorEnd(2),
-			Data = "button1",
 			Text = "Add files",
-			TextAlignment = TextAlignment.Centered,
-			IsDefault = false
+			TextAlignment = Alignment.Center,
 		};
 
 		this.aboutButton = new Button
 		{
+			X = Pos.AnchorEnd(),
 			Y = Pos.AnchorEnd(1),
-			Data = "button3",
 			Text = "About",
-			TextAlignment = TextAlignment.Centered,
-			IsDefault = false
+			TextAlignment = Alignment.Center,
 		};
-
-		// Right-align buttons
-		this.addFilesButton.X = Pos.AnchorEnd() - (Pos.Right(addFilesButton) - Pos.Left(addFilesButton));
-		this.startButton.X = Pos.AnchorEnd() - (Pos.Right(startButton) - Pos.Left(startButton));
-		this.aboutButton.X = Pos.AnchorEnd() - (Pos.Right(aboutButton) - Pos.Left(aboutButton));
 
 		container.Add(filesTableView);
 		container.Add(logTextView);

@@ -1,20 +1,19 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
+using Terminal.Gui;
 
 namespace FFBatchConverter;
 
-using Terminal.Gui;
-
-public partial class MyView
+public partial class BatchVideoEncoderView : View
 {
-	// Suppress null as it is initialized in the constructor in a separate method call.
+    // Suppress null as it is initialized in the constructor in a separate method call.
 	private DataTable FilesDataTable { get; set; } = null!;
 	private List<VideoEncoder> Encoders { get; } = [];
 	private object EncodersLock { get; } = new object();
 	private bool _running;
 
-	private new bool Running
+	private bool Running
 	{
 		get => _running;
 		set
@@ -27,7 +26,7 @@ public partial class MyView
 		}
 	}
 
-	public MyView()
+	public BatchVideoEncoderView()
 	{
 		InitializeComponent();
 
@@ -68,13 +67,13 @@ public partial class MyView
 				return;
 
 			// Begin encoding videos if current count allows it
-			bool result = int.TryParse(concurrencyTextField.Text.ToString(), out int concurrency);
+			bool result = int.TryParse(concurrencyTextField.Text, out int concurrency);
 
 			if (!result)
 				concurrency = 1;
 
 			if (Encoders.Count(e2 => e2.State == EncodingState.Encoding) < concurrency)
-				Encoders.FirstOrDefault(t => t.State == EncodingState.Pending)?.Start(argumentsTextField.Text.ToString()!, subdirectoryTextField.Text.ToString()!, extensionTextField.Text.ToString()!);
+				Encoders.FirstOrDefault(t => t.State == EncodingState.Pending)?.Start(argumentsTextField.Text!, subdirectoryTextField.Text!, extensionTextField.Text!);
 
 			Running = !Running;
 		}
@@ -82,7 +81,7 @@ public partial class MyView
 
 	private void OnAddFilesButtonOnClicked(object? sender, CancelEventArgs cancelEventArgs)
 	{
-		OpenDialog openDialog = new OpenDialog()
+		OpenDialog openDialog = new OpenDialog
 		{
 			AllowsMultipleSelection = true
 		};
@@ -157,7 +156,7 @@ public partial class MyView
 		lock (EncodersLock)
 		{
 			// Begin encoding videos if current count allows it
-			bool result = int.TryParse(concurrencyTextField.Text.ToString(), out int concurrency);
+			bool result = int.TryParse(concurrencyTextField.Text, out int concurrency);
 
 			if (!result)
 				concurrency = 1;
@@ -165,7 +164,7 @@ public partial class MyView
 			if (Running && Encoders.Count(e2 => e2.State == EncodingState.Encoding) < concurrency)
 			{
 				VideoEncoder? next = Encoders.FirstOrDefault(e2 => e2.State == EncodingState.Pending);
-				next?.Start(argumentsTextField.Text.ToString()!, subdirectoryTextField.Text.ToString()!, extensionTextField.Text.ToString()!);
+				next?.Start(argumentsTextField.Text!, subdirectoryTextField.Text!, extensionTextField.Text!);
 			}
 
 			if (Encoders.Count(e2 => e2.State == EncodingState.Encoding) == 0)

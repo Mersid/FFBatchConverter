@@ -1,14 +1,11 @@
-using System.Data;
+﻿using System.Data;
+using Terminal.Gui;
 
 namespace FFBatchConverter;
 
-using System;
-using Terminal.Gui;
-
-
-public partial class MyView : Window
+public partial class BatchVideoEncoderView
 {
-	private View container;
+    private View container;
 	private TableView filesTableView;
 	private TextView logTextView;
 
@@ -38,18 +35,6 @@ public partial class MyView : Window
 	{
 		this.Width = Dim.Fill(0);
 		this.Height = Dim.Fill(0);
-		this.X = 0;
-		this.Y = 0;
-		this.Modal = false;
-		this.Text = "";
-		this.Border.BorderStyle = LineStyle.Single;
-		this.TextAlignment = Alignment.Start;
-		this.Title = "Press Ctrl+Q to quit";
-		this.ColorScheme = new ColorScheme(this.ColorScheme)
-		{
-			Normal = new Terminal.Gui.Attribute(Color.Cyan, Color.Black),
-		};
-
 
 		// Holds the list and text box
 		this.container = new View

@@ -7,7 +7,7 @@ public class TopLevelView : Toplevel
 {
 	private new MenuBar MenuBar { get; } = new MenuBar();
 	private FrameView Container { get; } = new FrameView();
-	private View Child { get; } = new BatchVideoEncoderView();
+	private View Child { get; } = new MirrorView(new MirrorViewModel());
 
 	public TopLevelView()
 	{
@@ -32,7 +32,7 @@ public class TopLevelView : Toplevel
 		Container.Y = 1;
 		Container.Width = Dim.Fill();
 		Container.Height = Dim.Fill();
-		Container.Title = "FFBatchConverter";
+		Container.Title = "Batch Converter";
 
 		MenuBar.Menus =
 		[

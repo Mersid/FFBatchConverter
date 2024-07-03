@@ -1,5 +1,4 @@
 ﻿using System.Reactive.Linq;
-using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
 using Terminal.Gui;
 using Attribute = Terminal.Gui.Attribute;

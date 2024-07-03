@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Reactive.Concurrency;
 using Terminal.Gui;
 
 namespace FFBatchConverter;

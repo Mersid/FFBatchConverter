@@ -1,6 +1,4 @@
-﻿using System.Data;
-using System.Reactive.Linq;
-using ReactiveUI;
+﻿using ReactiveUI;
 using Terminal.Gui;
 
 namespace FFBatchConverter;

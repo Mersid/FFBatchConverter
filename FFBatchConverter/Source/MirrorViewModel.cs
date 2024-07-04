@@ -2,6 +2,7 @@
 
 namespace FFBatchConverter;
 
+[Obsolete("Testing class to experiment with ReactiveUI. We should probably remove this later.")]
 public class MirrorViewModel : ReactiveObject
 {
     private string _text = "Hello world!";

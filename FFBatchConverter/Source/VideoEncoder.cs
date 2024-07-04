@@ -8,6 +8,7 @@ namespace FFBatchConverter;
 /// <summary>
 /// Represents the encoder for a single video.
 /// </summary>
+[Obsolete("Use VideoEncoder2 instead.")]
 public class VideoEncoder
 {
     // TODO: Minimum size

@@ -2,6 +2,6 @@
 
 public class InformationUpdateEventArgs
 {
-    public VideoEncoder2 Encoder { get; init; }
-    public DataModificationType ModificationType { get; init; }
+    public required VideoEncoder2 Encoder { get; init; }
+    public required DataModificationType ModificationType { get; init; }
 }

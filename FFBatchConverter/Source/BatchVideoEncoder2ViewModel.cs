@@ -14,9 +14,33 @@ public class BatchVideoEncoder2ViewModel : ReactiveObject
     /// Then, if we change this value every time we update FilesDataTable, we can have a reactive table.
     /// </summary>
     [Reactive] public int Reactor { get; private set; }
-
-    public Dictionary<VideoEncoder2, DataRow> EncoderToRow { get; set; } = new Dictionary<VideoEncoder2, DataRow>();
+    private Dictionary<VideoEncoder2, DataRow> EncoderToRow { get; set; } = new Dictionary<VideoEncoder2, DataRow>();
     public DataTable FilesDataTable { get; }
+
+    [Reactive]
+    public string Concurrency { get; set; } = "1";
+
+    [Reactive]
+    public string Subdirectory { get; set; } = "FFBatch";
+
+    [Reactive]
+    public string Extension { get; set; } = "mkv";
+
+    [Reactive]
+    public string FfmpegPath { get; set; } = Helpers.GetFFmpegPath() ?? "";
+
+    [Reactive]
+    public string FfprobePath { get; set; } = Helpers.GetFFprobePath() ?? "";
+
+    [Reactive]
+    public string Arguments { get; set; } = "-c:v libx265 -c:a aac";
+
+    /// <summary>
+    /// True if encoding is currently in progress.
+    /// </summary>
+    [Reactive]
+    public bool Encoding { get; set; }
+
     private BatchVideoEncoder Encoder { get; }
 
     public BatchVideoEncoder2ViewModel()
@@ -76,29 +100,6 @@ public class BatchVideoEncoder2ViewModel : ReactiveObject
         // observes this property and triggers an update when it changes.
         Reactor++;
     }
-
-    [Reactive]
-    public string Concurrency { get; set; } = "1";
-
-    private readonly ObservableAsPropertyHelper<string> _concurrencyOaph;
-
-    [Reactive]
-    public string Subdirectory { get; set; } = "FFBatch";
-
-    [Reactive]
-    public string Extension { get; set; } = "mkv";
-
-    [Reactive]
-    public string FfmpegPath { get; set; } = Helpers.GetFFmpegPath() ?? "";
-
-    [Reactive]
-    public string FfprobePath { get; set; } = Helpers.GetFFprobePath() ?? "";
-
-    [Reactive]
-    public string Arguments { get; set; } = "-c:v libx265 -c:a aac";
-
-    [Reactive]
-    public bool Encoding { get; set; }
 
     public void StartButtonPressed(object? sender, CancelEventArgs cancelEventArgs)
     {

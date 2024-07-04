@@ -25,11 +25,6 @@ public class BatchVideoEncoder
     private bool IsEncoding { get; set; }
 
     /// <summary>
-    /// FFmpeg arguments.
-    /// </summary>
-    public string Arguments { get; set; }
-
-    /// <summary>
     /// Output path, relative to the input file.
     /// </summary>
     public string OutputPath { get; set; }
@@ -38,6 +33,11 @@ public class BatchVideoEncoder
     /// File extension to use for the output files.
     /// </summary>
     public string Extension { get; set; }
+
+    /// <summary>
+    /// FFmpeg arguments.
+    /// </summary>
+    public string Arguments { get; set; }
 
     public void StartEncoding()
     {

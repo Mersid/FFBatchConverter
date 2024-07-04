@@ -5,6 +5,7 @@ using Attribute = Terminal.Gui.Attribute;
 
 namespace FFBatchConverter;
 
+[Obsolete("Testing class to experiment with ReactiveUI. We should probably remove this later.")]
 public sealed class MirrorView : View
 {
     private TextField TextField { get; } = new TextField();

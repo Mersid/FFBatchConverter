@@ -5,6 +5,7 @@ using Terminal.Gui;
 
 namespace FFBatchConverter;
 
+[Obsolete("Use newer version based on MVVM architecture instead.")]
 public partial class BatchVideoEncoderView : View
 {
     // Suppress null as it is initialized in the constructor in a separate method call.

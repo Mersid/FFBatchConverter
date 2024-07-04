@@ -67,8 +67,8 @@ public class BatchVideoEncoder
             if (queuedEncoders.Count == 0)
                 break;
 
-            VideoEncoder2 encoder = Encoders[0];
-            Encoders.RemoveAt(0);
+            VideoEncoder2 encoder = queuedEncoders[0];
+            queuedEncoders.RemoveAt(0);
 
             encoder.Start(Arguments, OutputPath, Extension);
 
@@ -115,6 +115,8 @@ public class BatchVideoEncoder
 
     private void EncoderOnInfoUpdate(VideoEncoder2 encoder, DataReceivedEventArgs? info)
     {
+        WarnIfNotOnMainThread();
+
         // If encoding is done (or fail) we need to decrement the active encoding count to allow the next
         // video in the queue to start encoding.
         if (encoder.State != EncodingState.Encoding)

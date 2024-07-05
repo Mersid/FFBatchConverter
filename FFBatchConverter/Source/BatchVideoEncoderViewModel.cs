@@ -15,7 +15,14 @@ public class BatchVideoEncoderViewModel : ReactiveObject
     /// </summary>
     [Reactive] public int Reactor { get; private set; }
     private Dictionary<VideoEncoder, DataRow> EncoderToRow { get; set; } = new Dictionary<VideoEncoder, DataRow>();
+    /// <summary>
+    /// Matches by integer index to items in FilesDataTable
+    /// </summary>
+    private List<VideoEncoder> RowsIndex { get; set; } = [];
     public DataTable FilesDataTable { get; }
+
+    [Reactive] public string Log { get; set; } = "";
+    [Reactive] public int SelectedRow { get; set; }
 
     [Reactive]
     public string Concurrency { get; set; } = "1";
@@ -63,6 +70,18 @@ public class BatchVideoEncoderViewModel : ReactiveObject
         this
             .WhenAnyValue(x => x.Extension)
             .Subscribe(x => Encoder.Extension = x);
+
+        // Update log
+        this
+            .WhenAnyValue(x => x.SelectedRow)
+            .Subscribe(x =>
+            {
+                if (RowsIndex.Count == 0)
+                    return;
+
+                VideoEncoder encoder = RowsIndex[x];
+                Log = encoder.Log.ToString();
+            });
     }
 
     private void EncoderOnInformationUpdate(object? sender, InformationUpdateEventArgs e)
@@ -78,6 +97,7 @@ public class BatchVideoEncoderViewModel : ReactiveObject
                 row[3] = e.Encoder.State.ToString();
                 FilesDataTable.Rows.Add(row);
                 EncoderToRow.Add(e.Encoder, row);
+                RowsIndex.Add(e.Encoder);
                 break;
             case DataModificationType.Update:
                 row = EncoderToRow[e.Encoder];
@@ -92,6 +112,11 @@ public class BatchVideoEncoderViewModel : ReactiveObject
                 break;
             default:
                 throw new NotImplementedException();
+        }
+
+        if (e.Encoder == RowsIndex[SelectedRow])
+        {
+            Log = e.Encoder.Log.ToString();
         }
 
         // When the row is added to the table, it will be displayed on next update. This could include pressing a button,

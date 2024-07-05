@@ -66,6 +66,10 @@ public sealed class BatchVideoEncoderView : View
 			{
 				FilesTableView.Update();
 			});
+		FilesTableView.SelectedCellChanged += (sender, args) =>
+		{
+			model.SelectedRow = args.NewRow;
+		};
 
 		LogTextView = new TextView
 		{
@@ -76,6 +80,16 @@ public sealed class BatchVideoEncoderView : View
 			Text = "",
 			ReadOnly = true
 		};
+		model
+			.WhenAnyValue(x => x.Log)
+			.Subscribe(x =>
+			{
+				LogTextView.Selecting = false;
+				LogTextView.Text = x;
+
+				// Otherwise, it'll jump to top...
+				LogTextView.MoveEnd();
+			});
 
 		ConcurrencyLabel = new Label
 		{

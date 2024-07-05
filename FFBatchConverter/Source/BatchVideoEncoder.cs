@@ -27,17 +27,17 @@ public class BatchVideoEncoder
     /// <summary>
     /// Output path, relative to the input file.
     /// </summary>
-    public string OutputPath { get; set; }
+    public string OutputPath { get; set; } = string.Empty;
 
     /// <summary>
     /// File extension to use for the output files.
     /// </summary>
-    public string Extension { get; set; }
+    public string Extension { get; set; } = string.Empty;
 
     /// <summary>
     /// FFmpeg arguments.
     /// </summary>
-    public string Arguments { get; set; }
+    public string Arguments { get; set; } = string.Empty;
 
     public void StartEncoding()
     {

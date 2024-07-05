@@ -39,6 +39,9 @@ public class TopLevelView : Toplevel
 			new MenuBarItem("_File", [
 				new MenuItem("_Quit", "", () => Application.RequestStop())
 			]),
+			new MenuBarItem("_View", [
+				new MenuItem()
+			]),
 			new MenuBarItem("_Help", [
 				new MenuItem("_About", "", () => MessageBox.Query("About", "FFBatchConverter\nBy Mersid\nhttps://github.com/Mersid/FFBatchConverter\nThis program is released in the hope that it will be useful.", "Continue"))
 			])

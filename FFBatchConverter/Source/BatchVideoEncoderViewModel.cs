@@ -6,7 +6,7 @@ using Terminal.Gui;
 
 namespace FFBatchConverter;
 
-public class BatchVideoEncoder2ViewModel : ReactiveObject
+public class BatchVideoEncoderViewModel : ReactiveObject
 {
     /// <summary>
     /// We can't really make the DataTable reactive, so we'll just have to increment this whenever we add a new row.
@@ -14,7 +14,7 @@ public class BatchVideoEncoder2ViewModel : ReactiveObject
     /// Then, if we change this value every time we update FilesDataTable, we can have a reactive table.
     /// </summary>
     [Reactive] public int Reactor { get; private set; }
-    private Dictionary<VideoEncoder2, DataRow> EncoderToRow { get; set; } = new Dictionary<VideoEncoder2, DataRow>();
+    private Dictionary<VideoEncoder, DataRow> EncoderToRow { get; set; } = new Dictionary<VideoEncoder, DataRow>();
     public DataTable FilesDataTable { get; }
 
     [Reactive]
@@ -43,7 +43,7 @@ public class BatchVideoEncoder2ViewModel : ReactiveObject
 
     private BatchVideoEncoder Encoder { get; }
 
-    public BatchVideoEncoder2ViewModel()
+    public BatchVideoEncoderViewModel()
     {
         Encoder = ApplicationHost.Instance.Encoder;
         Encoder.InformationUpdate += EncoderOnInformationUpdate;

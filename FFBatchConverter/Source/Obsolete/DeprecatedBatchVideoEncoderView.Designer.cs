@@ -3,7 +3,7 @@ using Terminal.Gui;
 
 namespace FFBatchConverter;
 
-public partial class BatchVideoEncoderView
+public partial class DeprecatedBatchVideoEncoderView
 {
     private View container;
 	private TableView filesTableView;

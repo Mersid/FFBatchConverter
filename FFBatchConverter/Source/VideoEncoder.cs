@@ -1,14 +1,13 @@
-﻿using System.Data;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
+using Terminal.Gui;
 
 namespace FFBatchConverter;
 
 /// <summary>
 /// Represents the encoder for a single video.
 /// </summary>
-[Obsolete("Use VideoEncoder2 instead.")]
 public class VideoEncoder
 {
     // TODO: Minimum size
@@ -26,15 +25,17 @@ public class VideoEncoder
     public double Duration { get; }
     public double CurrentDuration { get; private set; }
     public EncodingState State { get; private set; } = EncodingState.Pending;
-    public DataRow DataRow { get; }
 
+    /// <summary>
+    /// Should only run on main thread (same one processing UI events)
+    /// </summary>
     public event Action<VideoEncoder, DataReceivedEventArgs?>? InfoUpdate;
 
-    public VideoEncoder(string inputFilePath, DataRow dataRow)
+    public VideoEncoder(string inputFilePath)
     {
         InputFilePath = inputFilePath;
-        DataRow = dataRow;
 
+        // TODO: Don't use Helpers static methods, as they may not reflect user updates!
         Process probe = new Process
         {
             StartInfo = new ProcessStartInfo
@@ -74,12 +75,6 @@ public class VideoEncoder
             Log.AppendLine(e.Message);
             State = EncodingState.Error;
         }
-
-        TimeSpan duration = TimeSpan.FromSeconds(Duration);
-        DataRow[0] = inputFilePath;
-        DataRow[1] = $"{duration.Hours:D2}:{duration.Minutes:D2}:{duration.Seconds:D2}";
-        DataRow[2] = $"{(new FileInfo(inputFilePath).Length / 1024d / 1024):F2} MiB";
-        DataRow[3] = State.ToString();
     }
 
     public void Start(string ffmpegArguments, string outputDirectoryRelative, string extension)
@@ -134,7 +129,13 @@ public class VideoEncoder
         State = Process.ExitCode == 0 ? EncodingState.Success : EncodingState.Error;
 
         Log.AppendLine($"Process exited with code {Process.ExitCode}");
-        InfoUpdate?.Invoke(this, null);
+
+        // Ensure this is run on main thread. Helps fix UI issues.
+        Application.Invoke(() =>
+        {
+            InfoUpdate?.Invoke(this, null);
+        });
+
 
         Process.OutputDataReceived -= OnStreamDataReceivedEvent;
         Process.ErrorDataReceived -= OnStreamDataReceivedEvent;
@@ -168,6 +169,11 @@ public class VideoEncoder
         }
 
         Log.AppendLine(args.Data);
-        InfoUpdate?.Invoke(this, args);
+
+        // Ensure this is run on main thread. Helps fix UI issues.
+        Application.Invoke(() =>
+        {
+            InfoUpdate?.Invoke(this, args);
+        });
     }
 }

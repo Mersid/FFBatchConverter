@@ -1,177 +1,241 @@
-﻿using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
+﻿using ReactiveUI;
 using Terminal.Gui;
 
 namespace FFBatchConverter;
 
-[Obsolete("Use newer version based on MVVM architecture instead.")]
-public partial class BatchVideoEncoderView : View
+public sealed class BatchVideoEncoderView : View
 {
-    // Suppress null as it is initialized in the constructor in a separate method call.
-	private DataTable FilesDataTable { get; set; } = null!;
-	private List<VideoEncoder> Encoders { get; } = [];
-	private object EncodersLock { get; } = new object();
-	private bool _running;
+    private View Container { get; }
+    private TableView FilesTableView { get; }
 
-	private bool Running
-	{
-		get => _running;
-		set
+    private TextView LogTextView { get; }
+
+    private Label ConcurrencyLabel { get; }
+    private TextField ConcurrencyTextField { get; }
+
+    private Label SubdirectoryLabel { get; }
+    private TextField SubdirectoryTextField { get; }
+
+    private Label ExtensionLabel { get; }
+    private TextField ExtensionTextField { get; }
+
+    private Label FfmpegPathLabel { get; }
+    private TextField FfmpegPathTextField { get; }
+
+    private Label FfprobePathLabel { get; }
+    private TextField FfprobePathTextField { get; }
+
+    private Label ArgumentsLabel { get; }
+    private TextField ArgumentsTextField { get; }
+
+    private Button StartButton { get; }
+    private Button AddFilesButton { get; }
+
+    public BatchVideoEncoderView(BatchVideoEncoderViewModel model)
+    {
+        Width = Dim.Fill();
+        Height = Dim.Fill();
+
+        // Holds the list and text box
+		Container = new View
 		{
-			Application.Invoke(() =>
-			{
-				_running = value;
-				startButton.Text = Running ? "Stop" : "Start";
-			});
-		}
-	}
-
-	public BatchVideoEncoderView()
-	{
-		InitializeComponent();
-
-		if (Helpers.GetFFmpegPath() is null)
-		{
-			MessageBox.ErrorQuery("FFmpeg not found!", "FFmpeg not found. If you have FFmpeg installed, make sure it's in the system PATH. Otherwise, you can manually specify the path to the program.", 1, "Continue");
-		}
-
-		if (Helpers.GetFFprobePath() is null)
-		{
-			MessageBox.ErrorQuery("FFprobe not found!", "FFprobe not found. If you have FFprobe installed, make sure it's in the system PATH. Otherwise, you can manually specify the path to the program.", 1, "Continue");
-		}
-
-		addFilesButton.Accept += OnAddFilesButtonOnClicked;
-		startButton.Accept += OnStartButtonOnClicked;
-		aboutButton.Accept += (_, _) => MessageBox.Query("About", "Version 1.0.0\n" +
-		                                                      "By Mersid\n" +
-		                                                      "https://github.com/Mersid/FFBatchConverter\n" +
-		                                                      "This program is released in the hope that it will be useful.", "Continue");
-
-		filesTableView.SelectedCellChanged += OnFilesTableViewOnSelectedCellChanged;
-	}
-
-	private void OnFilesTableViewOnSelectedCellChanged(object? sender, SelectedCellChangedEventArgs args)
-	{
-		logTextView.Text = Encoders[args.NewRow].Log.ToString();
-	}
-
-	private void OnStartButtonOnClicked(object? sender, CancelEventArgs cancelEventArgs)
-	{
-		// Kick-start the encoding process. As soon as the first video receives update data or is instantly completed/failed,
-		// an event loop will trigger the next video to start encoding. We can't do that here, because it would cause
-		// a race condition.
-		lock (EncodersLock)
-		{
-			// Do nothing if there's no videos to encode
-			if (Encoders.Count == 0)
-				return;
-
-			// Begin encoding videos if current count allows it
-			bool result = int.TryParse(concurrencyTextField.Text, out int concurrency);
-
-			if (!result)
-				concurrency = 1;
-
-			if (Encoders.Count(e2 => e2.State == EncodingState.Encoding) < concurrency)
-				Encoders.FirstOrDefault(t => t.State == EncodingState.Pending)?.Start(argumentsTextField.Text!, subdirectoryTextField.Text!, extensionTextField.Text!);
-
-			Running = !Running;
-		}
-	}
-
-	private void OnAddFilesButtonOnClicked(object? sender, CancelEventArgs cancelEventArgs)
-	{
-		OpenDialog openDialog = new OpenDialog
-		{
-			AllowsMultipleSelection = true
+			X = 0,
+			Y = 0,
+			Width = Dim.Fill(),
+			Height = Dim.Fill() - 4,
 		};
-		Application.Run(openDialog);
 
-		IReadOnlyList<string> paths = openDialog.FilePaths;
+		model.FilesDataTable.Columns.Add("File name", typeof(string));
+		model.FilesDataTable.Columns.Add("Duration", typeof(string));
+		model.FilesDataTable.Columns.Add("Size", typeof(string));
+		model.FilesDataTable.Columns.Add("Status", typeof(string));
 
-		// For folders, we need to get all files in the folder. For now, non-recursive.
-		List<string> paths2 = [];
-
-		foreach (string path in paths)
+		FilesTableView = new TableView
 		{
-			if (Directory.Exists(path))
+			Width = Dim.Fill(),
+			Height = Dim.Percent(50),
+			X = 0,
+			Y = 0,
+			FullRowSelect = true,
+			MultiSelect = false,
+			Table = new DataTableSource(model.FilesDataTable),
+		};
+		model
+			.WhenAnyValue(x => x.Reactor)
+			.Subscribe(x =>
 			{
-				paths2.AddRange(Directory.GetFiles(path));
-			}
-			else
-			{
-				paths2.Add(path);
-			}
-		}
+				FilesTableView.Update();
+			});
 
-		if (openDialog.Canceled)
-			return;
-
-		foreach (string path in paths2)
+		LogTextView = new TextView
 		{
-			if (!File.Exists(path))
-				continue;
+			X = 0,
+			Y = Pos.Bottom(FilesTableView),
+			Width = Dim.Fill(),
+			Height = Dim.Fill(),
+			Text = "",
+			ReadOnly = true
+		};
 
-			DataRow row = FilesDataTable.NewRow();
-			FilesDataTable.Rows.Add(row);
-
-			VideoEncoder e = new VideoEncoder(path, row);
-			e.InfoUpdate += OnEncoderInfoUpdate;
-			Encoders.Add(e);
-		}
-
-		filesTableView.Update();
-	}
-
-	private void OnEncoderInfoUpdate(VideoEncoder encoder, DataReceivedEventArgs? e)
-	{
-		// Update gui display
-		Application.Invoke(() =>
+		ConcurrencyLabel = new Label
 		{
-			encoder.DataRow[3] = $"{encoder.CurrentDuration / encoder.Duration * 100:F2}%";
+			X = 0,
+			Y = Pos.AnchorEnd(4),
+			Text = "Concurrency",
+		};
 
-			if (encoder.State is EncodingState.Error or EncodingState.Success)
-			{
-				// Video encoder has finished
-				encoder.DataRow[3] = encoder.State.ToString();
-			}
-
-			if (Encoders[filesTableView.SelectedRow] == encoder)
-			{
-				// If the update occurred from the selected encoder, write the new line to the log.
-				// Selecting must be set to false, or the new line will overwrite the selected contents.
-				// The InsertText() command writes to the end of the text view, so we need to move the cursor there first.
-				// We also need to set ReadOnly to false before writing, and then back to true after writing.
-				logTextView.Selecting = false;
-				logTextView.MoveEnd();
-				logTextView.ReadOnly = false;
-				logTextView.InsertText(e?.Data + "\n");
-				logTextView.ReadOnly = true;
-			}
-
-			SetNeedsDisplay();
-		});
-
-		// This could be called from different threads, but if an encoder gets started twice, the program will crash.
-		lock (EncodersLock)
+		ConcurrencyTextField = new TextField
 		{
-			// Begin encoding videos if current count allows it
-			bool result = int.TryParse(concurrencyTextField.Text, out int concurrency);
+			X = 14,
+			Y = Pos.AnchorEnd(4),
+			Width = 3,
+			Height = 1,
+		};
+		model
+			.WhenAnyValue(x => x.Concurrency)
+			.BindTo(ConcurrencyTextField, x => x.Text);
+		ConcurrencyTextField.TextChanged += (sender, args) => model.Concurrency = ConcurrencyTextField.Text;
 
-			if (!result)
-				concurrency = 1;
+		SubdirectoryLabel = new Label
+		{
+			X = 20,
+			Y = Pos.AnchorEnd(4),
+			Text = "Subdir",
+		};
 
-			if (Running && Encoders.Count(e2 => e2.State == EncodingState.Encoding) < concurrency)
+		SubdirectoryTextField = new TextField
+		{
+			X = 28,
+			Y = Pos.AnchorEnd(4),
+			Width = 30,
+			Height = 1,
+		};
+		model
+			.WhenAnyValue(x => x.Subdirectory)
+			.BindTo(SubdirectoryTextField, x => x.Text);
+		SubdirectoryTextField.TextChanged += (sender, args) => model.Subdirectory = SubdirectoryTextField.Text;
+
+		ExtensionLabel = new Label
+		{
+			X = 61,
+			Y = Pos.AnchorEnd(4),
+			Text = "Extension",
+		};
+
+		ExtensionTextField = new TextField
+		{
+			X = 72,
+			Y = Pos.AnchorEnd(4),
+			Width = 6,
+			Height = 1,
+		};
+		model
+			.WhenAnyValue(x => x.Extension)
+			.BindTo(ExtensionTextField, x => x.Text);
+		ExtensionTextField.TextChanged += (sender, args) => model.Extension = ExtensionTextField.Text;
+
+		FfmpegPathLabel = new Label
+		{
+			X = 0,
+			Y = Pos.AnchorEnd(3),
+			Text = "FFmpeg Path",
+		};
+
+		FfmpegPathTextField = new TextField
+		{
+			X = 14,
+			Y = Pos.AnchorEnd(3),
+			Width = 64,
+			Height = 1,
+		};
+		model
+			.WhenAnyValue(x => x.FfmpegPath)
+			.BindTo(FfmpegPathTextField, x => x.Text);
+		FfmpegPathTextField.TextChanged += (sender, args) => model.FfmpegPath = FfmpegPathTextField.Text;
+
+		FfprobePathLabel = new Label
+		{
+			X = 0,
+			Y = Pos.AnchorEnd(2),
+			Text = "FFprobe Path",
+		};
+
+		FfprobePathTextField = new TextField
+		{
+			X = 14,
+			Y = Pos.AnchorEnd(2),
+			Width = 64,
+			Height = 1,
+		};
+		model
+			.WhenAnyValue(x => x.FfprobePath)
+			.BindTo(FfprobePathTextField, x => x.Text);
+		FfprobePathTextField.TextChanged += (sender, args) => model.FfprobePath = FfprobePathTextField.Text;
+
+		ArgumentsLabel = new Label
+		{
+			X = 0,
+			Y = Pos.AnchorEnd(1),
+			Text = "Arguments",
+		};
+
+		ArgumentsTextField = new TextField
+		{
+			X = 14,
+			Y = Pos.AnchorEnd(1),
+			Width = 64,
+			Height = 1,
+		};
+		model
+			.WhenAnyValue(x => x.Arguments)
+			.BindTo(ArgumentsTextField, x => x.Text);
+		ArgumentsTextField.TextChanged += (sender, args) => model.Arguments = ArgumentsTextField.Text;
+
+		StartButton = new Button
+		{
+			X = Pos.AnchorEnd(),
+			Y = Pos.AnchorEnd(2),
+			TextAlignment = Alignment.Center,
+		};
+		model
+			.WhenAnyValue(x => x.Encoding)
+			.Subscribe(s => // s is the new value. So if the state is false and we hit the button, s is passed as true.
 			{
-				VideoEncoder? next = Encoders.FirstOrDefault(e2 => e2.State == EncodingState.Pending);
-				next?.Start(argumentsTextField.Text!, subdirectoryTextField.Text!, extensionTextField.Text!);
-			}
+				StartButton.Text = s ? "Stop" : "Start";
+			});
+		StartButton.Accept += model.StartButtonPressed;
 
-			if (Encoders.Count(e2 => e2.State == EncodingState.Encoding) == 0)
-			{
-				Running = false;
-			}
-		}
-	}
+		AddFilesButton = new Button
+		{
+			X = Pos.AnchorEnd(),
+			Y = Pos.AnchorEnd(1),
+			Text = "Add files",
+			TextAlignment = Alignment.Center,
+		};
+		AddFilesButton.Accept += model.AddFilesButtonPressed;
+
+		Container.Add(FilesTableView);
+		Container.Add(LogTextView);
+
+		Add(Container);
+
+		Add(ConcurrencyLabel);
+		Add(ConcurrencyTextField);
+		Add(SubdirectoryLabel);
+		Add(SubdirectoryTextField);
+		Add(ExtensionLabel);
+		Add(ExtensionTextField);
+
+		Add(FfmpegPathLabel);
+		Add(FfmpegPathTextField);
+
+		Add(FfprobePathLabel);
+		Add(FfprobePathTextField);
+
+		Add(ArgumentsLabel);
+		Add(ArgumentsTextField);
+
+		Add(StartButton);
+		Add(AddFilesButton);
+    }
 }

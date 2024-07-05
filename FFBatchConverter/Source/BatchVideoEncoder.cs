@@ -9,7 +9,7 @@ public class BatchVideoEncoder
     /// Event that is raised when there's an update to the status of any encoder.
     /// </summary>
     public event EventHandler<InformationUpdateEventArgs>? InformationUpdate;
-    private List<VideoEncoder2> Encoders { get; } = [];
+    private List<VideoEncoder> Encoders { get; } = [];
 
     private int _concurrency;
     public int Concurrency
@@ -21,7 +21,7 @@ public class BatchVideoEncoder
             ProcessActions();
         }
     }
-    private int ActiveEncodingCount { get; set; }
+
     private bool IsEncoding { get; set; }
 
     /// <summary>
@@ -61,21 +61,11 @@ public class BatchVideoEncoder
         if (!IsEncoding)
             return;
 
-        List<VideoEncoder2> queuedEncoders = Encoders.Where(e => e.State == EncodingState.Pending).ToList();
-        for (int i = ActiveEncodingCount; i < Concurrency; i++)
-        {
-            if (queuedEncoders.Count == 0)
-                break;
+        if (Encoders.Count(e => e.State == EncodingState.Encoding) >= Concurrency)
+            return;
 
-            VideoEncoder2 encoder = queuedEncoders[0];
-            queuedEncoders.RemoveAt(0);
-
-            encoder.Start(Arguments, OutputPath, Extension);
-
-            ActiveEncodingCount++;
-        }
+        Encoders.FirstOrDefault(t => t.State == EncodingState.Pending)?.Start(Arguments, OutputPath, Extension);
     }
-
     /// <summary>
     /// Takes a list of string paths, and for each, if it's a file, it will add it to the encoding list.
     /// If it's a directory, this will recursively search for all files within it and add them all to the encoding list.
@@ -90,18 +80,18 @@ public class BatchVideoEncoder
             files.AddRange(GetFilesRecursive(p));
         }
 
-        List<VideoEncoder2> encoders = files
+        List<VideoEncoder> encoders = files
             .AsParallel()
             .AsOrdered()
             .WithDegreeOfParallelism(Environment.ProcessorCount)
-            .Select(t => new VideoEncoder2(t))
+            .Select(t => new VideoEncoder(t))
             .OrderByDescending(t => t.Duration) // Process the longest files first. If two files are of the same length, process the largest file first.
             .ThenByDescending(t => (new FileInfo(t.InputFilePath).Length))
             .ToList();
 
         Encoders.AddRange(encoders);
 
-        foreach (VideoEncoder2 encoder in encoders)
+        foreach (VideoEncoder encoder in encoders)
         {
             encoder.InfoUpdate += EncoderOnInfoUpdate;
 
@@ -113,17 +103,11 @@ public class BatchVideoEncoder
         }
     }
 
-    private void EncoderOnInfoUpdate(VideoEncoder2 encoder, DataReceivedEventArgs? info)
+    private void EncoderOnInfoUpdate(VideoEncoder encoder, DataReceivedEventArgs? info)
     {
         WarnIfNotOnMainThread();
 
-        // If encoding is done (or fail) we need to decrement the active encoding count to allow the next
-        // video in the queue to start encoding.
-        if (encoder.State != EncodingState.Encoding)
-        {
-            ActiveEncodingCount--;
-            ProcessActions();
-        }
+        ProcessActions();
 
         InformationUpdate?.Invoke(this, new InformationUpdateEventArgs
         {

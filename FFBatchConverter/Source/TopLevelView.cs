@@ -7,7 +7,7 @@ public class TopLevelView : Toplevel
 {
 	private new MenuBar MenuBar { get; } = new MenuBar();
 	private FrameView Container { get; } = new FrameView();
-	private View Child { get; } = new BatchVideoEncoder2View(new BatchVideoEncoder2ViewModel());
+	private View Child { get; } = new BatchVideoEncoderView(new BatchVideoEncoderViewModel());
 
 	public TopLevelView()
 	{

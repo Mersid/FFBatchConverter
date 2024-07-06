@@ -14,13 +14,14 @@ public class BatchVideoEncoderViewModel : ReactiveObject
     /// Then, if we change this value every time we update FilesDataTable, we can have a reactive table.
     /// </summary>
     [Reactive] public int Reactor { get; private set; }
-    private Dictionary<VideoEncoder, DataRow> EncoderToRow { get; set; } = new Dictionary<VideoEncoder, DataRow>();
+    private Dictionary<VideoEncoder, EncoderTableRow> EncoderToRow { get; set; } = new Dictionary<VideoEncoder, EncoderTableRow>();
 
     /// <summary>
     /// Matches by integer index to items in FilesDataTable
     /// </summary>
     private List<VideoEncoder> RowsIndex { get; set; } = [];
-    public DataTable FilesDataTable { get; }
+
+    public ListTableSource<EncoderTableRow> TableRows { get; } = new ListTableSource<EncoderTableRow>();
 
     [Reactive] public string Log { get; set; } = "";
     [Reactive] public int SelectedRow { get; set; }
@@ -56,8 +57,6 @@ public class BatchVideoEncoderViewModel : ReactiveObject
         Encoder = ApplicationHost.Instance.Encoder;
         Encoder.InformationUpdate += EncoderOnInformationUpdate;
 
-        FilesDataTable = new DataTable();
-
         // If these values change in the UI/ViewModel, we want to update the encoder with the new values.
         this
             .WhenAnyValue(x => x.Concurrency)
@@ -80,8 +79,8 @@ public class BatchVideoEncoderViewModel : ReactiveObject
                 if (RowsIndex.Count == 0)
                     return;
 
-                VideoEncoder encoder = RowsIndex[x];
-                Log = encoder.Log.ToString();
+                // VideoEncoder encoder = RowsIndex[x];
+                // Log = encoder.Log.ToString();
             });
     }
 
@@ -90,24 +89,27 @@ public class BatchVideoEncoderViewModel : ReactiveObject
         switch (e.ModificationType)
         {
             case DataModificationType.Add:
-                DataRow row = FilesDataTable.NewRow();
                 TimeSpan duration = TimeSpan.FromSeconds(e.Encoder.Duration);
-                row[0] = e.Encoder.InputFilePath;
-                row[1] = $"{duration.Hours:D2}:{duration.Minutes:D2}:{duration.Seconds:D2}";
-                row[2] = $"{(new FileInfo(e.Encoder.InputFilePath).Length / 1024d / 1024):F2} MiB";
-                row[3] = e.Encoder.State.ToString();
-                FilesDataTable.Rows.Add(row);
+                EncoderTableRow row = new EncoderTableRow
+                {
+                    FileName = e.Encoder.InputFilePath,
+                    Duration = $"{duration.Hours:D2}:{duration.Minutes:D2}:{duration.Seconds:D2}",
+                    Size = $"{(new FileInfo(e.Encoder.InputFilePath).Length / 1024d / 1024):F2} MiB",
+                    Status = e.Encoder.State.ToString()
+                };
+
+                TableRows.Add(row);
                 EncoderToRow.Add(e.Encoder, row);
                 RowsIndex.Add(e.Encoder);
                 break;
             case DataModificationType.Update:
                 row = EncoderToRow[e.Encoder];
-                row[3] = $"{e.Encoder.CurrentDuration / e.Encoder.Duration * 100:F2}%";
+                row.Status = $"{e.Encoder.CurrentDuration / e.Encoder.Duration * 100:F2}%";
 
                 if (e.Encoder.State is EncodingState.Error or EncodingState.Success)
                 {
                     // Video encoder has finished
-                    row[3] = e.Encoder.State.ToString();
+                    row.Status = e.Encoder.State.ToString();
                 }
 
                 break;

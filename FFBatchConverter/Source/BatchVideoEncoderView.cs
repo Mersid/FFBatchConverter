@@ -45,11 +45,6 @@ public sealed class BatchVideoEncoderView : View
 			Height = Dim.Fill() - 4,
 		};
 
-		model.FilesDataTable.Columns.Add("File name", typeof(string));
-		model.FilesDataTable.Columns.Add("Duration", typeof(string));
-		model.FilesDataTable.Columns.Add("Size", typeof(string));
-		model.FilesDataTable.Columns.Add("Status", typeof(string));
-
 		FilesTableView = new TableView
 		{
 			Width = Dim.Fill(),
@@ -58,7 +53,7 @@ public sealed class BatchVideoEncoderView : View
 			Y = 0,
 			FullRowSelect = true,
 			MultiSelect = false,
-			Table = new DataTableSource(model.FilesDataTable),
+			Table = model.TableRows
 		};
 		model
 			.WhenAnyValue(x => x.Reactor)

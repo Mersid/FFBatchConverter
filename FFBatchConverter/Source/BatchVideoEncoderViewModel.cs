@@ -15,6 +15,7 @@ public class BatchVideoEncoderViewModel : ReactiveObject
     /// </summary>
     [Reactive] public int Reactor { get; private set; }
     private Dictionary<VideoEncoder, DataRow> EncoderToRow { get; set; } = new Dictionary<VideoEncoder, DataRow>();
+
     /// <summary>
     /// Matches by integer index to items in FilesDataTable
     /// </summary>

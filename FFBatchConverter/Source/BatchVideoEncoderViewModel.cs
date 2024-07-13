@@ -23,8 +23,13 @@ public class BatchVideoEncoderViewModel : ReactiveObject
 
     public ListTableSource<EncoderTableRow> TableRows { get; } = new ListTableSource<EncoderTableRow>();
 
-    [Reactive] public string Log { get; set; } = "";
-    [Reactive] public int SelectedRow { get; set; }
+    /// <summary>
+    /// Null if no row is selected (table has no entries)
+    /// </summary>
+    [Reactive] public int? SelectedRow { get; set; }
+
+    [Reactive]
+    public string Footer { get; set; } = "";
 
     [Reactive]
     public string Concurrency { get; set; } = "1";
@@ -71,21 +76,17 @@ public class BatchVideoEncoderViewModel : ReactiveObject
             .WhenAnyValue(x => x.Extension)
             .Subscribe(x => Encoder.Extension = x);
 
-        // Update log
         this
             .WhenAnyValue(x => x.SelectedRow)
             .Subscribe(x =>
             {
-                if (RowsIndex.Count == 0)
-                    return;
-
-                // VideoEncoder encoder = RowsIndex[x];
-                // Log = encoder.Log.ToString();
+                UpdateFooter();
             });
     }
 
     private void EncoderOnInformationUpdate(object? sender, InformationUpdateEventArgs e)
     {
+        int preRowCount = RowsIndex.Count;
         switch (e.ModificationType)
         {
             case DataModificationType.Add:
@@ -117,16 +118,35 @@ public class BatchVideoEncoderViewModel : ReactiveObject
                 throw new NotImplementedException();
         }
 
-        if (e.Encoder == RowsIndex[SelectedRow])
-        {
-            Log = e.Encoder.Log.ToString();
-        }
+        // Track if this is the first time a row has been added to the table, as we need to handle this case.
+        if (preRowCount == 0)
+            SelectedRow = 0;
+        UpdateFooter();
 
         // When the row is added to the table, it will be displayed on next update. This could include pressing a button,
         // scrolling, or any other event that triggers a redraw. However, we want it to automatically update as soon as the
         // data is added, so we increment the Reactor property to trigger the update. We set up a watch in the view that
         // observes this property and triggers an update when it changes.
         Reactor++;
+    }
+
+    private void UpdateFooter()
+    {
+        int? selectedIndex = SelectedRow;
+        int total = RowsIndex.Count;
+        double? scrollPercent = total switch
+        {
+            0 => null,
+            1 => 100,
+            _ => selectedIndex / (double)(total - 1) * 100
+        };
+
+        int pending = RowsIndex.Count(x => x.State == EncodingState.Pending);
+        int encoding = RowsIndex.Count(x => x.State == EncodingState.Encoding);
+        int success = RowsIndex.Count(x => x.State == EncodingState.Success);
+        int error = RowsIndex.Count(x => x.State == EncodingState.Error);
+
+        Footer = $"Selected: {(selectedIndex == null ? 0 : selectedIndex + 1)}/{total} ({(scrollPercent == null ? "--" : ((double)scrollPercent).ToString("F2"))}%) | Pending: {pending} | Encoding: {encoding} | Success: {success} | Error: {error}";
     }
 
     public void StartButtonPressed(object? sender, CancelEventArgs cancelEventArgs)

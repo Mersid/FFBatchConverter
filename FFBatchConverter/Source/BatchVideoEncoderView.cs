@@ -1,5 +1,6 @@
 ﻿using ReactiveUI;
 using Terminal.Gui;
+using Attribute = Terminal.Gui.Attribute;
 
 namespace FFBatchConverter;
 
@@ -8,7 +9,7 @@ public sealed class BatchVideoEncoderView : View
     private View Container { get; }
     private TableView FilesTableView { get; }
 
-    private TextView LogTextView { get; }
+    private Label FooterLabel { get; }
 
     private Label ConcurrencyLabel { get; }
     private TextField ConcurrencyTextField { get; }
@@ -48,7 +49,7 @@ public sealed class BatchVideoEncoderView : View
 		FilesTableView = new TableView
 		{
 			Width = Dim.Fill(),
-			Height = Dim.Percent(50),
+			Height = Dim.Fill() - 1,
 			X = 0,
 			Y = 0,
 			FullRowSelect = true,
@@ -66,25 +67,21 @@ public sealed class BatchVideoEncoderView : View
 			model.SelectedRow = args.NewRow;
 		};
 
-		LogTextView = new TextView
+		FooterLabel = new Label
 		{
+			Width = Dim.Fill(),
+			Height = 1,
 			X = 0,
 			Y = Pos.Bottom(FilesTableView),
-			Width = Dim.Fill(),
-			Height = Dim.Fill(),
-			Text = "",
-			ReadOnly = true
+			ColorScheme = new ColorScheme
+			{
+				Normal = new Attribute(ColorName.White, Color.DarkGray),
+			},
 		};
 		model
-			.WhenAnyValue(x => x.Log)
-			.Subscribe(x =>
-			{
-				LogTextView.Selecting = false;
-				LogTextView.Text = x;
-
-				// Otherwise, it'll jump to top...
-				LogTextView.MoveEnd();
-			});
+			.WhenAnyValue(x => x.Footer)
+			.BindTo(FooterLabel, x => x.Text);
+		FooterLabel.TextChanged += (sender, args) => model.Footer = FooterLabel.Text;
 
 		ConcurrencyLabel = new Label
 		{
@@ -224,7 +221,7 @@ public sealed class BatchVideoEncoderView : View
 		AddFilesButton.Accept += model.AddFilesButtonPressed;
 
 		Container.Add(FilesTableView);
-		Container.Add(LogTextView);
+		Container.Add(FooterLabel);
 
 		Add(Container);
 

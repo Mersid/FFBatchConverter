@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using Terminal.Gui;
 
 namespace FFBatchConverter;
 
@@ -7,6 +6,8 @@ public class BatchVideoEncoder
 {
     /// <summary>
     /// Event that is raised when there's an update to the status of any encoder.
+    /// There is no guarantee which thread this event will be raised on!
+    /// If using this with UI, caller is responsible for marshalling to the UI thread.
     /// </summary>
     public event EventHandler<InformationUpdateEventArgs>? InformationUpdate;
     private List<VideoEncoder> Encoders { get; } = [];
@@ -41,14 +42,12 @@ public class BatchVideoEncoder
 
     public void StartEncoding()
     {
-        WarnIfNotOnMainThread();
         IsEncoding = true;
         ProcessActions();
     }
 
     public void StopEncoding()
     {
-        WarnIfNotOnMainThread();
         IsEncoding = false;
         ProcessActions();
     }
@@ -105,8 +104,6 @@ public class BatchVideoEncoder
 
     private void EncoderOnInfoUpdate(VideoEncoder encoder, DataReceivedEventArgs? info)
     {
-        WarnIfNotOnMainThread();
-
         ProcessActions();
 
         InformationUpdate?.Invoke(this, new InformationUpdateEventArgs
@@ -133,13 +130,5 @@ public class BatchVideoEncoder
         }
 
         return files;
-    }
-
-    private static void WarnIfNotOnMainThread()
-    {
-        if (SynchronizationContext.Current is null)
-        {
-            MessageBox.ErrorQuery("Not on main thread!", "Batch encoder code is not running on the main thread! This could cause problems!", "Continue");
-        }
     }
 }

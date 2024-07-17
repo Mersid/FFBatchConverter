@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
-using Terminal.Gui;
 
 namespace FFBatchConverter;
 
@@ -130,12 +129,7 @@ public class VideoEncoder
 
         Log.AppendLine($"Process exited with code {Process.ExitCode}");
 
-        // Ensure this is run on main thread. Helps fix UI issues.
-        Application.Invoke(() =>
-        {
-            InfoUpdate?.Invoke(this, null);
-        });
-
+        InfoUpdate?.Invoke(this, null);
 
         Process.OutputDataReceived -= OnStreamDataReceivedEvent;
         Process.ErrorDataReceived -= OnStreamDataReceivedEvent;
@@ -170,10 +164,6 @@ public class VideoEncoder
 
         Log.AppendLine(args.Data);
 
-        // Ensure this is run on main thread. Helps fix UI issues.
-        Application.Invoke(() =>
-        {
-            InfoUpdate?.Invoke(this, args);
-        });
+        InfoUpdate?.Invoke(this, args);
     }
 }

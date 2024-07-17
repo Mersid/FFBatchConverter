@@ -60,7 +60,7 @@ public class BatchVideoEncoderViewModel : ReactiveObject
     public BatchVideoEncoderViewModel()
     {
         Encoder = ApplicationHost.Instance.Encoder;
-        Encoder.InformationUpdate += EncoderOnInformationUpdate;
+        Encoder.InformationUpdate += (sender, args) => Application.Invoke(() => EncoderOnInformationUpdate(sender, args));
 
         // If these values change in the UI/ViewModel, we want to update the encoder with the new values.
         this

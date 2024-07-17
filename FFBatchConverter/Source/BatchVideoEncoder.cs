@@ -36,6 +36,8 @@ public class BatchVideoEncoder
     private List<VideoEncoder> Encoders { get; } = [];
     private bool IsEncoding { get; set; }
 
+    private readonly object _lock = new object();
+
     /// <summary>
     /// Event that is raised when there's an update to the status of any encoder.
     /// There is no guarantee which thread this event will be raised on!
@@ -108,13 +110,16 @@ public class BatchVideoEncoder
     /// </summary>
     private void ProcessActions()
     {
-        if (!IsEncoding)
-            return;
+        lock (_lock)
+        {
+            if (!IsEncoding)
+                return;
 
-        if (Encoders.Count(e => e.State == EncodingState.Encoding) >= Concurrency)
-            return;
+            if (Encoders.Count(e => e.State == EncodingState.Encoding) >= Concurrency)
+                return;
 
-        Encoders.FirstOrDefault(t => t.State == EncodingState.Pending)?.Start(FfmpegPath, Arguments, OutputPath, Extension);
+            Encoders.FirstOrDefault(t => t.State == EncodingState.Pending)?.Start(FfmpegPath, Arguments, OutputPath, Extension);
+        }
     }
 
     private static List<string> GetFilesRecursive(string path)

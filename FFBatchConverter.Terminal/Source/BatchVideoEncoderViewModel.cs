@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using System.Data;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Terminal.Gui;
@@ -67,21 +66,24 @@ public class BatchVideoEncoderViewModel : ReactiveObject
             .WhenAnyValue(x => x.Concurrency)
             .Subscribe(x => Encoder.Concurrency = int.TryParse(x, out int concurrency) ? concurrency : 1);
         this
-            .WhenAnyValue(x => x.Arguments)
-            .Subscribe(x => Encoder.Arguments = x);
-        this
             .WhenAnyValue(x => x.Subdirectory)
             .Subscribe(x => Encoder.OutputPath = x);
         this
             .WhenAnyValue(x => x.Extension)
             .Subscribe(x => Encoder.Extension = x);
+        this
+            .WhenAnyValue(x => x.FfmpegPath)
+            .Subscribe(x => Encoder.FfmpegPath = x);
+        this
+            .WhenAnyValue(x => x.FfprobePath)
+            .Subscribe(x => Encoder.FfprobePath = x);
+        this
+            .WhenAnyValue(x => x.Arguments)
+            .Subscribe(x => Encoder.Arguments = x);
 
         this
             .WhenAnyValue(x => x.SelectedRow)
-            .Subscribe(x =>
-            {
-                UpdateFooter();
-            });
+            .Subscribe(_ => UpdateFooter());
     }
 
     private void EncoderOnInformationUpdate(object? sender, InformationUpdateEventArgs e)

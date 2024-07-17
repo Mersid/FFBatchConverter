@@ -14,11 +14,6 @@ public class VideoEncoder
     public StringBuilder Log { get; } = new StringBuilder();
 
     /// <summary>
-    /// Null when Start() has not yet been called.
-    /// </summary>
-    private Process? Process { get; set; }
-
-    /// <summary>
     /// Duration of the video in seconds.
     /// </summary>
     public double Duration { get; }
@@ -26,11 +21,16 @@ public class VideoEncoder
     public EncodingState State { get; private set; } = EncodingState.Pending;
 
     /// <summary>
+    /// Null when Start() has not yet been called.
+    /// </summary>
+    private Process? Process { get; set; }
+
+    /// <summary>
     /// Should only run on main thread (same one processing UI events)
     /// </summary>
     public event Action<VideoEncoder, DataReceivedEventArgs?>? InfoUpdate;
 
-    public VideoEncoder(string inputFilePath)
+    internal VideoEncoder(string ffprobePath, string inputFilePath)
     {
         InputFilePath = inputFilePath;
 
@@ -39,7 +39,7 @@ public class VideoEncoder
         {
             StartInfo = new ProcessStartInfo
             {
-                FileName = Helpers.GetFFprobePath(),
+                FileName = ffprobePath,
                 Arguments = $"-v quiet -print_format json -show_format \"{inputFilePath}\"",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -76,7 +76,7 @@ public class VideoEncoder
         }
     }
 
-    public void Start(string ffmpegArguments, string outputDirectoryRelative, string extension)
+    internal void Start(string ffmpegPath, string ffmpegArguments, string outputDirectoryRelative, string extension)
     {
         if (State != EncodingState.Pending)
         {
@@ -97,7 +97,7 @@ public class VideoEncoder
         {
             StartInfo = new ProcessStartInfo
             {
-                FileName = Helpers.GetFFmpegPath(),
+                FileName = ffmpegPath,
                 Arguments = $"-i \"{InputFilePath}\" -y {ffmpegArguments} \"{newFilePath}\"",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,

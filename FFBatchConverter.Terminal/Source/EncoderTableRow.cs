@@ -1,4 +1,4 @@
-﻿namespace FFBatchConverter;
+﻿namespace FFBatchConverter.Terminal;
 
 public class EncoderTableRow
 {

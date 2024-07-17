@@ -1,4 +1,4 @@
-﻿namespace FFBatchConverter;
+﻿namespace FFBatchConverter.Terminal;
 
 [AttributeUsage(AttributeTargets.Property)]
 public class ColumnNameAttribute(string name) : Attribute

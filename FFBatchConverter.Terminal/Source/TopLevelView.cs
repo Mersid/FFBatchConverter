@@ -1,7 +1,7 @@
 using Terminal.Gui;
 using Attribute = Terminal.Gui.Attribute;
 
-namespace FFBatchConverter;
+namespace FFBatchConverter.Terminal;
 
 public class TopLevelView : Toplevel
 {

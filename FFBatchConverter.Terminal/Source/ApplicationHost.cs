@@ -1,6 +1,6 @@
 ﻿using Terminal.Gui;
 
-namespace FFBatchConverter;
+namespace FFBatchConverter.Terminal;
 
 public class ApplicationHost
 {

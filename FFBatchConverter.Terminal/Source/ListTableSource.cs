@@ -1,8 +1,7 @@
-﻿using System.ComponentModel;
-using System.Reflection;
+﻿using System.Reflection;
 using Terminal.Gui;
 
-namespace FFBatchConverter;
+namespace FFBatchConverter.Terminal;
 
 public class ListTableSource<TRowType> : ITableSource
 {

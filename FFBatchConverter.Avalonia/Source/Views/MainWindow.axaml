@@ -21,12 +21,13 @@
     </Design.DataContext>
 
     <Grid RowDefinitions="*, Auto">
-        <Panel Grid.Row="0" Background="Coral">
+        <Panel Grid.Row="0" Background="Coral" DragDrop.AllowDrop="True">
             <DataGrid
+                IsReadOnly="True"
                 ItemsSource="{Binding TableRows}"
                 AutoGenerateColumns="True"
                 CanUserResizeColumns="True"
-                CanUserSortColumns="False"
+                CanUserSortColumns="True"
                 GridLinesVisibility="All"
                 BorderThickness="1"
                 BorderBrush="Gray"

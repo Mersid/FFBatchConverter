@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using Avalonia.Controls;
 using Avalonia.Threading;
+using BidirectionalMap;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
@@ -12,12 +12,7 @@ namespace FFBatchConverter.Avalonia.ViewModels;
 public class MainWindowViewModel : ReactiveObject
 {
 
-    private Dictionary<VideoEncoder, EncoderTableRow> EncoderToRow { get; set; } = new Dictionary<VideoEncoder, EncoderTableRow>();
-
-    /// <summary>
-    /// Matches by integer index to items in TableRows
-    /// </summary>
-    private List<VideoEncoder> Encoders { get; set; } = [];
+    private BiMap<VideoEncoder, EncoderTableRow> EncoderToRow { get; set; } = new BiMap<VideoEncoder, EncoderTableRow>();
 
     public ObservableCollection<EncoderTableRow> TableRows { get; set; } = [];
 
@@ -89,10 +84,9 @@ public class MainWindowViewModel : ReactiveObject
 
                 TableRows.Add(row);
                 EncoderToRow.Add(e.Encoder, row);
-                Encoders.Add(e.Encoder);
                 break;
             case DataModificationType.Update:
-                row = EncoderToRow[e.Encoder];
+                row = EncoderToRow.Forward[e.Encoder];
                 row.Status = $"{e.Encoder.CurrentDuration / e.Encoder.Duration * 100:F2}%";
 
                 if (e.Encoder.State is EncodingState.Error or EncodingState.Success)

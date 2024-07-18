@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using FFBatchConverter.Avalonia.ViewModels;
@@ -13,6 +14,10 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+
+
+        AddHandler(DragDrop.DropEvent, Drop);
+
     }
 
     private MainWindowViewModel ViewModel
@@ -50,5 +55,16 @@ public partial class MainWindow : Window
         });
 
         ViewModel.AddFiles(folders.Select(t => t.Path.LocalPath));
+    }
+
+    private void Drop(object? sender, DragEventArgs e)
+    {
+        IEnumerable<IStorageItem>? data = e.Data.GetFiles();
+
+        if (data is null)
+            return;
+
+        IEnumerable<string> files = data.Select(t => t.Path.LocalPath);
+        ViewModel.AddFiles(files);
     }
 }

@@ -20,66 +20,68 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <Grid RowDefinitions="*, Auto">
-        <Panel Grid.Row="0" Background="Coral" DragDrop.AllowDrop="True">
-            <DataGrid
-                IsReadOnly="True"
-                ItemsSource="{Binding TableRows}"
-                AutoGenerateColumns="True"
-                CanUserResizeColumns="True"
-                CanUserSortColumns="True"
-                GridLinesVisibility="All"
-                BorderThickness="1"
-                BorderBrush="Gray"
-                />
-        </Panel>
+    <UserControl>
+        <Grid RowDefinitions="*, Auto">
+            <Panel Grid.Row="0" Background="Coral" DragDrop.AllowDrop="True">
+                <DataGrid
+                    IsReadOnly="True"
+                    ItemsSource="{Binding TableRows}"
+                    AutoGenerateColumns="True"
+                    CanUserResizeColumns="True"
+                    CanUserSortColumns="True"
+                    GridLinesVisibility="All"
+                    BorderThickness="1"
+                    BorderBrush="Gray"
+                    />
+            </Panel>
 
-        <!-- Control panel -->
-        <Panel Grid.Row="1" Margin="0, 0, 0, 0" Background="Aqua">
-            <Grid ColumnDefinitions="*,200">
-                <StackPanel Grid.Column="0" Background="Plum">
-                    <Grid ColumnDefinitions="150, 70, 126, 230, 100, 70">
-                        <Label Grid.Column="0" VerticalAlignment="Center" Content="Concurrency" />
-                        <TextBox Grid.Column="1" Text="{Binding Concurrency}" />
+            <!-- Control panel -->
+            <Panel Grid.Row="1" Margin="0, 0, 0, 0" Background="Aqua">
+                <Grid ColumnDefinitions="*,200">
+                    <StackPanel Grid.Column="0" Background="Plum">
+                        <Grid ColumnDefinitions="150, 70, 126, 230, 100, 70">
+                            <Label Grid.Column="0" VerticalAlignment="Center" Content="Concurrency" />
+                            <TextBox Grid.Column="1" Text="{Binding Concurrency}" />
 
-                        <Label Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Content="Subdirectory" />
-                        <TextBox Grid.Column="3" Text="{Binding Subdirectory}" />
+                            <Label Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Content="Subdirectory" />
+                            <TextBox Grid.Column="3" Text="{Binding Subdirectory}" />
 
-                        <Label Grid.Column="4" HorizontalAlignment="Center" VerticalAlignment="Center" Content="Extension" />
-                        <TextBox Grid.Column="5" Text="{Binding Extension}" />
-                    </Grid>
-                    <Grid ColumnDefinitions="150, 600">
-                        <Label Grid.Column="0" VerticalAlignment="Center" Content="FFmpeg Path" />
-                        <TextBox Grid.Column="1" Text="{Binding FfmpegPath}" />
-                    </Grid>
-                    <Grid ColumnDefinitions="150, 600">
-                        <Label Grid.Column="0" VerticalAlignment="Center" Content="FFprobe Path" />
-                        <TextBox Grid.Column="1" Text="{Binding FfprobePath}" />
-                    </Grid>
-                    <Grid ColumnDefinitions="150, 600">
-                        <Label Grid.Column="0" VerticalAlignment="Center" Content="Arguments" />
-                        <TextBox Grid.Column="1" Text="{Binding Arguments}" />
-                    </Grid>
-                </StackPanel>
+                            <Label Grid.Column="4" HorizontalAlignment="Center" VerticalAlignment="Center" Content="Extension" />
+                            <TextBox Grid.Column="5" Text="{Binding Extension}" />
+                        </Grid>
+                        <Grid ColumnDefinitions="150, 600">
+                            <Label Grid.Column="0" VerticalAlignment="Center" Content="FFmpeg Path" />
+                            <TextBox Grid.Column="1" Text="{Binding FfmpegPath}" />
+                        </Grid>
+                        <Grid ColumnDefinitions="150, 600">
+                            <Label Grid.Column="0" VerticalAlignment="Center" Content="FFprobe Path" />
+                            <TextBox Grid.Column="1" Text="{Binding FfprobePath}" />
+                        </Grid>
+                        <Grid ColumnDefinitions="150, 600">
+                            <Label Grid.Column="0" VerticalAlignment="Center" Content="Arguments" />
+                            <TextBox Grid.Column="1" Text="{Binding Arguments}" />
+                        </Grid>
+                    </StackPanel>
 
 
-                <!-- Buttons -->
-                <StackPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="5">
-                    <!-- Start/stop button -->
-                    <Button
-                        HorizontalAlignment="Right"
-                        Content="{Binding Encoding, Converter={StaticResource BoolToStringConverter}}"
-                        Command="{Binding StartButtonClicked}" />
-                    <Button
-                        HorizontalAlignment="Right"
-                        Content="Add files"
-                        Click="AddFilesButtonClicked" />
-                    <Button
-                        HorizontalAlignment="Right"
-                        Content="Add folders"
-                        Click="AddFoldersButtonClicked" />
-                </StackPanel>
-            </Grid>
-        </Panel>
-    </Grid>
+                    <!-- Buttons -->
+                    <StackPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="5">
+                        <!-- Start/stop button -->
+                        <Button
+                            HorizontalAlignment="Right"
+                            Content="{Binding Encoding, Converter={StaticResource BoolToStringConverter}}"
+                            Command="{Binding StartButtonClicked}" />
+                        <Button
+                            HorizontalAlignment="Right"
+                            Content="Add files"
+                            Click="AddFilesButtonClicked" />
+                        <Button
+                            HorizontalAlignment="Right"
+                            Content="Add folders"
+                            Click="AddFoldersButtonClicked" />
+                    </StackPanel>
+                </Grid>
+            </Panel>
+        </Grid>
+    </UserControl>
 </Window>

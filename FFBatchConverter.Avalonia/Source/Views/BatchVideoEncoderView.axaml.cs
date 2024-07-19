@@ -25,7 +25,7 @@ public partial class BatchVideoEncoderView : UserControl
         get
         {
             Debug.Assert(DataContext is BatchVideoEncoderViewModel, "DataContext is MainWindowViewModel");
-            return DataContext as BatchVideoEncoderViewModel;
+            return (BatchVideoEncoderViewModel)DataContext;
         }
     }
 

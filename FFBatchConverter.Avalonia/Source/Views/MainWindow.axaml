@@ -21,5 +21,13 @@
         <vm:BatchVideoEncoderViewModel/>
     </Design.DataContext>
 
-    <ContentControl Content="{Binding CurrentView}" />
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="Open" />
+            </MenuItem>
+        </Menu>
+        <ContentControl Content="{Binding CurrentView}" />
+    </DockPanel>
+
 </Window>

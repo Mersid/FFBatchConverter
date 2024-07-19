@@ -2,7 +2,7 @@
 
 namespace FFBatchConverter.Avalonia.ViewModels;
 
-public class ReallyMainWindowViewModel : ReactiveObject
+public class TestWindowViewModel : ReactiveObject
 {
     
 }

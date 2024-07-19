@@ -18,6 +18,7 @@
         <PackageReference Include="Avalonia.Desktop" Version="11.0.10"/>
         <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.10"/>
         <PackageReference Include="Avalonia.Fonts.Inter" Version="11.0.10"/>
+        <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.0.10"/>
         <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
         <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.0.10"/>
         <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.10"/>
@@ -32,14 +33,14 @@
         <DependentUpon>App.axaml</DependentUpon>
         <SubType>Code</SubType>
       </Compile>
+      <Compile Update="Source\Views\TestWindow.axaml.cs">
+        <DependentUpon>TestWindow.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
     </ItemGroup>
 
     <ItemGroup>
       <UpToDateCheckInput Remove="Views\MainWindow.axaml" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <AdditionalFiles Include="Source\Views\MainWindow.axaml" />
     </ItemGroup>
 
     <ItemGroup>

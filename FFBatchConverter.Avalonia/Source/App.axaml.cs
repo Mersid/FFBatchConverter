@@ -22,9 +22,15 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.MainWindow = new ReallyMainWindow
+            desktop.MainWindow = new MainWindow
             {
-                DataContext = new ReallyMainWindowViewModel(),
+                DataContext = new MainWindowViewModel
+                {
+                    CurrentView = new BatchVideoEncoderView
+                    {
+                        DataContext = new BatchVideoEncoderViewModel()
+                    }
+                },
             };
         }
 

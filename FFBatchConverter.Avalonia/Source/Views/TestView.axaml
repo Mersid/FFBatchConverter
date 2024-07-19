@@ -5,13 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FFBatchConverter.Avalonia"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="FFBatchConverter.Avalonia.Views.TestWindow"
-        x:DataType="vm:TestWindowViewModel">
+        x:Class="FFBatchConverter.Avalonia.Views.TestView"
+        x:DataType="vm:TestViewModel">
 
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-        <vm:TestWindowViewModel/>
+        <vm:TestViewModel/>
     </Design.DataContext>
 
     <Label Content="Test Window" HorizontalAlignment="Center" VerticalAlignment="Center" Background="Aqua" />

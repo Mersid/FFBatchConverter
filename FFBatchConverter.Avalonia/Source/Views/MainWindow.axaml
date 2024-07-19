@@ -11,22 +11,24 @@
         Icon="/Source/Assets/avalonia-logo.ico"
         Title="FFBatchConverter.Avalonia">
 
-    <Window.Resources>
-        <local:BoolToStringConverter x:Key="BoolToStringConverter" TrueValue="Stop" FalseValue="Start" />
-    </Window.Resources>
-
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-        <vm:BatchVideoEncoderViewModel/>
+        <vm:MainWindowViewModel/>
     </Design.DataContext>
 
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
-                <MenuItem Header="Open" />
+                <MenuItem Header="Exit" Command="{Binding MenuExit}" />
+            </MenuItem>
+            <MenuItem Header="View">
+                <MenuItem Header="Batch Converter" Command="{Binding MenuNavigateBatchVideoEncoder}" />
+                <MenuItem Header="Test View" Command="{Binding MenuNavigateTest}" />
             </MenuItem>
         </Menu>
+
+        <!-- Thanks to https://github.com/ibram-reda/NavigationApp/tree/main -->
         <ContentControl Content="{Binding CurrentView}" />
     </DockPanel>
 

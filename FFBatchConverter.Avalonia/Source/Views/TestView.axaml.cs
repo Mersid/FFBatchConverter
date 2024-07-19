@@ -2,9 +2,9 @@
 
 namespace FFBatchConverter.Avalonia.Views;
 
-public partial class TestWindow : UserControl
+public partial class TestView : UserControl
 {
-    public TestWindow()
+    public TestView()
     {
         InitializeComponent();
     }

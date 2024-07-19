@@ -24,13 +24,7 @@ public partial class App : Application
         {
             desktop.MainWindow = new MainWindow
             {
-                DataContext = new MainWindowViewModel
-                {
-                    CurrentView = new BatchVideoEncoderView
-                    {
-                        DataContext = new BatchVideoEncoderViewModel()
-                    }
-                },
+                DataContext = new MainWindowViewModel(),
             };
         }
 

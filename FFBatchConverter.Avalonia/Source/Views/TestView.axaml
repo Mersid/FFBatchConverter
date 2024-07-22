@@ -14,5 +14,9 @@
         <vm:TestViewModel/>
     </Design.DataContext>
 
-    <Label Content="Test Window" HorizontalAlignment="Center" VerticalAlignment="Center" Background="Aqua" />
+    <!-- <Label Content="Test Window" HorizontalAlignment="Center" VerticalAlignment="Center" Background="Aqua" /> -->
+    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+        <Button Content="Save" Command="{Binding Save}" />
+        <Button Content="Load" Command="{Binding Load}" />
+    </StackPanel>
 </UserControl>

@@ -10,6 +10,8 @@ public partial class App : Application
 {
     public static App Instance { get; private set; } = null!;
 
+    public SettingsManager SettingsManager { get; } = new SettingsManager();
+
     public BatchVideoEncoder Encoder { get; } = new BatchVideoEncoder();
 
     public override void Initialize()

@@ -1,0 +1,60 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:FFBatchConverter.Avalonia.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:FFBatchConverter.Avalonia"
+        xmlns:views="clr-namespace:FFBatchConverter.Avalonia.Views"
+        mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="240"
+        Width="400" Height="240"
+        x:Class="FFBatchConverter.Avalonia.Views.SettingsWindow"
+        x:DataType="vm:SettingsWindowViewModel"
+        Icon="/Source/Assets/avalonia-logo.ico"
+        Title="Settings">
+
+    <Window.Resources>
+        <local:BoolToStringConverter x:Key="BoolToStringConverter" TrueValue="Custom path" FalseValue="Default path" />
+    </Window.Resources>
+
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:SettingsWindowViewModel/>
+    </Design.DataContext>
+
+    <StackPanel Margin="4">
+        <StackPanel>
+            <CheckBox
+                Content="Override FFmpeg program path"
+                IsChecked="{Binding ShouldOverrideFFmpegPath}" />
+            <Label Content="{Binding ShouldOverrideFFmpegPath, Converter={StaticResource BoolToStringConverter}}" />
+            <TextBox
+                Text="{Binding DefaultFFmpegPath}"
+                IsEnabled="False"
+                IsVisible="{Binding !ShouldOverrideFFmpegPath}"/>
+            <TextBox
+                Text="{Binding FFmpegPath}"
+                IsVisible="{Binding ShouldOverrideFFmpegPath}"/>
+        </StackPanel>
+
+        <StackPanel Margin="0, 16">
+            <CheckBox
+                Content="Override FFprobe program path"
+                IsChecked="{Binding ShouldOverrideFFprobePath}" />
+            <Label Content="{Binding ShouldOverrideFFprobePath, Converter={StaticResource BoolToStringConverter}}" />
+            <TextBox
+                Text="{Binding DefaultFFprobePath}"
+                IsEnabled="False"
+                IsVisible="{Binding !ShouldOverrideFFprobePath}"/>
+            <TextBox
+                Text="{Binding FFprobePath}"
+                IsVisible="{Binding ShouldOverrideFFprobePath}"/>
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" FlowDirection="RightToLeft">
+            <Button Content="Cancel" Click="Close" />
+            <Button Content="Save" Background="Lime" Command="{Binding Save}" Click="Close" />
+        </StackPanel>
+    </StackPanel>
+
+</Window>

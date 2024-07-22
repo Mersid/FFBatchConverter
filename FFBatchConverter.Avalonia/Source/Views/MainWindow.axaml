@@ -20,6 +20,8 @@
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
+                <MenuItem Header="Settings" Click="MenuSettingsClick"></MenuItem>
+                <Separator />
                 <MenuItem Header="Exit" Command="{Binding MenuExit}" />
             </MenuItem>
             <MenuItem Header="View">

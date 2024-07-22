@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Text;
 
 namespace FFBatchConverter;
 
@@ -12,6 +13,67 @@ public static class Helpers
 	public static string? GetFFprobePath()
 	{
 		return FindCommand("ffprobe");
+	}
+
+	/// <summary>
+	/// Given a file path, returns a list of all files in the directory and subdirectories.
+	/// If it's a file, just returns itself in a list.
+	/// An empty list is returned if the path does not exist.
+	/// </summary>
+	/// <param name="path"></param>
+	/// <returns></returns>
+	public static List<string> GetFilesRecursive(string path)
+	{
+		List<string> files = [];
+		if (Directory.Exists(path))
+		{
+			foreach (string dir in Directory.GetFileSystemEntries(path))
+			{
+				files.AddRange(GetFilesRecursive(dir));
+			}
+		}
+
+		if (File.Exists(path))
+		{
+			files.Add(path);
+		}
+
+		return files;
+	}
+
+	/// <summary>
+	/// Runs ffprobe on the file and returns the json output as a string.
+	/// </summary>
+	/// <param name="ffprobePath"></param>
+	/// <param name="filePath"></param>
+	/// <returns></returns>
+	public static string Probe(string ffprobePath, string filePath)
+	{
+		Process probe = new Process
+		{
+			StartInfo = new ProcessStartInfo
+			{
+				FileName = ffprobePath,
+				Arguments = $"-v quiet -print_format json -show_format \"{filePath}\"",
+				RedirectStandardOutput = true,
+				RedirectStandardError = true,
+				UseShellExecute = false,
+				CreateNoWindow = true
+			}
+		};
+
+		probe.Start();
+
+		// Run ffprobe to get duration data
+		StringBuilder probeOutput = new StringBuilder();
+		while (!probe.StandardOutput.EndOfStream)
+		{
+			string? info = probe.StandardOutput.ReadLine();
+			if (info != null)
+				probeOutput.AppendLine(info);
+		}
+
+		return probeOutput.ToString();
 	}
 
 	/// <summary>

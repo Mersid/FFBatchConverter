@@ -68,7 +68,7 @@ public class BatchVideoEncoder
         List<string> files = [];
         foreach (string p in path)
         {
-            files.AddRange(GetFilesRecursive(p));
+            files.AddRange(Helpers.GetFilesRecursive(p));
         }
 
         List<VideoEncoder> encoders = files
@@ -120,24 +120,5 @@ public class BatchVideoEncoder
 
             Encoders.FirstOrDefault(t => t.State == EncodingState.Pending)?.Start(FfmpegPath, Arguments, OutputPath, Extension);
         }
-    }
-
-    private static List<string> GetFilesRecursive(string path)
-    {
-        List<string> files = [];
-        if (Directory.Exists(path))
-        {
-            foreach (string dir in Directory.GetFileSystemEntries(path))
-            {
-                files.AddRange(GetFilesRecursive(dir));
-            }
-        }
-
-        if (File.Exists(path))
-        {
-            files.Add(path);
-        }
-
-        return files;
     }
 }

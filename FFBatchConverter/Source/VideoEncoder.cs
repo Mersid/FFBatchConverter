@@ -34,36 +34,13 @@ public class VideoEncoder
     {
         InputFilePath = inputFilePath;
 
-        // TODO: Don't use Helpers static methods, as they may not reflect user updates!
-        Process probe = new Process
-        {
-            StartInfo = new ProcessStartInfo
-            {
-                FileName = ffprobePath,
-                Arguments = $"-v quiet -print_format json -show_format \"{inputFilePath}\"",
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            }
-        };
-
-        probe.Start();
-
-        // Run ffprobe to get duration data
-        StringBuilder probeOutput = new StringBuilder();
-        while (!probe.StandardOutput.EndOfStream)
-        {
-            string? info = probe.StandardOutput.ReadLine();
-            if (info != null)
-                probeOutput.AppendLine(info);
-        }
+        string probeOutput = Helpers.Probe(ffprobePath, inputFilePath);
 
         // Json output is in probeOutput
-        JsonDocument json = JsonDocument.Parse(probeOutput.ToString());
+        JsonDocument json = JsonDocument.Parse(probeOutput);
 
         // Copy probeOutput to Log for debugging, if we need it.
-        Log.AppendLine(probeOutput.ToString());
+        Log.AppendLine(probeOutput);
 
         try
         {

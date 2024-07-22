@@ -17,6 +17,10 @@ public partial class App : Application
     public override void Initialize()
     {
         Instance = this;
+
+        SettingsManager.SettingsChanged += UpdateEncoderPaths;
+        UpdateEncoderPaths(SettingsManager.Settings);
+
         AvaloniaXamlLoader.Load(this);
     }
 
@@ -31,5 +35,11 @@ public partial class App : Application
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private void UpdateEncoderPaths(Settings settings)
+    {
+        Encoder.FFmpegPath = settings.ShouldOverrideFFmpegPath ? settings.FFmpegPath : Helpers.GetFFmpegPath();
+        Encoder.FFprobePath = settings.ShouldOverrideFFprobePath ? settings.FFprobePath : Helpers.GetFFprobePath();
     }
 }

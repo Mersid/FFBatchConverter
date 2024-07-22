@@ -26,12 +26,6 @@ public class BatchVideoEncoderViewModel : ReactiveObject
     public string Extension { get; set; } = "mkv";
 
     [Reactive]
-    public string FfmpegPath { get; set; } = Helpers.GetFFmpegPath() ?? "";
-
-    [Reactive]
-    public string FfprobePath { get; set; } = Helpers.GetFFprobePath() ?? "";
-
-    [Reactive]
     public string Arguments { get; set; } = "-c:v libx265 -c:a aac";
 
     /// <summary>
@@ -57,12 +51,6 @@ public class BatchVideoEncoderViewModel : ReactiveObject
         this
             .WhenAnyValue(x => x.Extension)
             .Subscribe(x => Encoder.Extension = x);
-        this
-            .WhenAnyValue(x => x.FfmpegPath)
-            .Subscribe(x => Encoder.FfmpegPath = x);
-        this
-            .WhenAnyValue(x => x.FfprobePath)
-            .Subscribe(x => Encoder.FfprobePath = x);
         this
             .WhenAnyValue(x => x.Arguments)
             .Subscribe(x => Encoder.Arguments = x);

@@ -25,8 +25,8 @@ public class BatchVideoEncoder
     /// </summary>
     public string Extension { get; set; } = string.Empty;
 
-    public string FfmpegPath { get; set; } = string.Empty;
-    public string FfprobePath { get; set; } = string.Empty;
+    public string FFmpegPath { get; set; } = string.Empty;
+    public string FFprobePath { get; set; } = string.Empty;
 
     /// <summary>
     /// FFmpeg arguments.
@@ -75,7 +75,7 @@ public class BatchVideoEncoder
             .AsParallel()
             .AsOrdered()
             .WithDegreeOfParallelism(Environment.ProcessorCount)
-            .Select(t => new VideoEncoder(FfprobePath, t))
+            .Select(t => new VideoEncoder(FFprobePath, t))
             .OrderByDescending(t => t.Duration) // Process the longest files first. If two files are of the same length, process the largest file first.
             .ThenByDescending(t => (new FileInfo(t.InputFilePath).Length))
             .ToList();
@@ -118,7 +118,7 @@ public class BatchVideoEncoder
             if (Encoders.Count(e => e.State == EncodingState.Encoding) >= Concurrency)
                 return;
 
-            Encoders.FirstOrDefault(t => t.State == EncodingState.Pending)?.Start(FfmpegPath, Arguments, OutputPath, Extension);
+            Encoders.FirstOrDefault(t => t.State == EncodingState.Pending)?.Start(FFmpegPath, Arguments, OutputPath, Extension);
         }
     }
 }

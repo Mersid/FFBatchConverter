@@ -73,10 +73,10 @@ public class BatchVideoEncoderViewModel : ReactiveObject
             .Subscribe(x => Encoder.Extension = x);
         this
             .WhenAnyValue(x => x.FfmpegPath)
-            .Subscribe(x => Encoder.FfmpegPath = x);
+            .Subscribe(x => Encoder.FFmpegPath = x);
         this
             .WhenAnyValue(x => x.FfprobePath)
-            .Subscribe(x => Encoder.FfprobePath = x);
+            .Subscribe(x => Encoder.FFprobePath = x);
         this
             .WhenAnyValue(x => x.Arguments)
             .Subscribe(x => Encoder.Arguments = x);

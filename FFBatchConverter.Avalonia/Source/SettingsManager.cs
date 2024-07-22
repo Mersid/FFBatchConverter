@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Text.Json;
 
 namespace FFBatchConverter.Avalonia;
@@ -7,6 +8,8 @@ public class SettingsManager
 {
     private string SettingsPath { get; } = "settings.json";
     public Settings Settings { get; private set; } = new Settings();
+
+    public event Action<Settings>? SettingsChanged;
 
     public SettingsManager()
     {
@@ -26,5 +29,7 @@ public class SettingsManager
     {
         string json = JsonSerializer.Serialize(Settings, SourceGenerationContext.Default.Settings);
         File.WriteAllText(SettingsPath, json);
+
+        SettingsChanged?.Invoke(Settings);
     }
 }

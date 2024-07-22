@@ -1,5 +1,4 @@
 ﻿using System;
-using Avalonia;
 using Avalonia.Controls;
 using FFBatchConverter.Avalonia.Views;
 using ReactiveUI;

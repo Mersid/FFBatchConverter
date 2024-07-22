@@ -3,7 +3,6 @@
         xmlns:vm="using:FFBatchConverter.Avalonia.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:FFBatchConverter.Avalonia"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="FFBatchConverter.Avalonia.Views.TestView"
         x:DataType="vm:TestViewModel">

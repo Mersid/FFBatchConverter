@@ -24,13 +24,27 @@
                 <DataGrid
                     IsReadOnly="True"
                     ItemsSource="{Binding TableRows}"
-                    AutoGenerateColumns="True"
+                    AutoGenerateColumns="False"
                     CanUserResizeColumns="True"
                     CanUserSortColumns="True"
                     GridLinesVisibility="All"
                     BorderThickness="1"
                     BorderBrush="Gray"
-                    />
+                    >
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="File Name" Binding="{Binding FileName}" />
+                        <DataGridTextColumn Header="Duration" Binding="{Binding Duration}" />
+                        <DataGridTextColumn Header="Size" Binding="{Binding Size}" />
+                        <DataGridTextColumn Header="Status" Binding="{Binding Status}" />
+                    </DataGrid.Columns>
+
+                    <DataGrid.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Copy" />
+                            <MenuItem Header="Paste" />
+                        </ContextMenu>
+                    </DataGrid.ContextMenu>
+                </DataGrid>
             </Panel>
 
             <!-- Control panel -->

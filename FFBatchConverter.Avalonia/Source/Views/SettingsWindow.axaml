@@ -9,6 +9,7 @@
         x:Class="FFBatchConverter.Avalonia.Views.SettingsWindow"
         x:DataType="vm:SettingsWindowViewModel"
         Icon="/Source/Assets/avalonia-logo.ico"
+        CanResize="False"
         Title="Settings">
 
     <Window.Resources>

@@ -1,3 +1,4 @@
+using System;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
@@ -12,7 +13,13 @@ public partial class App : Application
 
     public SettingsManager SettingsManager { get; } = new SettingsManager();
 
-    public BatchVideoEncoder Encoder { get; } = new BatchVideoEncoder();
+    public BatchVideoEncoder Encoder { get; private set; } = null!;
+
+    /// <summary>
+    /// Event that is raised when the video encoders in the application have been regenerated.
+    /// This is raised because some encoder settings can only be set at initialization.
+    /// </summary>
+    public event Action? EncoderRebuilt;
 
     public override void Initialize()
     {
@@ -39,7 +46,12 @@ public partial class App : Application
 
     private void UpdateEncoderPaths(Settings settings)
     {
-        Encoder.FFmpegPath = settings.ShouldOverrideFFmpegPath ? settings.FFmpegPath : Helpers.GetFFmpegPath();
-        Encoder.FFprobePath = settings.ShouldOverrideFFprobePath ? settings.FFprobePath : Helpers.GetFFprobePath();
+        Encoder = new BatchVideoEncoder
+        {
+            FFprobePath = settings.ShouldOverrideFFprobePath ? settings.FFprobePath : Helpers.GetFFprobePath(),
+            FFmpegPath = settings.ShouldOverrideFFmpegPath ? settings.FFmpegPath : Helpers.GetFFmpegPath(),
+        };
+
+        EncoderRebuilt?.Invoke();
     }
 }

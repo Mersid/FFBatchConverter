@@ -25,8 +25,8 @@ public class BatchVideoEncoder
     /// </summary>
     public string Extension { get; set; } = string.Empty;
 
-    public string FFmpegPath { get; set; } = string.Empty;
-    public string FFprobePath { get; set; } = string.Empty;
+    public required string FFmpegPath { get; init; }
+    public required string FFprobePath { get; init; }
 
     /// <summary>
     /// FFmpeg arguments.
@@ -84,7 +84,7 @@ public class BatchVideoEncoder
 
         foreach (VideoEncoder encoder in encoders)
         {
-            encoder.InfoUpdate += EncoderOnInfoUpdate;
+            encoder.InfoUpdate += EncoderInfoUpdate;
 
             InformationUpdate?.Invoke(this, new InformationUpdateEventArgs
             {
@@ -94,7 +94,7 @@ public class BatchVideoEncoder
         }
     }
 
-    private void EncoderOnInfoUpdate(VideoEncoder encoder, DataReceivedEventArgs? info)
+    private void EncoderInfoUpdate(VideoEncoder encoder, DataReceivedEventArgs? info)
     {
         ProcessActions();
 

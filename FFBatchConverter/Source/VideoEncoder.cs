@@ -9,7 +9,6 @@ namespace FFBatchConverter;
 /// </summary>
 public class VideoEncoder
 {
-    // TODO: Minimum size
     public string InputFilePath { get; }
     public StringBuilder Log { get; } = new StringBuilder();
 

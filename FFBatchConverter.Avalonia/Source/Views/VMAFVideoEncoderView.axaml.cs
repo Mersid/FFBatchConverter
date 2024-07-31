@@ -2,9 +2,9 @@
 
 namespace FFBatchConverter.Avalonia.Views;
 
-public partial class TestView : UserControl
+public partial class VMAFVideoEncoderView : UserControl
 {
-    public TestView()
+    public VMAFVideoEncoderView()
     {
         InitializeComponent();
     }

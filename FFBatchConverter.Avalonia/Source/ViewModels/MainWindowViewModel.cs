@@ -12,7 +12,7 @@ public class MainWindowViewModel : ReactiveObject
     public UserControl CurrentView { get; set; }
 
     private UserControl BatchVideoEncoderView { get; set; }
-    private UserControl TestView { get; set; }
+    private UserControl VMAFVideoEncoderView { get; set; }
 
     public MainWindowViewModel()
     {
@@ -21,9 +21,9 @@ public class MainWindowViewModel : ReactiveObject
             DataContext = new BatchVideoEncoderViewModel()
         };
 
-        TestView = new TestView
+        VMAFVideoEncoderView = new VMAFVideoEncoderView
         {
-            DataContext = new TestViewModel()
+            DataContext = new VMAFVideoEncoderViewModel()
         };
 
         CurrentView = BatchVideoEncoderView;
@@ -39,8 +39,8 @@ public class MainWindowViewModel : ReactiveObject
         CurrentView = BatchVideoEncoderView;
     }
 
-    public void MenuNavigateTest()
+    public void MenuNavigateVMAFVideoEncoder()
     {
-        CurrentView = TestView;
+        CurrentView = VMAFVideoEncoderView;
     }
 }

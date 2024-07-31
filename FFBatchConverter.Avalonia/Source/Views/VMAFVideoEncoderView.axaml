@@ -4,18 +4,18 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="FFBatchConverter.Avalonia.Views.TestView"
-        x:DataType="vm:TestViewModel">
+        x:Class="FFBatchConverter.Avalonia.Views.VMAFVideoEncoderView"
+        x:DataType="vm:VMAFVideoEncoderViewModel">
 
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-        <vm:TestViewModel/>
+        <vm:VMAFVideoEncoderViewModel/>
     </Design.DataContext>
 
     <!-- <Label Content="Test Window" HorizontalAlignment="Center" VerticalAlignment="Center" Background="Aqua" /> -->
     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-        <Button Content="Save" Command="{Binding Save}" />
-        <Button Content="Load" Command="{Binding Load}" />
+        <Button Content="Do the needful!" Command="{Binding DoTheNeedful}" />
+        <Button Content="Extra button :D" Command="{Binding ExtraButton}" />
     </StackPanel>
 </UserControl>

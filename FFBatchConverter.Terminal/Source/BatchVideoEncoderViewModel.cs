@@ -67,7 +67,7 @@ public class BatchVideoEncoderViewModel : ReactiveObject
             .Subscribe(x => Encoder.Concurrency = int.TryParse(x, out int concurrency) ? concurrency : 1);
         this
             .WhenAnyValue(x => x.Subdirectory)
-            .Subscribe(x => Encoder.OutputPath = x);
+            .Subscribe(x => Encoder.OutputSubdirectory = x);
         this
             .WhenAnyValue(x => x.Extension)
             .Subscribe(x => Encoder.Extension = x);
@@ -89,30 +89,31 @@ public class BatchVideoEncoderViewModel : ReactiveObject
     private void EncoderOnInformationUpdate(object? sender, InformationUpdateEventArgs e)
     {
         int preRowCount = RowsIndex.Count;
+        VideoEncoder encoder = (VideoEncoder)e.Encoder;
         switch (e.ModificationType)
         {
             case DataModificationType.Add:
-                TimeSpan duration = TimeSpan.FromSeconds(e.Encoder.Duration);
+                TimeSpan duration = TimeSpan.FromSeconds(encoder.Duration);
                 EncoderTableRow row = new EncoderTableRow
                 {
-                    FileName = e.Encoder.InputFilePath,
+                    FileName = encoder.InputFilePath,
                     Duration = $"{duration.Hours:D2}:{duration.Minutes:D2}:{duration.Seconds:D2}",
-                    Size = $"{(new FileInfo(e.Encoder.InputFilePath).Length / 1024d / 1024):F2} MiB",
-                    Status = e.Encoder.State.ToString()
+                    Size = $"{encoder.FileSize / 1024d / 1024:F2} MiB",
+                    Status = encoder.State.ToString()
                 };
 
                 TableRows.Add(row);
-                EncoderToRow.Add(e.Encoder, row);
-                RowsIndex.Add(e.Encoder);
+                EncoderToRow.Add(encoder, row);
+                RowsIndex.Add(encoder);
                 break;
             case DataModificationType.Update:
-                row = EncoderToRow[e.Encoder];
-                row.Status = $"{e.Encoder.CurrentDuration / e.Encoder.Duration * 100:F2}%";
+                row = EncoderToRow[encoder];
+                row.Status = $"{encoder.CurrentDuration / encoder.Duration * 100:F2}%";
 
-                if (e.Encoder.State is EncodingState.Error or EncodingState.Success)
+                if (encoder.State is EncodingState.Error or EncodingState.Success)
                 {
                     // Video encoder has finished
-                    row.Status = e.Encoder.State.ToString();
+                    row.Status = encoder.State.ToString();
                 }
 
                 break;

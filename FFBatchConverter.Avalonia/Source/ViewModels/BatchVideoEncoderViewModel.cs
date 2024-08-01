@@ -66,7 +66,7 @@ public class BatchVideoEncoderViewModel : ReactiveObject
             .Subscribe(x => Encoder.Concurrency = int.TryParse(x, out int concurrency) ? concurrency : 1);
         this
             .WhenAnyValue(x => x.Subdirectory)
-            .Subscribe(x => Encoder.OutputPath = x);
+            .Subscribe(x => Encoder.OutputSubdirectory = x);
         this
             .WhenAnyValue(x => x.Extension)
             .Subscribe(x => Encoder.Extension = x);
@@ -87,7 +87,7 @@ public class BatchVideoEncoderViewModel : ReactiveObject
                 {
                     FileName = encoder.InputFilePath,
                     Duration = $"{duration.Hours:D2}:{duration.Minutes:D2}:{duration.Seconds:D2}",
-                    Size = $"{(new FileInfo(encoder.InputFilePath).Length / 1024d / 1024):F2} MiB",
+                    Size = $"{encoder.FileSize / 1024d / 1024:F2} MiB",
                     Status = encoder.State.ToString()
                 };
 

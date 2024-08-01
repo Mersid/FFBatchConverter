@@ -9,14 +9,35 @@ namespace FFBatchConverter;
 /// </summary>
 public class VideoEncoder
 {
+    /// <summary>
+    /// Path to the input file.
+    /// </summary>
     public string InputFilePath { get; }
+
+    /// <summary>
+    /// Full path of the output file.
+    /// </summary>
+    public string OutputFilePath { get; private set; }
     public StringBuilder Log { get; } = new StringBuilder();
+
+    private string FFprobePath { get; set; }
+    private string FFmpegPath { get; set; }
 
     /// <summary>
     /// Duration of the video in seconds.
     /// </summary>
     public double Duration { get; }
+
+    /// <summary>
+    /// How much we've encoded so far, in seconds.
+    /// </summary>
     public double CurrentDuration { get; private set; }
+
+    /// <summary>
+    /// Size of the input file, in bytes.
+    /// </summary>
+    public long FileSize { get; private set; }
+
     public EncodingState State { get; private set; } = EncodingState.Pending;
 
     /// <summary>
@@ -29,11 +50,15 @@ public class VideoEncoder
     /// </summary>
     public event Action<VideoEncoder, DataReceivedEventArgs?>? InfoUpdate;
 
-    internal VideoEncoder(string ffprobePath, string inputFilePath)
+    internal VideoEncoder(string ffprobePath, string ffmpegPath, string inputFilePath)
     {
+        FFprobePath = ffprobePath;
+        FFmpegPath = ffmpegPath;
         InputFilePath = inputFilePath;
 
-        string probeOutput = Helpers.Probe(ffprobePath, inputFilePath);
+        FileSize = new FileInfo(inputFilePath).Length;
+
+        string probeOutput = Helpers.Probe(FFprobePath, inputFilePath);
 
         // Json output is in probeOutput
         JsonDocument json = JsonDocument.Parse(probeOutput);
@@ -52,7 +77,7 @@ public class VideoEncoder
         }
     }
 
-    internal void Start(string ffmpegPath, string ffmpegArguments, string outputDirectoryRelative, string extension)
+    internal void Start(string ffmpegArguments, string outputFilePath)
     {
         if (State != EncodingState.Pending)
         {
@@ -60,21 +85,14 @@ public class VideoEncoder
             return;
         }
 
-        string directory = Path.GetDirectoryName(InputFilePath) ?? ".";
-        string outputSubdirectory = Path.Combine(directory, outputDirectoryRelative);
-        string fileName = Path.GetFileNameWithoutExtension(InputFilePath);
-        string newFilePath = Path.Combine(outputSubdirectory, $"{fileName}.{extension}");
-
-        // Create the output directory if it doesn't exist
-        if (!Directory.Exists(outputSubdirectory))
-            Directory.CreateDirectory(outputSubdirectory);
+        OutputFilePath = outputFilePath;
 
         Process = new Process
         {
             StartInfo = new ProcessStartInfo
             {
-                FileName = ffmpegPath,
-                Arguments = $"-i \"{InputFilePath}\" -y {ffmpegArguments} \"{newFilePath}\"",
+                FileName = FFmpegPath,
+                Arguments = $"-i \"{InputFilePath}\" -y {ffmpegArguments} \"{OutputFilePath}\"",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,

@@ -17,8 +17,9 @@ public class BatchVideoEncoder
 
     /// <summary>
     /// Output directory, relative to the input file.
+    /// Do not use absolute paths!
     /// </summary>
-    public string OutputPath { get; set; } = string.Empty;
+    public string OutputSubdirectory { get; set; } = string.Empty;
 
     /// <summary>
     /// File extension to use for the output files.
@@ -75,9 +76,9 @@ public class BatchVideoEncoder
             .AsParallel()
             .AsOrdered()
             .WithDegreeOfParallelism(Environment.ProcessorCount)
-            .Select(t => new VideoEncoder(FFprobePath, t))
+            .Select(t => new VideoEncoder(FFprobePath, FFmpegPath, t))
             .OrderByDescending(t => t.Duration) // Process the longest files first. If two files are of the same length, process the largest file first.
-            .ThenByDescending(t => (new FileInfo(t.InputFilePath).Length))
+            .ThenByDescending(t => t.FileSize)
             .ToList();
 
         Encoders.AddRange(encoders);
@@ -118,7 +119,20 @@ public class BatchVideoEncoder
             if (Encoders.Count(e => e.State == EncodingState.Encoding) >= Concurrency)
                 return;
 
-            Encoders.FirstOrDefault(t => t.State == EncodingState.Pending)?.Start(FFmpegPath, Arguments, OutputPath, Extension);
+            VideoEncoder? encoder = Encoders.FirstOrDefault(t => t.State == EncodingState.Pending);
+            if (encoder is null)
+                return;
+
+            string directory = Path.GetDirectoryName(encoder.InputFilePath) ?? ".";
+            string outputSubdirectory = Path.Combine(directory, OutputSubdirectory);
+            string fileName = Path.GetFileNameWithoutExtension(encoder.InputFilePath);
+            string newFilePath = Path.Combine(outputSubdirectory, $"{fileName}.{Extension}");
+
+            // Create the output directory if it doesn't exist
+            if (!Directory.Exists(outputSubdirectory))
+                Directory.CreateDirectory(outputSubdirectory);
+
+            encoder.Start(Arguments, newFilePath);
         }
     }
 }

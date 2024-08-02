@@ -4,10 +4,12 @@
     <option name="projectPerEditor">
       <map>
         <entry key="FFBatchConverter.Avalonia/Source/App.axaml" value="FFBatchConverter.Avalonia/FFBatchConverter.Avalonia.csproj" />
+        <entry key="FFBatchConverter.Avalonia/Source/Views/BatchVMAFTargetEncoderView.axaml" value="FFBatchConverter.Avalonia/FFBatchConverter.Avalonia.csproj" />
         <entry key="FFBatchConverter.Avalonia/Source/Views/BatchVideoEncoderView.axaml" value="FFBatchConverter.Avalonia/FFBatchConverter.Avalonia.csproj" />
         <entry key="FFBatchConverter.Avalonia/Source/Views/MainWindow.axaml" value="FFBatchConverter.Avalonia/FFBatchConverter.Avalonia.csproj" />
         <entry key="FFBatchConverter.Avalonia/Source/Views/SettingsWindow.axaml" value="FFBatchConverter.Avalonia/FFBatchConverter.Avalonia.csproj" />
         <entry key="FFBatchConverter.Avalonia/Source/Views/TestView.axaml" value="FFBatchConverter.Avalonia/FFBatchConverter.Avalonia.csproj" />
+        <entry key="FFBatchConverter.Avalonia/Source/Views/VMAFVideoEncoderView.axaml" value="FFBatchConverter.Avalonia/FFBatchConverter.Avalonia.csproj" />
       </map>
     </option>
   </component>

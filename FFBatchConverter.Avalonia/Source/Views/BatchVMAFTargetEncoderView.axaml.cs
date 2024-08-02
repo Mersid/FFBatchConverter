@@ -2,9 +2,9 @@
 
 namespace FFBatchConverter.Avalonia.Views;
 
-public partial class VMAFVideoEncoderView : UserControl
+public partial class BatchVMAFTargetEncoderView : UserControl
 {
-    public VMAFVideoEncoderView()
+    public BatchVMAFTargetEncoderView()
     {
         InitializeComponent();
     }

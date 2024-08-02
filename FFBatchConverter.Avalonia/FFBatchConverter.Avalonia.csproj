@@ -34,7 +34,7 @@
         <DependentUpon>App.axaml</DependentUpon>
         <SubType>Code</SubType>
       </Compile>
-      <Compile Update="Source\Views\VMAFVideoEncoderView.axaml.cs">
+      <Compile Update="Source\Views\BatchVMAFTargetEncoderView.axaml.cs">
         <DependentUpon>TestWindow.axaml</DependentUpon>
         <SubType>Code</SubType>
       </Compile>

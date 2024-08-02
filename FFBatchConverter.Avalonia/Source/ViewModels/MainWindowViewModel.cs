@@ -21,9 +21,9 @@ public class MainWindowViewModel : ReactiveObject
             DataContext = new BatchVideoEncoderViewModel()
         };
 
-        VMAFVideoEncoderView = new VMAFVideoEncoderView
+        VMAFVideoEncoderView = new BatchVMAFTargetEncoderView
         {
-            DataContext = new VMAFVideoEncoderViewModel()
+            DataContext = new BatchVMAFTargetEncoderViewModel()
         };
 
         CurrentView = BatchVideoEncoderView;

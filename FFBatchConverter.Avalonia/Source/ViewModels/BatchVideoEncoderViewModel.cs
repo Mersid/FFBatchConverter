@@ -75,9 +75,9 @@ public class BatchVideoEncoderViewModel : ReactiveObject
             .Subscribe(x => Encoder.Arguments = x);
     }
 
-    private void EncoderOnInformationUpdate(object? sender, InformationUpdateEventArgs e)
+    private void EncoderOnInformationUpdate(object? sender, InformationUpdateEventArgs<VideoEncoder> e)
     {
-        VideoEncoder encoder = (VideoEncoder)e.Encoder;
+        VideoEncoder encoder = e.Encoder;
 
         switch (e.ModificationType)
         {

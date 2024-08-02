@@ -1,7 +1,7 @@
 ﻿namespace FFBatchConverter;
 
-public class InformationUpdateEventArgs
+public class InformationUpdateEventArgs<TEncoder>
 {
-    public required VideoEncoder Encoder { get; init; }
+    public required TEncoder Encoder { get; init; }
     public required DataModificationType ModificationType { get; init; }
 }

@@ -22,10 +22,10 @@ public class BatchVMAFTargetEncoderViewModel : ReactiveObject
         Encoder.OutputSubdirectory = "FFBatch";
         Encoder.H265 = false;
         Encoder.Concurrency = 1;
-        Encoder.TargetVMAF = 85;
+        Encoder.TargetVMAF = 86;
         Encoder.Extension = "mkv";
         Encoder.Arguments = "-c:a aac";
-        Encoder.AddEntries(new[] {"test.mp4"});
+        Encoder.AddEntries(new[] {"C:\\Users\\Admin\\Workshop\\FFBatchConverter\\FFBatchConverter.Avalonia\\bin\\Debug\\test.mp4"});
         Encoder.StartEncoding();
         int t = 8;
     }

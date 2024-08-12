@@ -44,7 +44,7 @@ public class BatchVMAFTargetEncoder
     /// </summary>
     public string Arguments { get; set; } = string.Empty;
 
-    private List<VMAFVideoEncoder> Encoders { get; } = [];
+    private List<VMAFTargetVideoEncoder> Encoders { get; } = [];
     private bool IsEncoding { get; set; }
 
     private readonly object _lock = new object();
@@ -54,7 +54,7 @@ public class BatchVMAFTargetEncoder
     /// There is no guarantee which thread this event will be raised on!
     /// If using this with UI, caller is responsible for marshalling to the UI thread.
     /// </summary>
-    public event EventHandler<InformationUpdateEventArgs<VMAFVideoEncoder>>? InformationUpdate;
+    public event EventHandler<InformationUpdateEventArgs<VMAFTargetVideoEncoder>>? InformationUpdate;
 
     public void StartEncoding()
     {
@@ -82,22 +82,22 @@ public class BatchVMAFTargetEncoder
             files.AddRange(Helpers.GetFilesRecursive(p));
         }
 
-        List<VMAFVideoEncoder> encoders = files
+        List<VMAFTargetVideoEncoder> encoders = files
             .AsParallel()
             .AsOrdered()
             .WithDegreeOfParallelism(Environment.ProcessorCount)
-            .Select(t => new VMAFVideoEncoder(FFprobePath, FFmpegPath, t))
+            .Select(t => new VMAFTargetVideoEncoder(FFprobePath, FFmpegPath, t))
             .OrderByDescending(t => t.Duration) // Process the longest files first. If two files are of the same length, process the largest file first.
             .ThenByDescending(t => (new FileInfo(t.InputFilePath).Length))
             .ToList();
 
         Encoders.AddRange(encoders);
 
-        foreach (VMAFVideoEncoder encoder in encoders)
+        foreach (VMAFTargetVideoEncoder encoder in encoders)
         {
             // encoder.InfoUpdate += EncoderInfoUpdate;
 
-            InformationUpdate?.Invoke(this, new InformationUpdateEventArgs<VMAFVideoEncoder>
+            InformationUpdate?.Invoke(this, new InformationUpdateEventArgs<VMAFTargetVideoEncoder>
             {
                 Encoder = encoder,
                 ModificationType = DataModificationType.Add
@@ -105,11 +105,11 @@ public class BatchVMAFTargetEncoder
         }
     }
 
-    private void EncoderInfoUpdate(VMAFVideoEncoder encoder, DataReceivedEventArgs? info)
+    private void EncoderInfoUpdate(VMAFTargetVideoEncoder encoder, DataReceivedEventArgs? info)
     {
         ProcessActions();
 
-        InformationUpdate?.Invoke(this, new InformationUpdateEventArgs<VMAFVideoEncoder>
+        InformationUpdate?.Invoke(this, new InformationUpdateEventArgs<VMAFTargetVideoEncoder>
         {
             Encoder = encoder,
             ModificationType = DataModificationType.Update
@@ -129,7 +129,7 @@ public class BatchVMAFTargetEncoder
             if (Encoders.Count(e => e.State == EncodingState.Encoding) >= Concurrency)
                 return;
 
-            VMAFVideoEncoder? encoder = Encoders.FirstOrDefault(t => t.State == EncodingState.Pending);
+            VMAFTargetVideoEncoder? encoder = Encoders.FirstOrDefault(t => t.State == EncodingState.Pending);
             if (encoder is null)
                 return;
 

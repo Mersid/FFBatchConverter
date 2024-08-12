@@ -25,7 +25,7 @@ public class BatchVMAFTargetEncoderViewModel : ReactiveObject
         Encoder.TargetVMAF = 86;
         Encoder.Extension = "mkv";
         Encoder.Arguments = "-c:a aac";
-        Encoder.AddEntries(new[] {"C:\\Users\\Admin\\Workshop\\FFBatchConverter\\FFBatchConverter.Avalonia\\bin\\Debug\\test.mp4"});
+        Encoder.AddEntries(new[] {"C:\\Users\\Admin\\Workshop\\FFBatchConverter\\FFBatchConverter.Avalonia\\bin\\Debug\\test2.mp4"});
         Encoder.StartEncoding();
         int t = 8;
     }

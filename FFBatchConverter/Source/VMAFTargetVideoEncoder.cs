@@ -14,6 +14,12 @@ public class VMAFTargetVideoEncoder
     private StringBuilder Log { get; } = new StringBuilder();
 
     public double Duration { get; private set; }
+
+    /// <summary>
+    /// Current duration of the processing video encoder's current phase, in seconds.
+    /// </summary>
+    public double CurrentDuration => VideoEncoder.CurrentDuration;
+
     public string InputFilePath { get; private set; }
     /// <summary>
     /// Full path of the output video. The container type of the encoded video is determined by the file extension here.
@@ -53,10 +59,16 @@ public class VMAFTargetVideoEncoder
     private const int DefaultH264Crf = 23;
     private const int DefaultH265Crf = 28;
 
-    private int HighCrf { get; set; } = MaxCrf;
-    private int LowCrf { get; set; } = MinCrf;
-    private int ThisCrf { get; set; }
+    public int HighCrf { get; set; } = MaxCrf;
+    public int LowCrf { get; set; } = MinCrf;
+
+    /// <summary>
+    /// The CRF value we're trying for this iteration of the VMAF encoder.
+    /// </summary>
+    public int ThisCrf { get; set; }
     private double TargetVMAF { get; set; }
+
+    public event Action<VMAFTargetVideoEncoder, DataReceivedEventArgs?>? InfoUpdate;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="VMAFTargetVideoEncoder"/> class.
@@ -142,6 +154,7 @@ public class VMAFTargetVideoEncoder
                     File.Copy(target.FilePath, OutputFilePath);
                     State = EncodingState.Success;
                     Cleanup();
+                    InfoUpdate?.Invoke(this, args);
                     return;
                 }
             }
@@ -183,6 +196,7 @@ public class VMAFTargetVideoEncoder
             string arguments = $"{FFmpegArguments} -c:v {(H265 ? "libx265" : "libx264")} -crf {ThisCrf}";
             Log.AppendLine($"Trying CRF {ThisCrf}");
             VideoEncoder.Start(arguments, H265, ThisCrf, tempFile);
+            InfoUpdate?.Invoke(this, args);
         }
     }
 

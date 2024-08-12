@@ -10,6 +10,10 @@ namespace FFBatchConverter;
 public class VMAFVideoEncoder
 {
     private VideoEncoder VideoEncoder { get; set; }
+
+    /// <summary>
+    /// If this is not null, we're in the scoring phase.
+    /// </summary>
     private VMAFScorer? VMAFScorer { get; set; }
     public StringBuilder Log { get; } = new StringBuilder();
 
@@ -17,6 +21,14 @@ public class VMAFVideoEncoder
     /// Duration of the video in seconds. Zero if the duration could not be determined (e.g. file does not exist or is not a video).
     /// </summary>
     public double Duration { get; private set; }
+
+    /// <summary>
+    /// Gets the processed duration of the video, in seconds, for the current stage of the process.
+    /// If we're encoding, then this is the current duration of the encoded video. If we're scoring, then this is the current duration of the scored video.
+    /// </summary>
+    public double CurrentDuration => VMAFScorer?.CurrentDuration ?? VideoEncoder.CurrentDuration;
+
+    public VMAFVideoEncodingPhase EncodingPhase => VMAFScorer != null ? VMAFVideoEncodingPhase.Scoring : VMAFVideoEncodingPhase.Encoding;
 
     /// <summary>
     /// Full path of the input video.

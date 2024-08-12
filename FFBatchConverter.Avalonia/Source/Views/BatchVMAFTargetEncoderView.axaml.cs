@@ -14,6 +14,8 @@ public partial class BatchVMAFTargetEncoderView : UserControl
     public BatchVMAFTargetEncoderView()
     {
         InitializeComponent();
+
+        AddHandler(DragDrop.DropEvent, Drop);
     }
 
     private BatchVMAFTargetEncoderViewModel ViewModel

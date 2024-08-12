@@ -20,7 +20,8 @@
 
     <UserControl>
         <Grid RowDefinitions="*, Auto">
-            <Panel Grid.Row="0" DragDrop.AllowDrop="True">
+            <!-- The transparent background is necessary for drag and drop. Otherwise, one can only drop on the data grid's header. -->
+            <Panel Grid.Row="0" DragDrop.AllowDrop="True" Background="Transparent">
                 <DataGrid
                     IsReadOnly="True"
                     ItemsSource="{Binding TableRows}"

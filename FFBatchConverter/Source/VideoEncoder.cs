@@ -24,7 +24,7 @@ public class VideoEncoder
     private string FFmpegPath { get; set; }
 
     /// <summary>
-    /// Duration of the video in seconds.
+    /// Duration of the video in seconds. Zero if the duration could not be determined (e.g. file does not exist or is not a video).
     /// </summary>
     public double Duration { get; }
 

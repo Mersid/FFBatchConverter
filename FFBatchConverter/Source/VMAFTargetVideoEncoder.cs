@@ -3,21 +3,38 @@ using System.Text;
 
 namespace FFBatchConverter;
 
+/// <summary>
+/// This encoder can be used to encode a video in x264 or x265 with a targeted VMAF value. The encoder will then
+/// attempt to find the CRF value that puts the video above the target VMAF value, such that the next CRF down would
+/// put it below the target VMAF value. In short, it encodes the video to a minimum perceptual quality level.
+/// </summary>
 public class VMAFTargetVideoEncoder
 {
-    public VMAFVideoEncoder? VideoEncoder { get; private set; }
-    public StringBuilder Log { get; } = new StringBuilder();
+    private VMAFVideoEncoder VideoEncoder { get; set; }
+    private StringBuilder Log { get; } = new StringBuilder();
 
     public double Duration { get; private set; }
     public string InputFilePath { get; private set; }
-    private string OutputFilePath { get; set; }
-    public bool H265 { get; private set; }
+    /// <summary>
+    /// Full path of the output video. The container type of the encoded video is determined by the file extension here.
+    /// Ensure the path exists, as the encoder will not create directories.
+    /// Null until the Start method is called, as that is when the output file is provided.
+    /// </summary>
+    private string? OutputFilePath { get; set; }
+
+    private bool H265 { get; set; }
 
     public EncodingState State { get; private set; } = EncodingState.Pending;
 
     private string FFprobePath { get; set; }
     private string FFmpegPath { get; set; }
-    private string FFmpegArguments { get; set; }
+
+    /// <summary>
+    /// Arguments to pass to ffmpeg. Do not include -c:v (or -vcodec) or -crf flags, as those are handled by
+    /// other settings.
+    /// Null until the Start method is called, as that is when the arguments are provided.
+    /// </summary>
+    private string? FFmpegArguments { get; set; }
 
     private readonly string _tempDirectory = Path.Combine(Path.GetTempPath(), "FFBatchConverter");
 
@@ -26,23 +43,23 @@ public class VMAFTargetVideoEncoder
     /// <summary>
     /// Lossless
     /// </summary>
-    public const int MinCrf = 0;
+    private const int MinCrf = 0;
 
     /// <summary>
     /// Technically 63 is the max for x264 10-bit, but all other cases are 51.
     /// </summary>
-    public const int MaxCrf = 51;
+    private const int MaxCrf = 51;
 
-    public const int DefaultH264Crf = 23;
-    public const int DefaultH265Crf = 28;
+    private const int DefaultH264Crf = 23;
+    private const int DefaultH265Crf = 28;
 
     private int HighCrf { get; set; } = MaxCrf;
     private int LowCrf { get; set; } = MinCrf;
     private int ThisCrf { get; set; }
-    public double TargetVMAF { get; set; }
+    private double TargetVMAF { get; set; }
 
     /// <summary>
-    ///
+    /// Initializes a new instance of the <see cref="VMAFTargetVideoEncoder"/> class.
     /// </summary>
     /// <param name="ffProbePath">Full path to the ffprobe program.</param>
     /// <param name="ffmpegPath">Full path to the ffmpeg program.</param>
@@ -61,11 +78,13 @@ public class VMAFTargetVideoEncoder
     }
 
     /// <summary>
-    ///
+    /// Starts the encoding process. A video will be encoded with the given settings, and then
+    /// repeatedly encoded with different CRF values until the VMAF score is above the target value.
     /// </summary>
     /// <param name="ffmpegArguments">Arguments to pass to ffmpeg. Do not include -c:v (or -vcodec) or -crf flags.</param>
     /// <param name="h265">True to use h265 (-c:v libx265) encoding, false to use h264. This is why we should not pass in -c:v in ffmpegArguments.</param>
-    /// <param name="outputFilePath"></param>
+    /// <param name="targetVMAF">The minimum VMAF score to aim for without excessively exceeding.</param>
+    /// <param name="outputFilePath">Full path to the output video file.</param>
     public void Start(string ffmpegArguments, bool h265, double targetVMAF, string outputFilePath)
     {
         FFmpegArguments = ffmpegArguments;
@@ -99,14 +118,17 @@ public class VMAFTargetVideoEncoder
 
         if (encoder.State == EncodingState.Success)
         {
+            Debug.Assert(encoder.OutputFilePath != null, "encoder.OutputFilePath != null");
+            Debug.Assert(OutputFilePath != null, nameof(OutputFilePath) + " != null");
+
             VideoEncoder.InfoUpdate -= OnEncoderInfoUpdate;
 
             // Scan to see if we found the boundary.
             CrfToVmafMaps.Add(new CrfToVMAFMap
             {
                 Crf = ThisCrf,
-                VmafScore = encoder.VMAFScorer.VMAFScore,
-                FilePath = encoder.VMAFScorer.DistortedFilePath
+                VmafScore = encoder.VMAFScore,
+                FilePath = encoder.OutputFilePath
             });
 
             List<CrfToVMAFMap> maps = CrfToVmafMaps.OrderBy(x => x.Crf).ToList();
@@ -135,7 +157,7 @@ public class VMAFTargetVideoEncoder
             {
                 ThisCrf++;
             }
-            else if (encoder.VMAFScorer.VMAFScore > TargetVMAF)
+            else if (encoder.VMAFScore > TargetVMAF)
             {
                 // Too high. Decrease VMAF, increase CRF range.
                 LowCrf = ThisCrf - 1;

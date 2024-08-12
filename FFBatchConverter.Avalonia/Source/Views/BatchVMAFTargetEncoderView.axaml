@@ -3,9 +3,14 @@
         xmlns:vm="using:FFBatchConverter.Avalonia.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:avalonia="clr-namespace:FFBatchConverter.Avalonia"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="FFBatchConverter.Avalonia.Views.BatchVMAFTargetEncoderView"
         x:DataType="vm:BatchVMAFTargetEncoderViewModel">
+
+    <UserControl.Resources>
+        <avalonia:BoolToStringConverter x:Key="BoolToStringConverter" TrueValue="Stop" FalseValue="Start" />
+    </UserControl.Resources>
 
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
@@ -13,9 +18,87 @@
         <vm:BatchVMAFTargetEncoderViewModel/>
     </Design.DataContext>
 
-    <!-- <Label Content="Test Window" HorizontalAlignment="Center" VerticalAlignment="Center" Background="Aqua" /> -->
-    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-        <Button Content="Do the needful!" Command="{Binding DoTheNeedful}" />
-        <Button Content="Extra button :D" Command="{Binding ExtraButton}" />
-    </StackPanel>
+    <UserControl>
+        <Grid RowDefinitions="*, Auto">
+            <Panel Grid.Row="0" DragDrop.AllowDrop="True">
+                <DataGrid
+                    IsReadOnly="True"
+                    ItemsSource="{Binding TableRows}"
+                    AutoGenerateColumns="False"
+                    CanUserResizeColumns="True"
+                    CanUserSortColumns="True"
+                    GridLinesVisibility="All"
+                    BorderThickness="1"
+                    BorderBrush="Gray"
+                    >
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="File Name" Binding="{Binding FileName}" />
+                        <DataGridTextColumn Header="Duration" Binding="{Binding Duration}" />
+                        <DataGridTextColumn Header="Size" Binding="{Binding Size}" />
+                        <DataGridTextColumn Header="Range" Binding="{Binding Range}" />
+                        <DataGridTextColumn Header="CRF" Binding="{Binding Crf}" />
+                        <DataGridTextColumn Header="VMAF" Binding="{Binding Vmaf}" />
+                        <DataGridTextColumn Header="Status" Binding="{Binding Status}" />
+                    </DataGrid.Columns>
+
+                    <DataGrid.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Copy" />
+                            <MenuItem Header="Paste" />
+                        </ContextMenu>
+                    </DataGrid.ContextMenu>
+                </DataGrid>
+            </Panel>
+
+            <!-- Control panel -->
+            <Panel Grid.Row="1" Margin="0, 0, 0, 5">
+                <Grid ColumnDefinitions="*,200">
+                    <StackPanel Grid.Column="0" VerticalAlignment="Bottom">
+                        <Grid ColumnDefinitions="150, 70, 126, 230, 100, 70">
+                            <Label Grid.Column="0" VerticalAlignment="Center" Content="Concurrency" />
+                            <TextBox Grid.Column="1" Text="{Binding Concurrency}" />
+
+                            <Label Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Content="Subdirectory" />
+                            <TextBox Grid.Column="3" Text="{Binding Subdirectory}" />
+
+                            <Label Grid.Column="4" HorizontalAlignment="Center" VerticalAlignment="Center" Content="Extension" />
+                            <TextBox Grid.Column="5" Text="{Binding Extension}" />
+                        </Grid>
+                        <Grid ColumnDefinitions="150, 423, 105, 70">
+                            <Label Grid.Column="0" VerticalAlignment="Center" Content="Encoder" />
+                            <ComboBox Grid.Column="1" SelectedIndex="{Binding EncoderSelection}" MinWidth="300">
+                                <ComboBoxItem>x265 (High Efficiency Video Coding)</ComboBoxItem>
+                                <ComboBoxItem>x264 (Advanced Video Coding)</ComboBoxItem>
+                            </ComboBox>
+
+                            <Label Grid.Column="2" VerticalAlignment="Center" Content="VMAF target" />
+                            <TextBox Grid.Column="3" Text="{Binding TargetVMAF}" />
+                        </Grid>
+                        <Grid ColumnDefinitions="150, 600">
+                            <Label Grid.Column="0" VerticalAlignment="Center" Content="Arguments" />
+                            <TextBox Grid.Column="1" Text="{Binding Arguments}" />
+                        </Grid>
+                    </StackPanel>
+
+
+                    <!-- Buttons -->
+                    <StackPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                        <!-- Start/stop button -->
+                        <Button
+                            HorizontalAlignment="Right"
+                            Content="{Binding Encoding, Converter={StaticResource BoolToStringConverter}}"
+                            Command="{Binding StartButtonClicked}" />
+                        <Button
+                            HorizontalAlignment="Right"
+                            Content="Add files"
+                            Click="AddFilesButtonClicked" />
+                        <Button
+                            HorizontalAlignment="Right"
+                            Content="Add folders"
+                            Click="AddFoldersButtonClicked" />
+                    </StackPanel>
+                </Grid>
+            </Panel>
+        </Grid>
+    </UserControl>
 </UserControl>

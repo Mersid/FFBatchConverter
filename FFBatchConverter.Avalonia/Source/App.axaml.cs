@@ -4,6 +4,8 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using FFBatchConverter.Avalonia.ViewModels;
 using FFBatchConverter.Avalonia.Views;
+using FFBatchConverter.Controllers;
+using FFBatchConverter.Misc;
 
 namespace FFBatchConverter.Avalonia;
 

@@ -1,44 +1,29 @@
 ﻿using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
+using FFBatchConverter.Misc;
 
-namespace FFBatchConverter;
+namespace FFBatchConverter.Encoders;
 
-/// <summary>
-/// Represents the encoder for a single video.
-/// </summary>
-public class VideoEncoder
+public class VMAFScorer
 {
-    /// <summary>
-    /// Path to the input file.
-    /// </summary>
-    public string InputFilePath { get; }
+    public string OriginalFilePath { get; }
+    public string DistortedFilePath { get; }
 
-    /// <summary>
-    /// Full path of the output file.
-    /// </summary>
-    public string OutputFilePath { get; private set; }
     public StringBuilder Log { get; } = new StringBuilder();
 
-    private string FFprobePath { get; set; }
-    private string FFmpegPath { get; set; }
-
     /// <summary>
-    /// Duration of the video in seconds. Zero if the duration could not be determined (e.g. file does not exist or is not a video).
+    /// Duration of the video in seconds.
     /// </summary>
     public double Duration { get; }
-
-    /// <summary>
-    /// How much we've encoded so far, in seconds.
-    /// </summary>
     public double CurrentDuration { get; private set; }
+    public EncodingState State { get; private set; } = EncodingState.Pending;
 
     /// <summary>
-    /// Size of the input file, in bytes.
+    /// The resulting VMAF score. This is only valid when State is Success.
     /// </summary>
-    public long FileSize { get; private set; }
-
-    public EncodingState State { get; private set; } = EncodingState.Pending;
+    public double VMAFScore { get; private set; }
 
     /// <summary>
     /// Null when Start() has not yet been called.
@@ -46,19 +31,22 @@ public class VideoEncoder
     private Process? Process { get; set; }
 
     /// <summary>
-    /// Should only run on main thread (same one processing UI events)
+    /// This is run from the process thread!
     /// </summary>
-    public event Action<VideoEncoder, DataReceivedEventArgs?>? InfoUpdate;
+    public event Action<VMAFScorer, DataReceivedEventArgs?>? InfoUpdate;
 
-    internal VideoEncoder(string ffprobePath, string ffmpegPath, string inputFilePath)
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="ffprobePath">Path to the ffprobe program.</param>
+    /// <param name="originalFilePath">Path to the original (reference) video.</param>
+    /// <param name="distortedFilePath">Path of the distorted (encoded) video.</param>
+    internal VMAFScorer(string ffprobePath, string originalFilePath, string distortedFilePath)
     {
-        FFprobePath = ffprobePath;
-        FFmpegPath = ffmpegPath;
-        InputFilePath = inputFilePath;
+        OriginalFilePath = originalFilePath;
+        DistortedFilePath = distortedFilePath;
 
-        FileSize = new FileInfo(inputFilePath).Length;
-
-        string probeOutput = Helpers.Probe(FFprobePath, inputFilePath);
+        string probeOutput = Helpers.Probe(ffprobePath, originalFilePath);
 
         // Json output is in probeOutput
         JsonDocument json = JsonDocument.Parse(probeOutput);
@@ -77,7 +65,7 @@ public class VideoEncoder
         }
     }
 
-    internal void Start(string ffmpegArguments, string outputFilePath)
+    internal void Start(string ffmpegPath)
     {
         if (State != EncodingState.Pending)
         {
@@ -85,14 +73,12 @@ public class VideoEncoder
             return;
         }
 
-        OutputFilePath = outputFilePath;
-
         Process = new Process
         {
             StartInfo = new ProcessStartInfo
             {
-                FileName = FFmpegPath,
-                Arguments = $"-i \"{InputFilePath}\" -y {ffmpegArguments} \"{OutputFilePath}\"",
+                FileName = ffmpegPath,
+                Arguments = $"-i \"{OriginalFilePath}\" -i \"{DistortedFilePath}\" -y -filter_complex \"[0:v]setpts=PTS-STARTPTS[reference]; [1:v]setpts=PTS-STARTPTS[distorted]; [distorted][reference]libvmaf=model=version=vmaf_v0.6.1:n_threads=30\" -f null -",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
@@ -112,29 +98,9 @@ public class VideoEncoder
         Process.BeginOutputReadLine();
         Process.BeginErrorReadLine();
 
-        Process.Exited += OnProcessOnExited;
+        Process.Exited += OnProcessExitedEvent;
     }
 
-    private void OnProcessOnExited(object? sender, EventArgs args)
-    {
-        Debug.Assert(Process != null, nameof(Process) + " != null");
-
-        State = Process.ExitCode == 0 ? EncodingState.Success : EncodingState.Error;
-
-        Log.AppendLine($"Process exited with code {Process.ExitCode}");
-
-        InfoUpdate?.Invoke(this, null);
-
-        Process.OutputDataReceived -= OnStreamDataReceivedEvent;
-        Process.ErrorDataReceived -= OnStreamDataReceivedEvent;
-        Process.Exited -= OnProcessOnExited;
-    }
-
-    /// <summary>
-    /// Fired when data is written by the underlying ffmpeg process.
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="args"></param>
     private void OnStreamDataReceivedEvent(object sender, DataReceivedEventArgs args)
     {
         if (State != EncodingState.Encoding)
@@ -159,5 +125,25 @@ public class VideoEncoder
         Log.AppendLine(args.Data);
 
         InfoUpdate?.Invoke(this, args);
+    }
+
+    private void OnProcessExitedEvent(object? sender, EventArgs e)
+    {
+        Debug.Assert(Process != null, nameof(Process) + " != null");
+
+        State = Process.ExitCode == 0 ? EncodingState.Success : EncodingState.Error;
+
+        Log.AppendLine($"Process exited with code {Process.ExitCode}");
+
+        Regex regex = new Regex("(?<=VMAF score: )[0-9.]+");
+        string vmafScore = regex.Match(Log.ToString()).Value;
+
+        VMAFScore = double.Parse(vmafScore);
+
+        InfoUpdate?.Invoke(this, null);
+
+        Process.OutputDataReceived -= OnStreamDataReceivedEvent;
+        Process.ErrorDataReceived -= OnStreamDataReceivedEvent;
+        Process.Exited -= OnProcessExitedEvent;
     }
 }

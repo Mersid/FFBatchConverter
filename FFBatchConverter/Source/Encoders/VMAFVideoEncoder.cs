@@ -1,7 +1,8 @@
 ﻿using System.Diagnostics;
 using System.Text;
+using FFBatchConverter.Misc;
 
-namespace FFBatchConverter;
+namespace FFBatchConverter.Encoders;
 
 /// <summary>
 /// This encoder can be used to encode a video in x264 or x265 with a specific CRF value, and then score it with VMAF

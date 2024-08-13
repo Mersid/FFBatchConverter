@@ -1,4 +1,4 @@
-﻿namespace FFBatchConverter;
+﻿namespace FFBatchConverter.Misc;
 
 public class CrfToVMAFMap
 {

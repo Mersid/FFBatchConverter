@@ -1,4 +1,5 @@
-﻿using ReactiveUI;
+﻿using FFBatchConverter.Misc;
+using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
 namespace FFBatchConverter.Avalonia.ViewModels;

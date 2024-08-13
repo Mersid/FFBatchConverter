@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Avalonia.Threading;
 using BidirectionalMap;
+using FFBatchConverter.Controllers;
+using FFBatchConverter.Encoders;
+using FFBatchConverter.Misc;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 

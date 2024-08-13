@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Text;
 
-namespace FFBatchConverter;
+namespace FFBatchConverter.Misc;
 
 public static class Helpers
 {

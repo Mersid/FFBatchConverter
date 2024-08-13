@@ -1,4 +1,4 @@
-﻿namespace FFBatchConverter;
+﻿namespace FFBatchConverter.Misc;
 
 /// <summary>
 /// Defines how the specified data in a collection is being modified.

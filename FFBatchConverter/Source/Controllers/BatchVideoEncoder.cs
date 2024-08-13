@@ -1,8 +1,10 @@
 ﻿using System.Diagnostics;
+using FFBatchConverter.Encoders;
+using FFBatchConverter.Misc;
 
-namespace FFBatchConverter;
+namespace FFBatchConverter.Controllers;
 
-public class BatchVMAFTargetEncoder
+public class BatchVideoEncoder
 {
     private int _concurrency;
     public int Concurrency
@@ -17,6 +19,7 @@ public class BatchVMAFTargetEncoder
 
     /// <summary>
     /// Output directory, relative to the input file.
+    /// Do not use absolute paths!
     /// </summary>
     public string OutputSubdirectory { get; set; } = string.Empty;
 
@@ -25,26 +28,15 @@ public class BatchVMAFTargetEncoder
     /// </summary>
     public string Extension { get; set; } = string.Empty;
 
-    /// <summary>
-    /// Set to true to use H.265 instead of H.264.
-    /// </summary>
-    public bool H265 { get; set; }
-
-    /// <summary>
-    /// The minimum VMAF value to target.
-    /// We aim for the CRF value with that puts the video above this value, such that the next CRF up would put it below this value.
-    /// </summary>
-    public double TargetVMAF { get; set; }
-
-    public required string FFmpegPath { get; set; } = string.Empty;
-    public required string FFprobePath { get; set; } = string.Empty;
+    public required string FFmpegPath { get; init; }
+    public required string FFprobePath { get; init; }
 
     /// <summary>
     /// FFmpeg arguments.
     /// </summary>
     public string Arguments { get; set; } = string.Empty;
 
-    private List<VMAFTargetVideoEncoder> Encoders { get; } = [];
+    private List<VideoEncoder> Encoders { get; } = [];
     private bool IsEncoding { get; set; }
 
     private readonly object _lock = new object();
@@ -54,7 +46,7 @@ public class BatchVMAFTargetEncoder
     /// There is no guarantee which thread this event will be raised on!
     /// If using this with UI, caller is responsible for marshalling to the UI thread.
     /// </summary>
-    public event EventHandler<InformationUpdateEventArgs<VMAFTargetVideoEncoder>>? InformationUpdate;
+    public event EventHandler<InformationUpdateEventArgs<VideoEncoder>>? InformationUpdate;
 
     public void StartEncoding()
     {
@@ -82,22 +74,22 @@ public class BatchVMAFTargetEncoder
             files.AddRange(Helpers.GetFilesRecursive(p));
         }
 
-        List<VMAFTargetVideoEncoder> encoders = files
+        List<VideoEncoder> encoders = files
             .AsParallel()
             .AsOrdered()
             .WithDegreeOfParallelism(Environment.ProcessorCount)
-            .Select(t => new VMAFTargetVideoEncoder(FFprobePath, FFmpegPath, t))
+            .Select(t => new VideoEncoder(FFprobePath, FFmpegPath, t))
             .OrderByDescending(t => t.Duration) // Process the longest files first. If two files are of the same length, process the largest file first.
-            .ThenByDescending(t => (new FileInfo(t.InputFilePath).Length))
+            .ThenByDescending(t => t.FileSize)
             .ToList();
 
         Encoders.AddRange(encoders);
 
-        foreach (VMAFTargetVideoEncoder encoder in encoders)
+        foreach (VideoEncoder encoder in encoders)
         {
             encoder.InfoUpdate += EncoderInfoUpdate;
 
-            InformationUpdate?.Invoke(this, new InformationUpdateEventArgs<VMAFTargetVideoEncoder>
+            InformationUpdate?.Invoke(this, new InformationUpdateEventArgs<VideoEncoder>
             {
                 Encoder = encoder,
                 ModificationType = DataModificationType.Add
@@ -105,11 +97,11 @@ public class BatchVMAFTargetEncoder
         }
     }
 
-    private void EncoderInfoUpdate(VMAFTargetVideoEncoder encoder, DataReceivedEventArgs? info)
+    private void EncoderInfoUpdate(VideoEncoder encoder, DataReceivedEventArgs? info)
     {
         ProcessActions();
 
-        InformationUpdate?.Invoke(this, new InformationUpdateEventArgs<VMAFTargetVideoEncoder>
+        InformationUpdate?.Invoke(this, new InformationUpdateEventArgs<VideoEncoder>
         {
             Encoder = encoder,
             ModificationType = DataModificationType.Update
@@ -129,7 +121,7 @@ public class BatchVMAFTargetEncoder
             if (Encoders.Count(e => e.State == EncodingState.Encoding) >= Concurrency)
                 return;
 
-            VMAFTargetVideoEncoder? encoder = Encoders.FirstOrDefault(t => t.State == EncodingState.Pending);
+            VideoEncoder? encoder = Encoders.FirstOrDefault(t => t.State == EncodingState.Pending);
             if (encoder is null)
                 return;
 
@@ -142,7 +134,7 @@ public class BatchVMAFTargetEncoder
             if (!Directory.Exists(outputSubdirectory))
                 Directory.CreateDirectory(outputSubdirectory);
 
-            encoder.Start(Arguments, H265, TargetVMAF, newFilePath);
+            encoder.Start(Arguments, newFilePath);
         }
     }
 }

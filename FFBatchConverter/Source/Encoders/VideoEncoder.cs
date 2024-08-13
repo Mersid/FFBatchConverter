@@ -1,28 +1,45 @@
 ﻿using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
-using System.Text.RegularExpressions;
+using FFBatchConverter.Misc;
 
-namespace FFBatchConverter;
+namespace FFBatchConverter.Encoders;
 
-public class VMAFScorer
+/// <summary>
+/// Represents the encoder for a single video.
+/// </summary>
+public class VideoEncoder
 {
-    public string OriginalFilePath { get; }
-    public string DistortedFilePath { get; }
+    /// <summary>
+    /// Path to the input file.
+    /// </summary>
+    public string InputFilePath { get; }
 
+    /// <summary>
+    /// Full path of the output file.
+    /// </summary>
+    public string OutputFilePath { get; private set; }
     public StringBuilder Log { get; } = new StringBuilder();
 
-    /// <summary>
-    /// Duration of the video in seconds.
-    /// </summary>
-    public double Duration { get; }
-    public double CurrentDuration { get; private set; }
-    public EncodingState State { get; private set; } = EncodingState.Pending;
+    private string FFprobePath { get; set; }
+    private string FFmpegPath { get; set; }
 
     /// <summary>
-    /// The resulting VMAF score. This is only valid when State is Success.
+    /// Duration of the video in seconds. Zero if the duration could not be determined (e.g. file does not exist or is not a video).
     /// </summary>
-    public double VMAFScore { get; private set; }
+    public double Duration { get; }
+
+    /// <summary>
+    /// How much we've encoded so far, in seconds.
+    /// </summary>
+    public double CurrentDuration { get; private set; }
+
+    /// <summary>
+    /// Size of the input file, in bytes.
+    /// </summary>
+    public long FileSize { get; private set; }
+
+    public EncodingState State { get; private set; } = EncodingState.Pending;
 
     /// <summary>
     /// Null when Start() has not yet been called.
@@ -30,22 +47,19 @@ public class VMAFScorer
     private Process? Process { get; set; }
 
     /// <summary>
-    /// This is run from the process thread!
+    /// Should only run on main thread (same one processing UI events)
     /// </summary>
-    public event Action<VMAFScorer, DataReceivedEventArgs?>? InfoUpdate;
+    public event Action<VideoEncoder, DataReceivedEventArgs?>? InfoUpdate;
 
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="ffprobePath">Path to the ffprobe program.</param>
-    /// <param name="originalFilePath">Path to the original (reference) video.</param>
-    /// <param name="distortedFilePath">Path of the distorted (encoded) video.</param>
-    internal VMAFScorer(string ffprobePath, string originalFilePath, string distortedFilePath)
+    internal VideoEncoder(string ffprobePath, string ffmpegPath, string inputFilePath)
     {
-        OriginalFilePath = originalFilePath;
-        DistortedFilePath = distortedFilePath;
+        FFprobePath = ffprobePath;
+        FFmpegPath = ffmpegPath;
+        InputFilePath = inputFilePath;
 
-        string probeOutput = Helpers.Probe(ffprobePath, originalFilePath);
+        FileSize = new FileInfo(inputFilePath).Length;
+
+        string probeOutput = Helpers.Probe(FFprobePath, inputFilePath);
 
         // Json output is in probeOutput
         JsonDocument json = JsonDocument.Parse(probeOutput);
@@ -64,7 +78,7 @@ public class VMAFScorer
         }
     }
 
-    internal void Start(string ffmpegPath)
+    internal void Start(string ffmpegArguments, string outputFilePath)
     {
         if (State != EncodingState.Pending)
         {
@@ -72,12 +86,14 @@ public class VMAFScorer
             return;
         }
 
+        OutputFilePath = outputFilePath;
+
         Process = new Process
         {
             StartInfo = new ProcessStartInfo
             {
-                FileName = ffmpegPath,
-                Arguments = $"-i \"{OriginalFilePath}\" -i \"{DistortedFilePath}\" -y -filter_complex \"[0:v]setpts=PTS-STARTPTS[reference]; [1:v]setpts=PTS-STARTPTS[distorted]; [distorted][reference]libvmaf=model=version=vmaf_v0.6.1:n_threads=30\" -f null -",
+                FileName = FFmpegPath,
+                Arguments = $"-i \"{InputFilePath}\" -y {ffmpegArguments} \"{OutputFilePath}\"",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
@@ -97,9 +113,29 @@ public class VMAFScorer
         Process.BeginOutputReadLine();
         Process.BeginErrorReadLine();
 
-        Process.Exited += OnProcessExitedEvent;
+        Process.Exited += OnProcessOnExited;
     }
 
+    private void OnProcessOnExited(object? sender, EventArgs args)
+    {
+        Debug.Assert(Process != null, nameof(Process) + " != null");
+
+        State = Process.ExitCode == 0 ? EncodingState.Success : EncodingState.Error;
+
+        Log.AppendLine($"Process exited with code {Process.ExitCode}");
+
+        InfoUpdate?.Invoke(this, null);
+
+        Process.OutputDataReceived -= OnStreamDataReceivedEvent;
+        Process.ErrorDataReceived -= OnStreamDataReceivedEvent;
+        Process.Exited -= OnProcessOnExited;
+    }
+
+    /// <summary>
+    /// Fired when data is written by the underlying ffmpeg process.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="args"></param>
     private void OnStreamDataReceivedEvent(object sender, DataReceivedEventArgs args)
     {
         if (State != EncodingState.Encoding)
@@ -124,25 +160,5 @@ public class VMAFScorer
         Log.AppendLine(args.Data);
 
         InfoUpdate?.Invoke(this, args);
-    }
-
-    private void OnProcessExitedEvent(object? sender, EventArgs e)
-    {
-        Debug.Assert(Process != null, nameof(Process) + " != null");
-
-        State = Process.ExitCode == 0 ? EncodingState.Success : EncodingState.Error;
-
-        Log.AppendLine($"Process exited with code {Process.ExitCode}");
-
-        Regex regex = new Regex("(?<=VMAF score: )[0-9.]+");
-        string vmafScore = regex.Match(Log.ToString()).Value;
-
-        VMAFScore = double.Parse(vmafScore);
-
-        InfoUpdate?.Invoke(this, null);
-
-        Process.OutputDataReceived -= OnStreamDataReceivedEvent;
-        Process.ErrorDataReceived -= OnStreamDataReceivedEvent;
-        Process.Exited -= OnProcessExitedEvent;
     }
 }

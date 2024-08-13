@@ -1,4 +1,7 @@
 ﻿using System.ComponentModel;
+using FFBatchConverter.Controllers;
+using FFBatchConverter.Encoders;
+using FFBatchConverter.Misc;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Terminal.Gui;

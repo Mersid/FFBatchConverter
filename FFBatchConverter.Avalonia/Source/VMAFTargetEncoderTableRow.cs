@@ -24,5 +24,8 @@ public class VMAFTargetEncoderTableRow : ReactiveObject
     public string Vmaf { get; set; }
 
     [Reactive]
+    public string Phase { get; set; }
+
+    [Reactive]
     public string Status { get; set; }
 }

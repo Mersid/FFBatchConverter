@@ -39,6 +39,7 @@
                         <DataGridTextColumn Header="Range" Binding="{Binding Range}" />
                         <DataGridTextColumn Header="CRF" Binding="{Binding Crf}" />
                         <DataGridTextColumn Header="VMAF" Binding="{Binding Vmaf}" />
+                        <DataGridTextColumn Header="Phase" Binding="{Binding Phase}" />
                         <DataGridTextColumn Header="Status" Binding="{Binding Status}" />
                     </DataGrid.Columns>
 

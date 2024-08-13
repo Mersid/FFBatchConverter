@@ -20,6 +20,11 @@ public class VMAFTargetVideoEncoder
     /// </summary>
     public double CurrentDuration => VideoEncoder.CurrentDuration;
 
+    /// <summary>
+    /// Size of the input file, in bytes.
+    /// </summary>
+    public long FileSize { get; private set; }
+
     public string InputFilePath { get; private set; }
     /// <summary>
     /// Full path of the output video. The container type of the encoded video is determined by the file extension here.
@@ -68,6 +73,14 @@ public class VMAFTargetVideoEncoder
     public int ThisCrf { get; set; }
     private double TargetVMAF { get; set; }
 
+    /// <summary>
+    /// The VMAF score of the last encoded video.
+    /// Null if we haven't finished scoring at least one video yet.
+    /// </summary>
+    public double? LastVMAF { get; set; }
+
+    public VMAFVideoEncodingPhase EncodingPhase => VideoEncoder.EncodingPhase;
+
     public event Action<VMAFTargetVideoEncoder, DataReceivedEventArgs?>? InfoUpdate;
 
     /// <summary>
@@ -81,6 +94,8 @@ public class VMAFTargetVideoEncoder
         FFprobePath = ffProbePath;
         FFmpegPath = ffmpegPath;
         InputFilePath = inputFilePath;
+
+        FileSize = new FileInfo(inputFilePath).Length;
 
         // Make a video encoder to get the duration.
         VideoEncoder = new VMAFVideoEncoder(ffProbePath, ffmpegPath, inputFilePath);
@@ -143,6 +158,8 @@ public class VMAFTargetVideoEncoder
                 FilePath = encoder.OutputFilePath
             });
 
+            LastVMAF = encoder.VMAFScore;
+
             List<CrfToVMAFMap> maps = CrfToVmafMaps.OrderBy(x => x.Crf).ToList();
             for (int i = 1; i < maps.Count; i++)
             {
@@ -153,6 +170,7 @@ public class VMAFTargetVideoEncoder
 
                     File.Copy(target.FilePath, OutputFilePath);
                     State = EncodingState.Success;
+                    LastVMAF = target.VmafScore;
                     Cleanup();
                     InfoUpdate?.Invoke(this, args);
                     return;
@@ -196,8 +214,9 @@ public class VMAFTargetVideoEncoder
             string arguments = $"{FFmpegArguments} -c:v {(H265 ? "libx265" : "libx264")} -crf {ThisCrf}";
             Log.AppendLine($"Trying CRF {ThisCrf}");
             VideoEncoder.Start(arguments, H265, ThisCrf, tempFile);
-            InfoUpdate?.Invoke(this, args);
         }
+
+        InfoUpdate?.Invoke(this, args);
     }
 
     private void Cleanup()

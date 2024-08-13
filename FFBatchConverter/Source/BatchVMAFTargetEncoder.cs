@@ -95,7 +95,7 @@ public class BatchVMAFTargetEncoder
 
         foreach (VMAFTargetVideoEncoder encoder in encoders)
         {
-            // encoder.InfoUpdate += EncoderInfoUpdate;
+            encoder.InfoUpdate += EncoderInfoUpdate;
 
             InformationUpdate?.Invoke(this, new InformationUpdateEventArgs<VMAFTargetVideoEncoder>
             {

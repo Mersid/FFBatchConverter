@@ -6,12 +6,12 @@ using FFBatchConverter.Misc;
 
 namespace FFBatchConverter.Encoders;
 
-public class VMAFScorer
+internal class VMAFScorer
 {
     public string OriginalFilePath { get; }
     public string DistortedFilePath { get; }
 
-    public StringBuilder Log { get; } = new StringBuilder();
+    private StringBuilder Log { get; } = new StringBuilder();
 
     /// <summary>
     /// Duration of the video in seconds.
@@ -22,6 +22,9 @@ public class VMAFScorer
 
     /// <summary>
     /// The resulting VMAF score. This is only valid when State is Success.
+    /// <remarks>
+    /// We could probably make this a report, but for now this is only part of the internal API, so we'll hold off.
+    /// </remarks>
     /// </summary>
     public double VMAFScore { get; private set; }
 

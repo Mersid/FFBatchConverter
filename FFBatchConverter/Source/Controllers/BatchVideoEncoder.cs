@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using FFBatchConverter.Encoders;
 using FFBatchConverter.Misc;
+using FFBatchConverter.Models;
 
 namespace FFBatchConverter.Controllers;
 
@@ -44,9 +45,10 @@ public class BatchVideoEncoder
     /// <summary>
     /// Event that is raised when there's an update to the status of any encoder.
     /// There is no guarantee which thread this event will be raised on!
-    /// If using this with UI, caller is responsible for marshalling to the UI thread.
+    /// If using this with UI, caller is responsible for marshalling to the UI thread. <br />
+    /// In general, an event is raised when a video encoder starts, finishes, or has received an update to its progress.
     /// </summary>
-    public event EventHandler<InformationUpdateEventArgs<VideoEncoder>>? InformationUpdate;
+    public event EventHandler<InformationUpdateEventArgs<VideoEncoderStatusReport>>? InformationUpdate;
 
     public void StartEncoding()
     {
@@ -89,9 +91,9 @@ public class BatchVideoEncoder
         {
             encoder.InfoUpdate += EncoderInfoUpdate;
 
-            InformationUpdate?.Invoke(this, new InformationUpdateEventArgs<VideoEncoder>
+            InformationUpdate?.Invoke(this, new InformationUpdateEventArgs<VideoEncoderStatusReport>
             {
-                Encoder = encoder,
+                Report = encoder.Report,
                 ModificationType = DataModificationType.Add
             });
         }
@@ -101,9 +103,9 @@ public class BatchVideoEncoder
     {
         ProcessActions();
 
-        InformationUpdate?.Invoke(this, new InformationUpdateEventArgs<VideoEncoder>
+        InformationUpdate?.Invoke(this, new InformationUpdateEventArgs<VideoEncoderStatusReport>
         {
-            Encoder = encoder,
+            Report = encoder.Report,
             ModificationType = DataModificationType.Update
         });
     }

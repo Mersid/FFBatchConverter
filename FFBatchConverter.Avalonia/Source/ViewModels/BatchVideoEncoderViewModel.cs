@@ -7,6 +7,7 @@ using BidirectionalMap;
 using FFBatchConverter.Controllers;
 using FFBatchConverter.Encoders;
 using FFBatchConverter.Misc;
+using FFBatchConverter.Models;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
@@ -78,9 +79,10 @@ public class BatchVideoEncoderViewModel : ReactiveObject
             .Subscribe(x => Encoder.Arguments = x);
     }
 
-    private void EncoderOnInformationUpdate(object? sender, InformationUpdateEventArgs<VideoEncoder> e)
+    private void EncoderOnInformationUpdate(object? sender, InformationUpdateEventArgs<VideoEncoderStatusReport> e)
     {
-        VideoEncoder encoder = e.Encoder;
+        VideoEncoder encoder = e.Report.Encoder;
+        VideoEncoderStatusReport report = e.Report;
 
         switch (e.ModificationType)
         {
@@ -91,7 +93,7 @@ public class BatchVideoEncoderViewModel : ReactiveObject
                     FileName = encoder.InputFilePath,
                     Duration = $"{duration.Hours:D2}:{duration.Minutes:D2}:{duration.Seconds:D2}",
                     Size = $"{encoder.FileSize / 1024d / 1024:F2} MiB",
-                    Status = encoder.State.ToString()
+                    Status = report.State.ToString()
                 };
 
                 TableRows.Add(row);
@@ -99,12 +101,12 @@ public class BatchVideoEncoderViewModel : ReactiveObject
                 break;
             case DataModificationType.Update:
                 row = EncoderToRow.Forward[encoder];
-                row.Status = $"{encoder.CurrentDuration / encoder.Duration * 100:F2}%";
+                row.Status = $"{report.CurrentDuration / encoder.Duration * 100:F2}%";
 
-                if (encoder.State is EncodingState.Error or EncodingState.Success)
+                if (report.State is EncodingState.Error or EncodingState.Success)
                 {
                     // Video encoder has finished
-                    row.Status = encoder.State.ToString();
+                    row.Status = report.State.ToString();
                 }
 
                 break;

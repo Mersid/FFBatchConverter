@@ -92,7 +92,7 @@ public class BatchVideoEncoderViewModel : ReactiveObject
     private void EncoderOnInformationUpdate(object? sender, InformationUpdateEventArgs e)
     {
         int preRowCount = RowsIndex.Count;
-        VideoEncoder encoder = (VideoEncoder)e.Encoder;
+        VideoEncoder encoder = (VideoEncoder)e.Report;
         switch (e.ModificationType)
         {
             case DataModificationType.Add:

@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using FFBatchConverter.Encoders;
 using FFBatchConverter.Misc;
+using FFBatchConverter.Models;
 
 namespace FFBatchConverter.Controllers;
 
@@ -56,7 +57,7 @@ public class BatchVMAFTargetEncoder
     /// There is no guarantee which thread this event will be raised on!
     /// If using this with UI, caller is responsible for marshalling to the UI thread.
     /// </summary>
-    public event EventHandler<InformationUpdateEventArgs<VMAFTargetVideoEncoder>>? InformationUpdate;
+    public event EventHandler<InformationUpdateEventArgs<VMAFTargetEncoderStatusReport>>? InformationUpdate;
 
     public void StartEncoding()
     {
@@ -99,9 +100,9 @@ public class BatchVMAFTargetEncoder
         {
             encoder.InfoUpdate += EncoderInfoUpdate;
 
-            InformationUpdate?.Invoke(this, new InformationUpdateEventArgs<VMAFTargetVideoEncoder>
+            InformationUpdate?.Invoke(this, new InformationUpdateEventArgs<VMAFTargetEncoderStatusReport>
             {
-                Encoder = encoder,
+                Report = encoder.Report,
                 ModificationType = DataModificationType.Add
             });
         }
@@ -111,9 +112,9 @@ public class BatchVMAFTargetEncoder
     {
         ProcessActions();
 
-        InformationUpdate?.Invoke(this, new InformationUpdateEventArgs<VMAFTargetVideoEncoder>
+        InformationUpdate?.Invoke(this, new InformationUpdateEventArgs<VMAFTargetEncoderStatusReport>
         {
-            Encoder = encoder,
+            Report = encoder.Report,
             ModificationType = DataModificationType.Update
         });
     }

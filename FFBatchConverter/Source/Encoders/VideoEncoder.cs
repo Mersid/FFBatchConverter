@@ -2,6 +2,7 @@
 using System.Text;
 using System.Text.Json;
 using FFBatchConverter.Misc;
+using FFBatchConverter.Models;
 
 namespace FFBatchConverter.Encoders;
 
@@ -19,7 +20,8 @@ public class VideoEncoder
     /// Full path of the output file.
     /// </summary>
     public string OutputFilePath { get; private set; }
-    public StringBuilder Log { get; } = new StringBuilder();
+
+    internal StringBuilder Log { get; } = new StringBuilder();
 
     private string FFprobePath { get; set; }
     private string FFmpegPath { get; set; }
@@ -32,14 +34,14 @@ public class VideoEncoder
     /// <summary>
     /// How much we've encoded so far, in seconds.
     /// </summary>
-    public double CurrentDuration { get; private set; }
+    internal double CurrentDuration { get; private set; }
 
     /// <summary>
     /// Size of the input file, in bytes.
     /// </summary>
     public long FileSize { get; private set; }
 
-    public EncodingState State { get; private set; } = EncodingState.Pending;
+    internal EncodingState State { get; private set; } = EncodingState.Pending;
 
     /// <summary>
     /// Null when Start() has not yet been called.
@@ -50,6 +52,13 @@ public class VideoEncoder
     /// Should only run on main thread (same one processing UI events)
     /// </summary>
     public event Action<VideoEncoder, DataReceivedEventArgs?>? InfoUpdate;
+
+    public VideoEncoderStatusReport Report => new VideoEncoderStatusReport
+    {
+        Encoder = this,
+        State = State,
+        CurrentDuration = CurrentDuration
+    };
 
     internal VideoEncoder(string ffprobePath, string ffmpegPath, string inputFilePath)
     {

@@ -8,7 +8,7 @@ namespace FFBatchConverter.Encoders;
 /// This encoder can be used to encode a video in x264 or x265 with a specific CRF value, and then score it with VMAF
 /// to determine the quality of the encoding.
 /// </summary>
-public class VMAFVideoEncoder
+internal class VMAFVideoEncoder
 {
     private VideoEncoder VideoEncoder { get; set; }
 
@@ -78,7 +78,7 @@ public class VMAFVideoEncoder
     /// <param name="ffProbePath">Full path to the ffprobe program.</param>
     /// <param name="ffmpegPath">Full path to the ffmpeg program.</param>
     /// <param name="inputFilePath">Full path to the input video file.</param>
-    public VMAFVideoEncoder(string ffProbePath, string ffmpegPath, string inputFilePath)
+    internal VMAFVideoEncoder(string ffProbePath, string ffmpegPath, string inputFilePath)
     {
         FFprobePath = ffProbePath;
         FFmpegPath = ffmpegPath;
@@ -98,7 +98,7 @@ public class VMAFVideoEncoder
     /// <param name="h265">True to use h265 (-c:v libx265) encoding, false to use h264. This is why we should not pass in -c:v in ffmpegArguments.</param>
     /// <param name="crf">The CRF value to use for the encoder.</param>
     /// <param name="outputFilePath">Full path to the output video file.</param>
-    public void Start(string ffmpegArguments, bool h265, int crf, string outputFilePath)
+    internal void Start(string ffmpegArguments, bool h265, int crf, string outputFilePath)
     {
         FFmpegArguments = ffmpegArguments;
         OutputFilePath = outputFilePath;

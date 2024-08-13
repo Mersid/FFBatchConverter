@@ -6,6 +6,7 @@ using BidirectionalMap;
 using FFBatchConverter.Controllers;
 using FFBatchConverter.Encoders;
 using FFBatchConverter.Misc;
+using FFBatchConverter.Models;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
@@ -33,7 +34,8 @@ public class BatchVMAFTargetEncoderViewModel : ReactiveObject
     public int EncoderSelection { get; set; } = 0;
 
     // TODO: Add verification.
-    public double TargetVMAF { get; set; } = 86;
+    [Reactive]
+    public string TargetVMAF { get; set; } = "86";
 
     [Reactive]
     public string Arguments { get; set; } = "-c:a aac";
@@ -85,15 +87,16 @@ public class BatchVMAFTargetEncoderViewModel : ReactiveObject
             .Subscribe(x => Encoder.H265 = x == 0);
         this
             .WhenAnyValue(x => x.TargetVMAF)
-            .Subscribe(x => Encoder.TargetVMAF = x);
+            .Subscribe(x => Encoder.TargetVMAF = int.TryParse(x, out int concurrency) ? concurrency : 86);
         this
             .WhenAnyValue(x => x.Arguments)
             .Subscribe(x => Encoder.Arguments = x);
     }
 
-    private void EncoderOnInformationUpdate(object? sender, InformationUpdateEventArgs<VMAFTargetVideoEncoder> e)
+    private void EncoderOnInformationUpdate(object? sender, InformationUpdateEventArgs<VMAFTargetEncoderStatusReport> e)
     {
-        VMAFTargetVideoEncoder encoder = e.Encoder;
+        VMAFTargetVideoEncoder encoder = e.Report.Encoder;
+        VMAFTargetEncoderStatusReport report = e.Report;
 
         switch (e.ModificationType)
         {
@@ -104,11 +107,11 @@ public class BatchVMAFTargetEncoderViewModel : ReactiveObject
                     FileName = encoder.InputFilePath,
                     Duration = $"{duration.Hours:D2}:{duration.Minutes:D2}:{duration.Seconds:D2}",
                     Size = $"{encoder.FileSize / 1024d / 1024:F2} MiB",
-                    Range = $"{encoder.LowCrf}-{encoder.HighCrf}",
-                    Crf = encoder.ThisCrf.ToString(),
-                    Vmaf = encoder.LastVMAF is null ? "-" : encoder.LastVMAF.ToString(),
+                    Range = $"{report.LowCrf}-{report.HighCrf}",
+                    Crf = report.ThisCrf.ToString(),
+                    Vmaf = report.LastVMAF is null ? "-" : report.LastVMAF.ToString(),
                     Phase = encoder.EncodingPhase.ToString(),
-                    Status = encoder.State.ToString()
+                    Status = report.State.ToString()
                 };
 
                 TableRows.Add(row);
@@ -116,16 +119,16 @@ public class BatchVMAFTargetEncoderViewModel : ReactiveObject
                 break;
             case DataModificationType.Update:
                 row = EncoderToRow.Forward[encoder];
-                row.Range = $"{encoder.LowCrf}-{encoder.HighCrf}";
-                row.Crf = encoder.ThisCrf.ToString();
-                row.Vmaf = encoder.LastVMAF.ToString() ?? "-";
+                row.Range = $"{report.LowCrf}-{report.HighCrf}";
+                row.Crf = report.ThisCrf.ToString();
+                row.Vmaf = report.LastVMAF.ToString() ?? "-";
                 row.Phase = encoder.EncodingPhase.ToString();
-                row.Status = $"{encoder.CurrentDuration / encoder.Duration * 100:F2}%";
+                row.Status = $"{report.CurrentDuration / encoder.Duration * 100:F2}%";
 
-                if (encoder.State is EncodingState.Error or EncodingState.Success)
+                if (report.State is EncodingState.Error or EncodingState.Success)
                 {
                     // Video encoder has finished
-                    row.Status = encoder.State.ToString();
+                    row.Status = report.State.ToString();
                 }
 
                 break;
@@ -144,7 +147,7 @@ public class BatchVMAFTargetEncoderViewModel : ReactiveObject
         }
         else
         {
-            Encoder.StartEncoding();
+            Encoder.StopEncoding();
         }
     }
 

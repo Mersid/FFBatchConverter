@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Text;
 using FFBatchConverter.Misc;
+using FFBatchConverter.Models;
 
 namespace FFBatchConverter.Encoders;
 
@@ -19,7 +20,7 @@ public class VMAFTargetVideoEncoder
     /// <summary>
     /// Current duration of the processing video encoder's current phase, in seconds.
     /// </summary>
-    public double CurrentDuration => VideoEncoder.CurrentDuration;
+    internal double CurrentDuration => VideoEncoder.CurrentDuration;
 
     /// <summary>
     /// Size of the input file, in bytes.
@@ -36,7 +37,7 @@ public class VMAFTargetVideoEncoder
 
     private bool H265 { get; set; }
 
-    public EncodingState State { get; private set; } = EncodingState.Pending;
+    internal EncodingState State { get; private set; } = EncodingState.Pending;
 
     private string FFprobePath { get; set; }
     private string FFmpegPath { get; set; }
@@ -65,24 +66,35 @@ public class VMAFTargetVideoEncoder
     private const int DefaultH264Crf = 23;
     private const int DefaultH265Crf = 28;
 
-    public int HighCrf { get; set; } = MaxCrf;
-    public int LowCrf { get; set; } = MinCrf;
+    private int HighCrf { get; set; } = MaxCrf;
+    private int LowCrf { get; set; } = MinCrf;
 
     /// <summary>
     /// The CRF value we're trying for this iteration of the VMAF encoder.
     /// </summary>
-    public int ThisCrf { get; set; }
+    private int ThisCrf { get; set; }
     private double TargetVMAF { get; set; }
 
     /// <summary>
     /// The VMAF score of the last encoded video.
     /// Null if we haven't finished scoring at least one video yet.
     /// </summary>
-    public double? LastVMAF { get; set; }
+    private double? LastVMAF { get; set; }
 
     public VMAFVideoEncodingPhase EncodingPhase => VideoEncoder.EncodingPhase;
 
     public event Action<VMAFTargetVideoEncoder, DataReceivedEventArgs?>? InfoUpdate;
+
+    public VMAFTargetEncoderStatusReport Report => new VMAFTargetEncoderStatusReport
+    {
+        Encoder = this,
+        State = State,
+        CurrentDuration = CurrentDuration,
+        HighCrf = HighCrf,
+        LowCrf = LowCrf,
+        ThisCrf = ThisCrf,
+        LastVMAF = LastVMAF,
+    };
 
     /// <summary>
     /// Initializes a new instance of the <see cref="VMAFTargetVideoEncoder"/> class.
@@ -90,7 +102,7 @@ public class VMAFTargetVideoEncoder
     /// <param name="ffProbePath">Full path to the ffprobe program.</param>
     /// <param name="ffmpegPath">Full path to the ffmpeg program.</param>
     /// <param name="inputFilePath">Full path to the input video file.</param>
-    public VMAFTargetVideoEncoder(string ffProbePath, string ffmpegPath, string inputFilePath)
+    internal VMAFTargetVideoEncoder(string ffProbePath, string ffmpegPath, string inputFilePath)
     {
         FFprobePath = ffProbePath;
         FFmpegPath = ffmpegPath;
@@ -113,7 +125,7 @@ public class VMAFTargetVideoEncoder
     /// <param name="h265">True to use h265 (-c:v libx265) encoding, false to use h264. This is why we should not pass in -c:v in ffmpegArguments.</param>
     /// <param name="targetVMAF">The minimum VMAF score to aim for without excessively exceeding.</param>
     /// <param name="outputFilePath">Full path to the output video file.</param>
-    public void Start(string ffmpegArguments, bool h265, double targetVMAF, string outputFilePath)
+    internal void Start(string ffmpegArguments, bool h265, double targetVMAF, string outputFilePath)
     {
         FFmpegArguments = ffmpegArguments;
         OutputFilePath = outputFilePath;
@@ -139,7 +151,6 @@ public class VMAFTargetVideoEncoder
 
         if (encoder.State == EncodingState.Error)
         {
-            // TODO: Handle error
             State = EncodingState.Error;
             Cleanup();
         }

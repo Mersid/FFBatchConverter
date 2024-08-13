@@ -1,7 +1,7 @@
 ﻿namespace FFBatchConverter.Misc;
 
-public class InformationUpdateEventArgs<TEncoder>
+public class InformationUpdateEventArgs<TReport>
 {
-    public required TEncoder Encoder { get; init; }
+    public required TReport Report { get; init; }
     public required DataModificationType ModificationType { get; init; }
 }

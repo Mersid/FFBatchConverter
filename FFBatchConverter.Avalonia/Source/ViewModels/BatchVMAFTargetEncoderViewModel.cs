@@ -109,7 +109,7 @@ public class BatchVMAFTargetEncoderViewModel : ReactiveObject
                     Size = $"{encoder.FileSize / 1024d / 1024:F2} MiB",
                     Range = $"{report.LowCrf}-{report.HighCrf}",
                     Crf = report.ThisCrf.ToString(),
-                    Vmaf = report.LastVMAF is null ? "-" : report.LastVMAF.ToString(),
+                    Vmaf = report.LastVMAF?.ToString("F2") ?? "-",
                     Phase = encoder.EncodingPhase.ToString(),
                     Status = report.State.ToString()
                 };
@@ -121,7 +121,7 @@ public class BatchVMAFTargetEncoderViewModel : ReactiveObject
                 row = EncoderToRow.Forward[encoder];
                 row.Range = $"{report.LowCrf}-{report.HighCrf}";
                 row.Crf = report.ThisCrf.ToString();
-                row.Vmaf = report.LastVMAF.ToString() ?? "-";
+                row.Vmaf = report.LastVMAF?.ToString("F2") ?? "-";
                 row.Phase = encoder.EncodingPhase.ToString();
                 row.Status = $"{report.CurrentDuration / encoder.Duration * 100:F2}%";
 

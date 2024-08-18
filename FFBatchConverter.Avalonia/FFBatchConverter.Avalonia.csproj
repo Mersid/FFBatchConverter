@@ -42,6 +42,18 @@
         <DependentUpon>SettingsWindow.axaml</DependentUpon>
         <SubType>Code</SubType>
       </Compile>
+      <Compile Update="Source\Views\BatchVMAFEncoderView.axaml.cs">
+        <DependentUpon>BatchVMAFEncoderView.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+        <Compile Update="Source\Views\BatchVideoEncoderView.axaml.cs">
+            <DependentUpon>BatchVideoEncoderView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Source\Views\BatchVMAFEncoderView.axaml.cs">
+            <DependentUpon>BatchVMAFEncoderView.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
     </ItemGroup>
 
     <ItemGroup>

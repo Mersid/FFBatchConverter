@@ -12,11 +12,11 @@ using ReactiveUI.Fody.Helpers;
 
 namespace FFBatchConverter.Avalonia.ViewModels;
 
-public class BatchVMAFTargetEncoderViewModel : ReactiveObject
+public class BatchVMAFEncoderViewModel : ReactiveObject
 {
-    private BiMap<VMAFTargetVideoEncoder, VMAFTargetEncoderTableRow> EncoderToRow { get; set; } = new BiMap<VMAFTargetVideoEncoder, VMAFTargetEncoderTableRow>();
+    private BiMap<VMAFVideoEncoder, VMAFEncoderTableRow> EncoderToRow { get; set; } = new BiMap<VMAFVideoEncoder, VMAFEncoderTableRow>();
 
-    public ObservableCollection<VMAFTargetEncoderTableRow> TableRows { get; set; } = [];
+    public ObservableCollection<VMAFEncoderTableRow> TableRows { get; set; } = [];
 
     [Reactive]
     public string Concurrency { get; set; } = "1";
@@ -35,7 +35,7 @@ public class BatchVMAFTargetEncoderViewModel : ReactiveObject
 
     // TODO: Add verification.
     [Reactive]
-    public string TargetVMAF { get; set; } = "86";
+    public string Crf { get; set; } = "";
 
     [Reactive]
     public string Arguments { get; set; } = "-c:a aac";
@@ -46,9 +46,9 @@ public class BatchVMAFTargetEncoderViewModel : ReactiveObject
     [Reactive]
     public bool Encoding { get; set; }
 
-    private BatchVMAFTargetEncoder? Encoder { get; set; }
+    private BatchVMAFEncoder? Encoder { get; set; }
 
-    public BatchVMAFTargetEncoderViewModel()
+    public BatchVMAFEncoderViewModel()
     {
         AttachEncoderEvents();
     }
@@ -60,7 +60,7 @@ public class BatchVMAFTargetEncoderViewModel : ReactiveObject
     private void EncoderRebuiltEvent()
     {
         Encoding = false;
-        EncoderToRow = new BiMap<VMAFTargetVideoEncoder, VMAFTargetEncoderTableRow>();
+        EncoderToRow = new BiMap<VMAFVideoEncoder, VMAFEncoderTableRow>();
         TableRows.Clear();
     }
 
@@ -68,7 +68,7 @@ public class BatchVMAFTargetEncoderViewModel : ReactiveObject
     {
         if (Encoder != null)
             Encoder.InformationUpdate -= EncoderOnInformationUpdate; // If already attached, remove the old event handler.
-        Encoder = App.Instance.VMAFTargetEncoder;
+        Encoder = App.Instance.VMAFEncoder;
         Encoder.InformationUpdate += (sender, args) => Dispatcher.UIThread.Invoke(() => EncoderOnInformationUpdate(sender, args));
         App.Instance.EncoderRebuilt += EncoderRebuiltEvent;
 
@@ -86,30 +86,28 @@ public class BatchVMAFTargetEncoderViewModel : ReactiveObject
             .WhenAnyValue(x => x.EncoderSelection)
             .Subscribe(x => Encoder.H265 = x == 0);
         this
-            .WhenAnyValue(x => x.TargetVMAF)
-            .Subscribe(x => Encoder.TargetVMAF = int.TryParse(x, out int targetVMAF) ? targetVMAF : 86);
+            .WhenAnyValue(x => x.Crf)
+            .Subscribe(x => Encoder.Crf = int.TryParse(x, out int crf) ? crf : -1);
         this
             .WhenAnyValue(x => x.Arguments)
             .Subscribe(x => Encoder.Arguments = x);
     }
 
-    private void EncoderOnInformationUpdate(object? sender, InformationUpdateEventArgs<VMAFTargetEncoderStatusReport> e)
+    private void EncoderOnInformationUpdate(object? sender, InformationUpdateEventArgs<VMAFVideoEncoderStatusReport> e)
     {
-        VMAFTargetVideoEncoder encoder = e.Report.Encoder;
-        VMAFTargetEncoderStatusReport report = e.Report;
+        VMAFVideoEncoder encoder = e.Report.Encoder;
+        VMAFVideoEncoderStatusReport report = e.Report;
 
         switch (e.ModificationType)
         {
             case DataModificationType.Add:
                 TimeSpan duration = TimeSpan.FromSeconds(encoder.Duration);
-                VMAFTargetEncoderTableRow row = new VMAFTargetEncoderTableRow
+                VMAFEncoderTableRow row = new VMAFEncoderTableRow
                 {
                     FileName = encoder.InputFilePath,
                     Duration = $"{duration.Hours:D2}:{duration.Minutes:D2}:{duration.Seconds:D2}",
                     Size = $"{encoder.FileSize / 1024d / 1024:F2} MiB",
-                    Range = $"{report.LowCrf}-{report.HighCrf}",
-                    Crf = report.ThisCrf.ToString(),
-                    Vmaf = report.LastVMAF?.ToString("F2") ?? "-",
+                    Vmaf = report.VMAFScore == 0 ? "-" : report.VMAFScore.ToString("F2"),
                     Phase = encoder.EncodingPhase.ToString(),
                     Status = report.State.ToString()
                 };
@@ -119,9 +117,7 @@ public class BatchVMAFTargetEncoderViewModel : ReactiveObject
                 break;
             case DataModificationType.Update:
                 row = EncoderToRow.Forward[encoder];
-                row.Range = $"{report.LowCrf}-{report.HighCrf}";
-                row.Crf = report.ThisCrf.ToString();
-                row.Vmaf = report.LastVMAF?.ToString("F2") ?? "-";
+                row.Vmaf = report.VMAFScore == 0 ? "-" : report.VMAFScore.ToString("F2");
                 row.Phase = encoder.EncodingPhase.ToString();
                 row.Status = $"{report.CurrentDuration / encoder.Duration * 100:F2}%";
 

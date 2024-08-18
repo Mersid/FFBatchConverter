@@ -139,9 +139,18 @@ internal class VMAFScorer
         Log.AppendLine($"Process exited with code {Process.ExitCode}");
 
         Regex regex = new Regex("(?<=VMAF score: )[0-9.]+");
-        string vmafScore = regex.Match(Log.ToString()).Value;
+        string vmafScoreString = regex.Match(Log.ToString()).Value;
 
-        VMAFScore = double.Parse(vmafScore);
+        if (double.TryParse(vmafScoreString, out double vmafScore))
+        {
+            VMAFScore = vmafScore;
+        }
+        else
+        {
+            Log.AppendLine("Could not parse VMAF score.");
+            VMAFScore = 0;
+            State = EncodingState.Error;
+        }
 
         InfoUpdate?.Invoke(this, null);
 

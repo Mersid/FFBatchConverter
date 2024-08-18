@@ -16,7 +16,8 @@ public partial class App : Application
     public SettingsManager SettingsManager { get; } = new SettingsManager();
 
     public BatchVideoEncoder Encoder { get; private set; } = null!;
-    public BatchVMAFTargetEncoder VMAFEncoder { get; private set; } = null!;
+    public BatchVMAFEncoder VMAFEncoder { get; private set; } = null!;
+    public BatchVMAFTargetEncoder VMAFTargetEncoder { get; private set; } = null!;
 
     /// <summary>
     /// Event that is raised when the video encoders in the application have been regenerated.
@@ -55,7 +56,13 @@ public partial class App : Application
             FFmpegPath = settings.ShouldOverrideFFmpegPath ? settings.FFmpegPath : Helpers.GetFFmpegPath(),
         };
 
-        VMAFEncoder = new BatchVMAFTargetEncoder
+        VMAFTargetEncoder = new BatchVMAFTargetEncoder
+        {
+            FFprobePath = settings.ShouldOverrideFFprobePath ? settings.FFprobePath : Helpers.GetFFprobePath(),
+            FFmpegPath = settings.ShouldOverrideFFmpegPath ? settings.FFmpegPath : Helpers.GetFFmpegPath(),
+        };
+
+        VMAFEncoder = new BatchVMAFEncoder
         {
             FFprobePath = settings.ShouldOverrideFFprobePath ? settings.FFprobePath : Helpers.GetFFprobePath(),
             FFmpegPath = settings.ShouldOverrideFFmpegPath ? settings.FFmpegPath : Helpers.GetFFmpegPath(),

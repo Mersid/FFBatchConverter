@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Text;
 using FFBatchConverter.Misc;
+using FFBatchConverter.Models;
 
 namespace FFBatchConverter.Encoders;
 
@@ -8,7 +9,7 @@ namespace FFBatchConverter.Encoders;
 /// This encoder can be used to encode a video in x264 or x265 with a specific CRF value, and then score it with VMAF
 /// to determine the quality of the encoding.
 /// </summary>
-internal class VMAFVideoEncoder
+public class VMAFVideoEncoder
 {
     private VideoEncoder VideoEncoder { get; set; }
 
@@ -29,12 +30,17 @@ internal class VMAFVideoEncoder
     /// </summary>
     public double CurrentDuration => VMAFScorer?.CurrentDuration ?? VideoEncoder.CurrentDuration;
 
+    /// <summary>
+    /// Size of the input file, in bytes.
+    /// </summary>
+    public long FileSize { get; private set; }
+
     public VMAFVideoEncodingPhase EncodingPhase => VMAFScorer != null ? VMAFVideoEncodingPhase.Scoring : VMAFVideoEncodingPhase.Encoding;
 
     /// <summary>
     /// Full path of the input video.
     /// </summary>
-    private string InputFilePath { get; }
+    public string InputFilePath { get; }
 
     /// <summary>
     /// Full path of the output video. The container type of the encoded video is determined by the file extension here.
@@ -50,6 +56,7 @@ internal class VMAFVideoEncoder
 
     /// <summary>
     /// Set a value [0, 51] for the CRF value. Lower values are higher quality.
+    /// Use -1 to use the default value for the codec (23 for x264, 28 for x265).
     /// </summary>
     private int Crf { get; set; }
 
@@ -72,6 +79,14 @@ internal class VMAFVideoEncoder
 
     public event Action<VMAFVideoEncoder, DataReceivedEventArgs?>? InfoUpdate;
 
+    public VMAFVideoEncoderStatusReport Report => new VMAFVideoEncoderStatusReport
+    {
+        Encoder = this,
+        State = State,
+        CurrentDuration = CurrentDuration,
+        VMAFScore = VMAFScore
+    };
+
     /// <summary>
     /// Creates a new VMAF video encoder.
     /// </summary>
@@ -83,6 +98,8 @@ internal class VMAFVideoEncoder
         FFprobePath = ffProbePath;
         FFmpegPath = ffmpegPath;
         InputFilePath = Path.GetFullPath(inputFilePath);
+
+        FileSize = new FileInfo(inputFilePath).Length;
 
         // Make a video encoder to get the duration.
         VideoEncoder = new VideoEncoder(ffProbePath, ffmpegPath, inputFilePath);
@@ -96,7 +113,7 @@ internal class VMAFVideoEncoder
     /// </summary>
     /// <param name="ffmpegArguments">Arguments to pass to ffmpeg. Do not include -c:v (or -vcodec) or -crf flags.</param>
     /// <param name="h265">True to use h265 (-c:v libx265) encoding, false to use h264. This is why we should not pass in -c:v in ffmpegArguments.</param>
-    /// <param name="crf">The CRF value to use for the encoder.</param>
+    /// <param name="crf">The CRF value to use for the encoder. Use -1 to use the default value for the codec.</param>
     /// <param name="outputFilePath">Full path to the output video file.</param>
     internal void Start(string ffmpegArguments, bool h265, int crf, string outputFilePath)
     {
@@ -105,7 +122,9 @@ internal class VMAFVideoEncoder
         H265 = h265;
         Crf = crf;
 
-        string arguments = $"{FFmpegArguments} -c:v {(H265 ? "libx265" : "libx264")} -crf {Crf}";
+        string arguments = $"{FFmpegArguments} -c:v {(H265 ? "libx265" : "libx264")}";
+        if (Crf != -1)
+            arguments += $" -crf {Crf}";
 
         VideoEncoder.InfoUpdate += OnEncoderInfoUpdate;
 

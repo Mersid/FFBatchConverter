@@ -17,7 +17,8 @@ public class VMAFVideoEncoder
     /// If this is not null, we're in the scoring phase.
     /// </summary>
     private VMAFScorer? VMAFScorer { get; set; }
-    public StringBuilder Log { get; } = new StringBuilder();
+    internal StringBuilder Log { get; } = new StringBuilder();
+    public string LogString => Log.ToString();
 
     /// <summary>
     /// Duration of the video in seconds. Zero if the duration could not be determined (e.g. file does not exist or is not a video).
@@ -106,6 +107,12 @@ public class VMAFVideoEncoder
         Duration = VideoEncoder.Duration;
 
         Log.AppendLine(VideoEncoder.Log.ToString());
+
+        if (Duration == 0)
+        {
+            Log.AppendLine("Could not determine duration. Please verify if this is a valid video.");
+            State = EncodingState.Error;
+        }
     }
 
     /// <summary>

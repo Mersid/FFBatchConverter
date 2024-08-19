@@ -22,6 +22,7 @@ public class VideoEncoder
     public string OutputFilePath { get; private set; }
 
     internal StringBuilder Log { get; } = new StringBuilder();
+    public string LogString => Log.ToString();
 
     private string FFprobePath { get; set; }
     private string FFmpegPath { get; set; }

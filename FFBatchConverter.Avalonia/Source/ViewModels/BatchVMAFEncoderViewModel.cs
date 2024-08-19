@@ -14,7 +14,7 @@ namespace FFBatchConverter.Avalonia.ViewModels;
 
 public class BatchVMAFEncoderViewModel : ReactiveObject
 {
-    private BiMap<VMAFVideoEncoder, VMAFEncoderTableRow> EncoderToRow { get; set; } = new BiMap<VMAFVideoEncoder, VMAFEncoderTableRow>();
+    public BiMap<VMAFVideoEncoder, VMAFEncoderTableRow> EncoderToRow { get; set; } = new BiMap<VMAFVideoEncoder, VMAFEncoderTableRow>();
 
     public ObservableCollection<VMAFEncoderTableRow> TableRows { get; set; } = [];
 

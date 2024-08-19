@@ -65,4 +65,26 @@ public partial class BatchVMAFEncoderView : UserControl
         IEnumerable<string> files = data.Select(t => t.Path.LocalPath);
         ViewModel.AddFiles(files);
     }
+
+    private void CopyLogsMenuItemClicked(object? sender, RoutedEventArgs e)
+    {
+        // Item can be null if no item is selected (we start and right click on header)
+        if (DataGrid.SelectedItem is not VMAFEncoderTableRow item)
+            return;
+
+        TopLevel? topLevel = TopLevel.GetTopLevel(this);
+        Debug.Assert(topLevel != null, nameof(topLevel) + " != null");
+        Debug.Assert(topLevel.Clipboard != null, nameof(topLevel.Clipboard) + " != null");
+
+        topLevel.Clipboard.SetTextAsync(ViewModel.EncoderToRow.Reverse[item].LogString);
+    }
+
+    private void OpenLogsEditorMenuItemClicked(object? sender, RoutedEventArgs e)
+    {
+        List<VMAFEncoderTableRow> items = DataGrid.SelectedItems.Cast<VMAFEncoderTableRow>().ToList();
+        foreach (VMAFEncoderTableRow item in items)
+        {
+            LogHelper.OpenLog(ViewModel.EncoderToRow.Reverse[item].LogString);
+        }
+    }
 }

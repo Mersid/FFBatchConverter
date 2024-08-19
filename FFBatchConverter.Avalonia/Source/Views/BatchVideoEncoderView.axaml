@@ -31,6 +31,7 @@
                     GridLinesVisibility="All"
                     BorderThickness="1"
                     BorderBrush="Gray"
+                    x:Name="DataGrid"
                     >
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="File Name" Binding="{Binding FileName}" />
@@ -41,8 +42,8 @@
 
                     <DataGrid.ContextMenu>
                         <ContextMenu>
-                            <MenuItem Header="Copy" />
-                            <MenuItem Header="Paste" />
+                            <MenuItem Header="Copy log" Click="CopyLogsMenuItemClicked" />
+                            <MenuItem Header="Open log in text editor" Click="OpenLogsEditorMenuItemClicked" />
                         </ContextMenu>
                     </DataGrid.ContextMenu>
                 </DataGrid>

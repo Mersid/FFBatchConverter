@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using Avalonia;
 using Avalonia.Threading;
 using BidirectionalMap;
 using FFBatchConverter.Controllers;
@@ -16,7 +18,7 @@ namespace FFBatchConverter.Avalonia.ViewModels;
 public class BatchVideoEncoderViewModel : ReactiveObject
 {
 
-    private BiMap<VideoEncoder, EncoderTableRow> EncoderToRow { get; set; } = new BiMap<VideoEncoder, EncoderTableRow>();
+    public BiMap<VideoEncoder, EncoderTableRow> EncoderToRow { get; set; } = new BiMap<VideoEncoder, EncoderTableRow>();
 
     public ObservableCollection<EncoderTableRow> TableRows { get; set; } = [];
 

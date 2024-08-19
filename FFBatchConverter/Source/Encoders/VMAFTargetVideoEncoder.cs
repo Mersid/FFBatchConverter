@@ -14,6 +14,7 @@ public class VMAFTargetVideoEncoder
 {
     private VMAFVideoEncoder VideoEncoder { get; set; }
     private StringBuilder Log { get; } = new StringBuilder();
+    public string LogString => Log.ToString();
 
     public double Duration { get; private set; }
 
@@ -115,6 +116,12 @@ public class VMAFTargetVideoEncoder
         Duration = VideoEncoder.Duration;
 
         Log.AppendLine(VideoEncoder.Log.ToString());
+
+        if (Duration == 0)
+        {
+            Log.AppendLine("Could not determine duration. Please verify if this is a valid video.");
+            State = EncodingState.Error;
+        }
     }
 
     /// <summary>

@@ -6,6 +6,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using FFBatchConverter.Avalonia.ViewModels;
+using FFBatchConverter.Encoders;
 
 namespace FFBatchConverter.Avalonia.Views;
 
@@ -86,5 +87,17 @@ public partial class BatchVideoEncoderView : UserControl
             LogHelper.OpenLog(ViewModel.EncoderToRow.Reverse[item].LogString);
         }
 
+    }
+
+    private void RemoveMenuItemClicked(object? sender, RoutedEventArgs e)
+    {
+        List<EncoderTableRow> items = DataGrid.SelectedItems.Cast<EncoderTableRow>().ToList();
+        ViewModel.RemoveEncodersByRow(items);
+    }
+
+    private void ResetMenuItemClicked(object? sender, RoutedEventArgs e)
+    {
+        List<EncoderTableRow> items = DataGrid.SelectedItems.Cast<EncoderTableRow>().ToList();
+        ViewModel.ResetEncodersByRow(items);
     }
 }

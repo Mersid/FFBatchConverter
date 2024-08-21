@@ -99,6 +99,34 @@ public class BatchVideoEncoder
         }
     }
 
+    /// <summary>
+    /// Takes a list of encoders. If this encoder is pending or done (failed or successful), it will remove it from the list.
+    /// It is an error to remove an encoder that is currently encoding.
+    /// </summary>
+    /// <param name="encoders"></param>
+    public void RemoveEntries(IEnumerable<VideoEncoder> encoders)
+    {
+        lock (_lock)
+        {
+            foreach (VideoEncoder encoder in encoders)
+            {
+                if (encoder.State == EncodingState.Encoding)
+                    throw new InvalidOperationException("Cannot remove an encoder that is currently encoding.");
+
+                if (!Encoders.Remove(encoder))
+                    continue;
+
+                encoder.InfoUpdate -= EncoderInfoUpdate;
+
+                InformationUpdate?.Invoke(this, new InformationUpdateEventArgs<VideoEncoderStatusReport>
+                {
+                    Report = encoder.Report,
+                    ModificationType = DataModificationType.Remove
+                });
+            }
+        }
+    }
+
     private void EncoderInfoUpdate(VideoEncoder encoder, DataReceivedEventArgs? info)
     {
         ProcessActions();

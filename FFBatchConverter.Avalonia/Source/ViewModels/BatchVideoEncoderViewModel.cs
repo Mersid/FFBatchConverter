@@ -12,6 +12,7 @@ using FFBatchConverter.Controllers;
 using FFBatchConverter.Encoders;
 using FFBatchConverter.Misc;
 using FFBatchConverter.Models;
+using FFBatchConverter.Tokens;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
@@ -20,7 +21,7 @@ namespace FFBatchConverter.Avalonia.ViewModels;
 public class BatchVideoEncoderViewModel : ReactiveObject
 {
 
-    public BiMap<VideoEncoder, EncoderTableRow> EncoderToRow { get; set; } = new BiMap<VideoEncoder, EncoderTableRow>();
+    public BiMap<VideoEncoderToken, EncoderTableRow> EncoderToRow { get; set; } = new BiMap<VideoEncoderToken, EncoderTableRow>();
 
     public ObservableCollection<EncoderTableRow> TableRows { get; set; } = [];
 
@@ -56,7 +57,7 @@ public class BatchVideoEncoderViewModel : ReactiveObject
     private void EncoderRebuiltEvent()
     {
         Encoding = false;
-        EncoderToRow = new BiMap<VideoEncoder, EncoderTableRow>();
+        EncoderToRow = new BiMap<VideoEncoderToken, EncoderTableRow>();
         TableRows.Clear();
     }
 
@@ -85,18 +86,18 @@ public class BatchVideoEncoderViewModel : ReactiveObject
 
     private void EncoderOnInformationUpdate(object? sender, InformationUpdateEventArgs<VideoEncoderStatusReport> e)
     {
-        VideoEncoder encoder = e.Report.Encoder;
+        VideoEncoderToken encoder = e.Report.Token;
         VideoEncoderStatusReport report = e.Report;
 
         switch (e.ModificationType)
         {
             case DataModificationType.Add:
-                TimeSpan duration = TimeSpan.FromSeconds(encoder.Duration);
+                TimeSpan duration = TimeSpan.FromSeconds(report.Duration);
                 EncoderTableRow row = new EncoderTableRow
                 {
-                    FileName = encoder.InputFilePath,
+                    FileName = report.InputFilePath,
                     Duration = $"{duration.Hours:D2}:{duration.Minutes:D2}:{duration.Seconds:D2}",
-                    Size = $"{encoder.FileSize / 1024d / 1024:F2} MiB",
+                    Size = $"{report.FileSize / 1024d / 1024:F2} MiB",
                     Status = report.State.ToString()
                 };
 
@@ -105,7 +106,7 @@ public class BatchVideoEncoderViewModel : ReactiveObject
                 break;
             case DataModificationType.Update:
                 row = EncoderToRow.Forward[encoder];
-                row.Status = $"{report.CurrentDuration / encoder.Duration * 100:F2}%";
+                row.Status = $"{report.CurrentDuration / report.Duration * 100:F2}%";
 
                 if (report.State is EncodingState.Error or EncodingState.Success)
                 {
@@ -132,7 +133,7 @@ public class BatchVideoEncoderViewModel : ReactiveObject
         }
         else
         {
-            Encoder.StartEncoding();
+            Encoder.StopEncoding();
         }
     }
 
@@ -145,48 +146,13 @@ public class BatchVideoEncoderViewModel : ReactiveObject
         Encoder.AddEntries(paths);
     }
 
-    public void RemoveEncodersByRow(IEnumerable<EncoderTableRow> rows)
+    /// <summary>
+    /// Gets the logs for a specific encoder by token.
+    /// </summary>
+    /// <param name="token"></param>
+    /// <returns></returns>
+    public string GetLogs(VideoEncoderToken token)
     {
-        // Filter encoders that are currently encoding.
-        IEnumerable<VideoEncoder> encoders = rows
-            .Select(t => EncoderToRow.Reverse[t])
-            .Where(t => t.Report.State is not EncodingState.Encoding);
-
-        Encoder.RemoveEntries(encoders);
-        foreach (VideoEncoder encoder in encoders)
-        {
-            EncoderTableRow row = EncoderToRow.Forward[encoder];
-            EncoderToRow.Remove(encoder);
-            TableRows.Remove(row);
-        }
-    }
-
-    public void ResetEncodersByRow(IEnumerable<EncoderTableRow> rows)
-    {
-        // TODO: Redo/junk this.
-        IEnumerable<VideoEncoder> encoders = rows
-            .Select(t => EncoderToRow.Reverse[t])
-            .Where(t => t.Report.State is not EncodingState.Encoding);
-
-        foreach (VideoEncoder oldEncoder in encoders)
-        {
-            TimeSpan duration = TimeSpan.FromSeconds(oldEncoder.Duration);
-            EncoderTableRow newRow = new EncoderTableRow
-            {
-                FileName = oldEncoder.InputFilePath,
-                Duration = $"{duration.Hours:D2}:{duration.Minutes:D2}:{duration.Seconds:D2}",
-                Size = $"{oldEncoder.FileSize / 1024d / 1024:F2} MiB",
-                Status = oldEncoder.Report.State.ToString()
-            };
-
-            EncoderTableRow oldRow = EncoderToRow.Forward[oldEncoder];
-
-            TableRows.Replace(oldRow, newRow);
-            EncoderToRow.Remove(oldEncoder);
-
-            Encoder.RemoveEntries([oldEncoder]);
-
-            EncoderToRow.Add(oldEncoder, newRow);
-        }
+        return Encoder.GetLogs(token);
     }
 }

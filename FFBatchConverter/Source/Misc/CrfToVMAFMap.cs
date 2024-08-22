@@ -1,6 +1,6 @@
 ﻿namespace FFBatchConverter.Misc;
 
-public class CrfToVMAFMap
+internal class CrfToVMAFMap
 {
     public required string FilePath { get; init; }
     public required int Crf { get; init; }

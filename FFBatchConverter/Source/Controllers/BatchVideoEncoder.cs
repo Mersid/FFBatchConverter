@@ -1,7 +1,9 @@
 ﻿using System.Diagnostics;
+using BidirectionalMap;
 using FFBatchConverter.Encoders;
 using FFBatchConverter.Misc;
 using FFBatchConverter.Models;
+using FFBatchConverter.Tokens;
 
 namespace FFBatchConverter.Controllers;
 
@@ -37,7 +39,7 @@ public class BatchVideoEncoder
     /// </summary>
     public string Arguments { get; set; } = string.Empty;
 
-    private List<VideoEncoder> Encoders { get; } = [];
+    private BiMap<VideoEncoderToken, VideoEncoder> Encoders { get; } = [];
     private bool IsEncoding { get; set; }
 
     private readonly object _lock = new object();
@@ -85,46 +87,43 @@ public class BatchVideoEncoder
             .ThenByDescending(t => t.FileSize)
             .ToList();
 
-        Encoders.AddRange(encoders);
-
         foreach (VideoEncoder encoder in encoders)
         {
+            Encoders.Add(new VideoEncoderToken(), encoder);
             encoder.InfoUpdate += EncoderInfoUpdate;
 
             InformationUpdate?.Invoke(this, new InformationUpdateEventArgs<VideoEncoderStatusReport>
             {
-                Report = encoder.Report,
+                Report = GetReport(Encoders.Reverse[encoder]),
                 ModificationType = DataModificationType.Add
             });
         }
     }
 
     /// <summary>
-    /// Takes a list of encoders. If this encoder is pending or done (failed or successful), it will remove it from the list.
-    /// It is an error to remove an encoder that is currently encoding.
+    /// Produces a report for a specific encoder by its public token.
     /// </summary>
-    /// <param name="encoders"></param>
-    public void RemoveEntries(IEnumerable<VideoEncoder> encoders)
+    /// <param name="token"></param>
+    /// <returns></returns>
+    public VideoEncoderStatusReport GetReport(VideoEncoderToken token)
     {
-        lock (_lock)
+        VideoEncoder encoder = Encoders.Forward[token];
+        VideoEncoderStatusReport report = new VideoEncoderStatusReport
         {
-            foreach (VideoEncoder encoder in encoders)
-            {
-                if (encoder.State == EncodingState.Encoding)
-                    throw new InvalidOperationException("Cannot remove an encoder that is currently encoding.");
+            Token = token,
+            State = encoder.State,
+            InputFilePath = encoder.InputFilePath,
+            FileSize = encoder.FileSize,
+            CurrentDuration = encoder.CurrentDuration,
+            Duration = encoder.Duration
+        };
 
-                if (!Encoders.Remove(encoder))
-                    continue;
+        return report;
+    }
 
-                encoder.InfoUpdate -= EncoderInfoUpdate;
-
-                InformationUpdate?.Invoke(this, new InformationUpdateEventArgs<VideoEncoderStatusReport>
-                {
-                    Report = encoder.Report,
-                    ModificationType = DataModificationType.Remove
-                });
-            }
-        }
+    public string GetLogs(VideoEncoderToken token)
+    {
+        return Encoders.Forward[token].LogString;
     }
 
     private void EncoderInfoUpdate(VideoEncoder encoder, DataReceivedEventArgs? info)
@@ -133,7 +132,7 @@ public class BatchVideoEncoder
 
         InformationUpdate?.Invoke(this, new InformationUpdateEventArgs<VideoEncoderStatusReport>
         {
-            Report = encoder.Report,
+            Report = GetReport(Encoders.Reverse[encoder]),
             ModificationType = DataModificationType.Update
         });
     }
@@ -148,10 +147,10 @@ public class BatchVideoEncoder
             if (!IsEncoding)
                 return;
 
-            if (Encoders.Count(e => e.State == EncodingState.Encoding) >= Concurrency)
+            if (Encoders.Forward.Values.Count(e => e.State == EncodingState.Encoding) >= Concurrency)
                 return;
 
-            VideoEncoder? encoder = Encoders.FirstOrDefault(t => t.State == EncodingState.Pending);
+            VideoEncoder? encoder = Encoders.Forward.Values.FirstOrDefault(t => t.State == EncodingState.Pending);
             if (encoder is null)
                 return;
 

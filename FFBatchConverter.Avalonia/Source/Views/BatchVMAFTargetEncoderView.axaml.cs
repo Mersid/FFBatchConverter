@@ -6,6 +6,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using FFBatchConverter.Avalonia.ViewModels;
+using FFBatchConverter.Tokens;
 
 namespace FFBatchConverter.Avalonia.Views;
 
@@ -76,7 +77,8 @@ public partial class BatchVMAFTargetEncoderView : UserControl
         Debug.Assert(topLevel != null, nameof(topLevel) + " != null");
         Debug.Assert(topLevel.Clipboard != null, nameof(topLevel.Clipboard) + " != null");
 
-        topLevel.Clipboard.SetTextAsync(ViewModel.EncoderToRow.Reverse[item].LogString);
+        VMAFTargetEncoderToken token = ViewModel.EncoderToRow.Reverse[item];
+        topLevel.Clipboard.SetTextAsync(ViewModel.GetLogs(token));
     }
 
     private void OpenLogsEditorMenuItemClicked(object? sender, RoutedEventArgs e)
@@ -84,7 +86,8 @@ public partial class BatchVMAFTargetEncoderView : UserControl
         List<VMAFTargetEncoderTableRow> items = DataGrid.SelectedItems.Cast<VMAFTargetEncoderTableRow>().ToList();
         foreach (VMAFTargetEncoderTableRow item in items)
         {
-            LogHelper.OpenLog(ViewModel.EncoderToRow.Reverse[item].LogString);
+            VMAFTargetEncoderToken token = ViewModel.EncoderToRow.Reverse[item];
+            LogHelper.OpenLog(ViewModel.GetLogs(token));
         }
     }
 }

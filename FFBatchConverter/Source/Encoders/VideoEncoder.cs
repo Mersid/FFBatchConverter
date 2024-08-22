@@ -9,7 +9,7 @@ namespace FFBatchConverter.Encoders;
 /// <summary>
 /// Represents the encoder for a single video.
 /// </summary>
-public class VideoEncoder
+internal class VideoEncoder
 {
     /// <summary>
     /// Path to the input file.
@@ -24,8 +24,8 @@ public class VideoEncoder
     internal StringBuilder Log { get; } = new StringBuilder();
     public string LogString => Log.ToString();
 
-    private string FFprobePath { get; set; }
-    private string FFmpegPath { get; set; }
+    internal string FFprobePath { get; set; }
+    internal string FFmpegPath { get; set; }
 
     /// <summary>
     /// Duration of the video in seconds. Zero if the duration could not be determined (e.g. file does not exist or is not a video).
@@ -53,13 +53,6 @@ public class VideoEncoder
     /// Should only run on main thread (same one processing UI events)
     /// </summary>
     public event Action<VideoEncoder, DataReceivedEventArgs?>? InfoUpdate;
-
-    public VideoEncoderStatusReport Report => new VideoEncoderStatusReport
-    {
-        Encoder = this,
-        State = State,
-        CurrentDuration = CurrentDuration
-    };
 
     internal VideoEncoder(string ffprobePath, string ffmpegPath, string inputFilePath)
     {

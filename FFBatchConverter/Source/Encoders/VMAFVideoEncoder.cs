@@ -9,7 +9,7 @@ namespace FFBatchConverter.Encoders;
 /// This encoder can be used to encode a video in x264 or x265 with a specific CRF value, and then score it with VMAF
 /// to determine the quality of the encoding.
 /// </summary>
-public class VMAFVideoEncoder
+internal class VMAFVideoEncoder
 {
     private VideoEncoder VideoEncoder { get; set; }
 
@@ -79,14 +79,6 @@ public class VMAFVideoEncoder
     public double VMAFScore => VMAFScorer?.VMAFScore ?? 0;
 
     public event Action<VMAFVideoEncoder, DataReceivedEventArgs?>? InfoUpdate;
-
-    public VMAFVideoEncoderStatusReport Report => new VMAFVideoEncoderStatusReport
-    {
-        Encoder = this,
-        State = State,
-        CurrentDuration = CurrentDuration,
-        VMAFScore = VMAFScore
-    };
 
     /// <summary>
     /// Creates a new VMAF video encoder.

@@ -10,7 +10,7 @@ namespace FFBatchConverter.Encoders;
 /// attempt to find the CRF value that puts the video above the target VMAF value, such that the next CRF down would
 /// put it below the target VMAF value. In short, it encodes the video to a minimum perceptual quality level.
 /// </summary>
-public class VMAFTargetVideoEncoder
+internal class VMAFTargetVideoEncoder
 {
     private VMAFVideoEncoder VideoEncoder { get; set; }
     private StringBuilder Log { get; } = new StringBuilder();
@@ -67,35 +67,24 @@ public class VMAFTargetVideoEncoder
     private const int DefaultH264Crf = 23;
     private const int DefaultH265Crf = 28;
 
-    private int HighCrf { get; set; } = MaxCrf;
-    private int LowCrf { get; set; } = MinCrf;
+    internal int HighCrf { get; set; } = MaxCrf;
+    internal int LowCrf { get; set; } = MinCrf;
 
     /// <summary>
     /// The CRF value we're trying for this iteration of the VMAF encoder.
     /// </summary>
-    private int ThisCrf { get; set; }
+    internal int ThisCrf { get; set; }
     private double TargetVMAF { get; set; }
 
     /// <summary>
     /// The VMAF score of the last encoded video.
     /// Null if we haven't finished scoring at least one video yet.
     /// </summary>
-    private double? LastVMAF { get; set; }
+    internal double? LastVMAF { get; set; }
 
     public VMAFVideoEncodingPhase EncodingPhase => VideoEncoder.EncodingPhase;
 
     public event Action<VMAFTargetVideoEncoder, DataReceivedEventArgs?>? InfoUpdate;
-
-    public VMAFTargetEncoderStatusReport Report => new VMAFTargetEncoderStatusReport
-    {
-        Encoder = this,
-        State = State,
-        CurrentDuration = CurrentDuration,
-        HighCrf = HighCrf,
-        LowCrf = LowCrf,
-        ThisCrf = ThisCrf,
-        LastVMAF = LastVMAF,
-    };
 
     /// <summary>
     /// Initializes a new instance of the <see cref="VMAFTargetVideoEncoder"/> class.

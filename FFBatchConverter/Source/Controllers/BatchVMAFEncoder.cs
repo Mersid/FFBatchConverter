@@ -1,7 +1,9 @@
 ﻿using System.Diagnostics;
+using BidirectionalMap;
 using FFBatchConverter.Encoders;
 using FFBatchConverter.Misc;
 using FFBatchConverter.Models;
+using FFBatchConverter.Tokens;
 
 namespace FFBatchConverter.Controllers;
 
@@ -46,7 +48,7 @@ public class BatchVMAFEncoder
     /// </summary>
     public string Arguments { get; set; } = string.Empty;
 
-    private List<VMAFVideoEncoder> Encoders { get; } = [];
+    private BiMap<VMAFEncoderToken, VMAFVideoEncoder> Encoders { get; } = [];
     private bool IsEncoding { get; set; }
 
     private readonly object _lock = new object();
@@ -93,18 +95,41 @@ public class BatchVMAFEncoder
             .ThenByDescending(t => (new FileInfo(t.InputFilePath).Length))
             .ToList();
 
-        Encoders.AddRange(encoders);
-
         foreach (VMAFVideoEncoder encoder in encoders)
         {
+            Encoders.Add(new VMAFEncoderToken(), encoder);
             encoder.InfoUpdate += EncoderInfoUpdate;
 
             InformationUpdate?.Invoke(this, new InformationUpdateEventArgs<VMAFVideoEncoderStatusReport>
             {
-                Report = encoder.Report,
+                Report = GetReport(Encoders.Reverse[encoder]),
                 ModificationType = DataModificationType.Add
             });
         }
+    }
+
+    public VMAFVideoEncoderStatusReport GetReport(VMAFEncoderToken token)
+    {
+        VMAFVideoEncoder encoder = Encoders.Forward[token];
+        VMAFVideoEncoderStatusReport report = new VMAFVideoEncoderStatusReport
+        {
+            Token = token,
+            State = encoder.State,
+            EncodingPhase = encoder.EncodingPhase,
+            InputFilePath = encoder.InputFilePath,
+            FileSize = encoder.FileSize,
+            CurrentDuration = encoder.CurrentDuration,
+            Duration = encoder.Duration,
+            VMAFScore = encoder.VMAFScore
+        };
+
+        return report;
+    }
+
+    public string GetLogs(VMAFEncoderToken token)
+    {
+        VMAFVideoEncoder encoder = Encoders.Forward[token];
+        return encoder.LogString;
     }
 
     private void EncoderInfoUpdate(VMAFVideoEncoder encoder, DataReceivedEventArgs? info)
@@ -113,7 +138,7 @@ public class BatchVMAFEncoder
 
         InformationUpdate?.Invoke(this, new InformationUpdateEventArgs<VMAFVideoEncoderStatusReport>
         {
-            Report = encoder.Report,
+            Report = GetReport(Encoders.Reverse[encoder]),
             ModificationType = DataModificationType.Update
         });
     }
@@ -128,10 +153,10 @@ public class BatchVMAFEncoder
             if (!IsEncoding)
                 return;
 
-            if (Encoders.Count(e => e.State == EncodingState.Encoding) >= Concurrency)
+            if (Encoders.Forward.Values.Count(e => e.State == EncodingState.Encoding) >= Concurrency)
                 return;
 
-            VMAFVideoEncoder? encoder = Encoders.FirstOrDefault(t => t.State == EncodingState.Pending);
+            VMAFVideoEncoder? encoder = Encoders.Forward.Values.FirstOrDefault(t => t.State == EncodingState.Pending);
             if (encoder is null)
                 return;
 

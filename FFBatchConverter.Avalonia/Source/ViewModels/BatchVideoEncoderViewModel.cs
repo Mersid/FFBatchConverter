@@ -10,6 +10,7 @@ using FFBatchConverter.Controllers;
 using FFBatchConverter.Encoders;
 using FFBatchConverter.Misc;
 using FFBatchConverter.Models;
+using FFBatchConverter.Tokens;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
@@ -18,7 +19,7 @@ namespace FFBatchConverter.Avalonia.ViewModels;
 public class BatchVideoEncoderViewModel : ReactiveObject
 {
 
-    public BiMap<VideoEncoder, EncoderTableRow> EncoderToRow { get; set; } = new BiMap<VideoEncoder, EncoderTableRow>();
+    public BiMap<VideoEncoderToken, EncoderTableRow> EncoderToRow { get; set; } = new BiMap<VideoEncoderToken, EncoderTableRow>();
 
     public ObservableCollection<EncoderTableRow> TableRows { get; set; } = [];
 
@@ -54,7 +55,7 @@ public class BatchVideoEncoderViewModel : ReactiveObject
     private void EncoderRebuiltEvent()
     {
         Encoding = false;
-        EncoderToRow = new BiMap<VideoEncoder, EncoderTableRow>();
+        EncoderToRow = new BiMap<VideoEncoderToken, EncoderTableRow>();
         TableRows.Clear();
     }
 
@@ -83,18 +84,18 @@ public class BatchVideoEncoderViewModel : ReactiveObject
 
     private void EncoderOnInformationUpdate(object? sender, InformationUpdateEventArgs<VideoEncoderStatusReport> e)
     {
-        VideoEncoder encoder = e.Report.Encoder;
+        VideoEncoderToken encoder = e.Report.Token;
         VideoEncoderStatusReport report = e.Report;
 
         switch (e.ModificationType)
         {
             case DataModificationType.Add:
-                TimeSpan duration = TimeSpan.FromSeconds(encoder.Duration);
+                TimeSpan duration = TimeSpan.FromSeconds(report.Duration);
                 EncoderTableRow row = new EncoderTableRow
                 {
-                    FileName = encoder.InputFilePath,
+                    FileName = report.InputFilePath,
                     Duration = $"{duration.Hours:D2}:{duration.Minutes:D2}:{duration.Seconds:D2}",
-                    Size = $"{encoder.FileSize / 1024d / 1024:F2} MiB",
+                    Size = $"{report.FileSize / 1024d / 1024:F2} MiB",
                     Status = report.State.ToString()
                 };
 
@@ -103,7 +104,7 @@ public class BatchVideoEncoderViewModel : ReactiveObject
                 break;
             case DataModificationType.Update:
                 row = EncoderToRow.Forward[encoder];
-                row.Status = $"{report.CurrentDuration / encoder.Duration * 100:F2}%";
+                row.Status = $"{report.CurrentDuration / report.Duration * 100:F2}%";
 
                 if (report.State is EncodingState.Error or EncodingState.Success)
                 {
@@ -127,7 +128,7 @@ public class BatchVideoEncoderViewModel : ReactiveObject
         }
         else
         {
-            Encoder.StartEncoding();
+            Encoder.StopEncoding();
         }
     }
 
@@ -138,5 +139,15 @@ public class BatchVideoEncoderViewModel : ReactiveObject
     public void AddFiles(IEnumerable<string> paths)
     {
         Encoder.AddEntries(paths);
+    }
+
+    /// <summary>
+    /// Gets the logs for a specific encoder by token.
+    /// </summary>
+    /// <param name="token"></param>
+    /// <returns></returns>
+    public string GetLogs(VideoEncoderToken token)
+    {
+        return Encoder.GetLogs(token);
     }
 }

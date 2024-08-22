@@ -7,6 +7,7 @@ using FFBatchConverter.Controllers;
 using FFBatchConverter.Encoders;
 using FFBatchConverter.Misc;
 using FFBatchConverter.Models;
+using FFBatchConverter.Tokens;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
@@ -14,7 +15,7 @@ namespace FFBatchConverter.Avalonia.ViewModels;
 
 public class BatchVMAFTargetEncoderViewModel : ReactiveObject
 {
-    public BiMap<VMAFTargetVideoEncoder, VMAFTargetEncoderTableRow> EncoderToRow { get; set; } = new BiMap<VMAFTargetVideoEncoder, VMAFTargetEncoderTableRow>();
+    public BiMap<VMAFTargetEncoderToken, VMAFTargetEncoderTableRow> EncoderToRow { get; set; } = new BiMap<VMAFTargetEncoderToken, VMAFTargetEncoderTableRow>();
 
     public ObservableCollection<VMAFTargetEncoderTableRow> TableRows { get; set; } = [];
 
@@ -60,7 +61,7 @@ public class BatchVMAFTargetEncoderViewModel : ReactiveObject
     private void EncoderRebuiltEvent()
     {
         Encoding = false;
-        EncoderToRow = new BiMap<VMAFTargetVideoEncoder, VMAFTargetEncoderTableRow>();
+        EncoderToRow = new BiMap<VMAFTargetEncoderToken, VMAFTargetEncoderTableRow>();
         TableRows.Clear();
     }
 
@@ -95,35 +96,35 @@ public class BatchVMAFTargetEncoderViewModel : ReactiveObject
 
     private void EncoderOnInformationUpdate(object? sender, InformationUpdateEventArgs<VMAFTargetEncoderStatusReport> e)
     {
-        VMAFTargetVideoEncoder encoder = e.Report.Encoder;
+        VMAFTargetEncoderToken token = e.Report.Token;
         VMAFTargetEncoderStatusReport report = e.Report;
 
         switch (e.ModificationType)
         {
             case DataModificationType.Add:
-                TimeSpan duration = TimeSpan.FromSeconds(encoder.Duration);
+                TimeSpan duration = TimeSpan.FromSeconds(report.Duration);
                 VMAFTargetEncoderTableRow row = new VMAFTargetEncoderTableRow
                 {
-                    FileName = encoder.InputFilePath,
+                    FileName = report.InputFilePath,
                     Duration = $"{duration.Hours:D2}:{duration.Minutes:D2}:{duration.Seconds:D2}",
-                    Size = $"{encoder.FileSize / 1024d / 1024:F2} MiB",
+                    Size = $"{report.FileSize / 1024d / 1024:F2} MiB",
                     Range = $"{report.LowCrf}-{report.HighCrf}",
                     Crf = report.ThisCrf.ToString(),
                     Vmaf = report.LastVMAF?.ToString("F2") ?? "-",
-                    Phase = encoder.EncodingPhase.ToString(),
+                    Phase = report.EncodingPhase.ToString(),
                     Status = report.State.ToString()
                 };
 
                 TableRows.Add(row);
-                EncoderToRow.Add(encoder, row);
+                EncoderToRow.Add(token, row);
                 break;
             case DataModificationType.Update:
-                row = EncoderToRow.Forward[encoder];
+                row = EncoderToRow.Forward[token];
                 row.Range = $"{report.LowCrf}-{report.HighCrf}";
                 row.Crf = report.ThisCrf.ToString();
                 row.Vmaf = report.LastVMAF?.ToString("F2") ?? "-";
-                row.Phase = encoder.EncodingPhase.ToString();
-                row.Status = $"{report.CurrentDuration / encoder.Duration * 100:F2}%";
+                row.Phase = report.EncodingPhase.ToString();
+                row.Status = $"{report.CurrentDuration / report.Duration * 100:F2}%";
 
                 if (report.State is EncodingState.Error or EncodingState.Success)
                 {
@@ -158,5 +159,10 @@ public class BatchVMAFTargetEncoderViewModel : ReactiveObject
     public void AddFiles(IEnumerable<string> paths)
     {
         Encoder.AddEntries(paths);
+    }
+
+    public string GetLogs(VMAFTargetEncoderToken token)
+    {
+        return Encoder.GetLogs(token);
     }
 }

@@ -146,6 +146,23 @@ public class BatchVideoEncoderViewModel : ReactiveObject
         Encoder.AddEntries(paths);
     }
 
+    public void RemoveEncodersByRow(IEnumerable<EncoderTableRow> rows)
+    {
+        List<VideoEncoderToken> tokens = rows
+            .Select(t => EncoderToRow.Reverse[t])
+            .Where(t => Encoder.GetReport(t).State is not EncodingState.Encoding)
+            .ToList(); // If this isn't here, the RemoveEntries call will cause an exception when enumerating in the foreach loop below.
+
+        Encoder.RemoveEntries(tokens);
+
+        foreach (VideoEncoderToken token in tokens)
+        {
+            EncoderTableRow row = EncoderToRow.Forward[token];
+            TableRows.Remove(row);
+            EncoderToRow.Remove(token);
+        }
+    }
+
     /// <summary>
     /// Gets the logs for a specific encoder by token.
     /// </summary>

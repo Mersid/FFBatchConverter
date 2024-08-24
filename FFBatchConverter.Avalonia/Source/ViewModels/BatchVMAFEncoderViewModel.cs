@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using Avalonia.Threading;
 using BidirectionalMap;
 using FFBatchConverter.Controllers;
@@ -129,6 +130,9 @@ public class BatchVMAFEncoderViewModel : ReactiveObject
                 }
 
                 break;
+            case DataModificationType.Remove:
+                // Nothing to do here.
+                break;
             default:
                 throw new NotImplementedException();
         }
@@ -155,6 +159,23 @@ public class BatchVMAFEncoderViewModel : ReactiveObject
     public void AddFiles(IEnumerable<string> paths)
     {
         Encoder.AddEntries(paths);
+    }
+
+    public void RemoveEncodersByRow(IEnumerable<VMAFEncoderTableRow> rows)
+    {
+        List<VMAFEncoderToken> tokens = rows
+            .Select(t => EncoderToRow.Reverse[t])
+            .Where(t => Encoder.GetReport(t).State is not EncodingState.Encoding)
+            .ToList(); // If this isn't here, the RemoveEntries call will cause an exception when enumerating in the foreach loop below.
+
+        Encoder.RemoveEntries(tokens);
+
+        foreach (VMAFEncoderToken token in tokens)
+        {
+            VMAFEncoderTableRow row = EncoderToRow.Forward[token];
+            TableRows.Remove(row);
+            EncoderToRow.Remove(token);
+        }
     }
 
     public string GetLogs(VMAFEncoderToken token)

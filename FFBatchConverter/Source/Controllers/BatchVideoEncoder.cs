@@ -100,6 +100,29 @@ public class BatchVideoEncoder
         }
     }
 
+    public void RemoveEntries(IEnumerable<VideoEncoderToken> tokens)
+    {
+        foreach (VideoEncoderToken token in tokens)
+        {
+            VideoEncoder encoder = Encoders.Forward[token];
+
+            if (encoder.State == EncodingState.Encoding)
+                throw new InvalidOperationException("Cannot remove an encoder that is currently encoding.");
+
+            encoder.InfoUpdate -= EncoderInfoUpdate;
+
+            // Get the report before removing, as we will not be able to do so afterward without a direct reference to the encoder.
+            VideoEncoderStatusReport report = GetReport(token);
+            Encoders.Remove(token);
+
+            InformationUpdate?.Invoke(this, new InformationUpdateEventArgs<VideoEncoderStatusReport>
+            {
+                Report = report,
+                ModificationType = DataModificationType.Remove
+            });
+        }
+    }
+
     /// <summary>
     /// Produces a report for a specific encoder by its public token.
     /// </summary>

@@ -48,6 +48,8 @@
                         <ContextMenu>
                             <MenuItem Header="Copy log" Click="CopyLogsMenuItemClicked" />
                             <MenuItem Header="Open log in text editor" Click="OpenLogsEditorMenuItemClicked" />
+                            <Separator />
+                            <MenuItem Header="Remove" Click="RemoveMenuItemClicked" />
                         </ContextMenu>
                     </DataGrid.ContextMenu>
                 </DataGrid>

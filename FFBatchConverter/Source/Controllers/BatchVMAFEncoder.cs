@@ -108,6 +108,29 @@ public class BatchVMAFEncoder
         }
     }
 
+    public void RemoveEntries(IEnumerable<VMAFEncoderToken> tokens)
+    {
+        foreach (VMAFEncoderToken token in tokens)
+        {
+            VMAFVideoEncoder encoder = Encoders.Forward[token];
+
+            if (encoder.State == EncodingState.Encoding)
+                throw new InvalidOperationException("Cannot remove an encoder that is currently encoding.");
+
+            encoder.InfoUpdate -= EncoderInfoUpdate;
+
+            // Get the report before removing, as we will not be able to do so afterward without a direct reference to the encoder.
+            VMAFVideoEncoderStatusReport report = GetReport(token);
+            Encoders.Remove(token);
+
+            InformationUpdate?.Invoke(this, new InformationUpdateEventArgs<VMAFVideoEncoderStatusReport>
+            {
+                Report = report,
+                ModificationType = DataModificationType.Remove
+            });
+        }
+    }
+
     public VMAFVideoEncoderStatusReport GetReport(VMAFEncoderToken token)
     {
         VMAFVideoEncoder encoder = Encoders.Forward[token];

@@ -90,4 +90,10 @@ public partial class BatchVMAFTargetEncoderView : UserControl
             LogHelper.OpenLog(ViewModel.GetLogs(token));
         }
     }
+
+    private void RemoveMenuItemClicked(object? sender, RoutedEventArgs e)
+    {
+        List<VMAFTargetEncoderTableRow> items = DataGrid.SelectedItems.Cast<VMAFTargetEncoderTableRow>().ToList();
+        ViewModel.RemoveEncodersByRow(items);
+    }
 }

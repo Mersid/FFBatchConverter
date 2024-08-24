@@ -50,6 +50,7 @@
                             <MenuItem Header="Open log in text editor" Click="OpenLogsEditorMenuItemClicked" />
                             <Separator />
                             <MenuItem Header="Remove" Click="RemoveMenuItemClicked" />
+                            <MenuItem Header="Reset to pending" Click="ResetMenuItemClicked" />
                         </ContextMenu>
                     </DataGrid.ContextMenu>
                 </DataGrid>

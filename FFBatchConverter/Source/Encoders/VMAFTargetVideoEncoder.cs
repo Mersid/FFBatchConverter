@@ -12,7 +12,7 @@ namespace FFBatchConverter.Encoders;
 /// </summary>
 internal class VMAFTargetVideoEncoder
 {
-    private VMAFVideoEncoder VideoEncoder { get; set; }
+    private VMAFVideoEncoder? VideoEncoder { get; set; }
     private StringBuilder Log { get; } = new StringBuilder();
     public string LogString => Log.ToString();
 
@@ -94,6 +94,8 @@ internal class VMAFTargetVideoEncoder
     /// <param name="inputFilePath">Full path to the input video file.</param>
     internal VMAFTargetVideoEncoder(string ffProbePath, string ffmpegPath, string inputFilePath)
     {
+        Initialize();
+
         FFprobePath = ffProbePath;
         FFmpegPath = ffmpegPath;
         InputFilePath = inputFilePath;
@@ -110,6 +112,26 @@ internal class VMAFTargetVideoEncoder
         {
             Log.AppendLine("Could not determine duration. Please verify if this is a valid video.");
             State = EncodingState.Error;
+        }
+    }
+
+    internal void Reset() => Initialize();
+
+    private void Initialize()
+    {
+        if (State == EncodingState.Encoding)
+            throw new InvalidOperationException("Cannot initialize or re-initialize an encoder that is currently encoding.");
+
+        State = EncodingState.Pending;
+        CrfToVmafMaps.Clear();
+        HighCrf = MaxCrf;
+        LowCrf = MinCrf;
+        LastVMAF = null;
+
+        if (VideoEncoder is not null)
+        {
+            VideoEncoder.Reset();
+            VideoEncoder.InfoUpdate -= OnEncoderInfoUpdate;
         }
     }
 
@@ -176,7 +198,7 @@ internal class VMAFTargetVideoEncoder
                     // Found the boundary. Should also note there's an inverse relationship between CRF and VMAF.
                     CrfToVMAFMap target = maps[i - 1];
 
-                    File.Copy(target.FilePath, OutputFilePath);
+                    File.Copy(target.FilePath, OutputFilePath, true);
                     State = EncodingState.Success;
                     LastVMAF = target.VmafScore;
                     Cleanup();

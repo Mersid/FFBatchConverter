@@ -106,7 +106,7 @@ public class BatchVideoEncoderViewModel : ReactiveObject
                 break;
             case DataModificationType.Update:
                 row = EncoderToRow.Forward[encoder];
-                row.Status = $"{report.CurrentDuration / report.Duration * 100:F2}%";
+                row.Status = report.State is EncodingState.Encoding ? $"{report.CurrentDuration / report.Duration * 100:F2}%" : report.State.ToString();
 
                 if (report.State is EncodingState.Error or EncodingState.Success)
                 {
@@ -161,6 +161,16 @@ public class BatchVideoEncoderViewModel : ReactiveObject
             TableRows.Remove(row);
             EncoderToRow.Remove(token);
         }
+    }
+
+    public void ResetEncodersByRow(IEnumerable<EncoderTableRow> rows)
+    {
+        List<VideoEncoderToken> tokens = rows
+            .Select(t => EncoderToRow.Reverse[t])
+            .Where(t => Encoder.GetReport(t).State is not EncodingState.Encoding)
+            .ToList(); // If this isn't here, the RemoveEntries call will cause an exception when enumerating in the foreach loop below.
+
+        Encoder.ResetEntries(tokens);
     }
 
     /// <summary>

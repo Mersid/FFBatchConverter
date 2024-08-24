@@ -131,6 +131,18 @@ internal class VMAFVideoEncoder
         State = EncodingState.Encoding;
     }
 
+    internal void Reset() => Initialize();
+
+    private void Initialize()
+    {
+        if (State == EncodingState.Encoding)
+            throw new InvalidOperationException("Cannot initialize or re-initialize an encoder that is currently encoding.");
+
+        VideoEncoder.Reset();
+        State = EncodingState.Pending;
+        VMAFScorer = null;
+    }
+
     private void OnEncoderInfoUpdate(VideoEncoder encoder, DataReceivedEventArgs? args)
     {
         Log.AppendLine(args?.Data);

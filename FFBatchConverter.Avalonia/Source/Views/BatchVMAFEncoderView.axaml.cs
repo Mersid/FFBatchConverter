@@ -96,4 +96,10 @@ public partial class BatchVMAFEncoderView : UserControl
         List<VMAFEncoderTableRow> items = DataGrid.SelectedItems.Cast<VMAFEncoderTableRow>().ToList();
         ViewModel.RemoveEncodersByRow(items);
     }
+
+    private void ResetMenuItemClicked(object? sender, RoutedEventArgs e)
+    {
+        List<VMAFEncoderTableRow> items = DataGrid.SelectedItems.Cast<VMAFEncoderTableRow>().ToList();
+        ViewModel.ResetEncodersByRow(items);
+    }
 }

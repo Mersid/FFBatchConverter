@@ -56,6 +56,8 @@ internal class VideoEncoder
 
     internal VideoEncoder(string ffprobePath, string ffmpegPath, string inputFilePath)
     {
+        Initialize();
+
         FFprobePath = ffprobePath;
         FFmpegPath = ffmpegPath;
         InputFilePath = inputFilePath;
@@ -79,6 +81,17 @@ internal class VideoEncoder
             Log.AppendLine(e.Message);
             State = EncodingState.Error;
         }
+    }
+
+    internal void Reset() => Initialize();
+
+    private void Initialize()
+    {
+        if (State == EncodingState.Encoding)
+            throw new InvalidOperationException("Cannot initialize or re-initialize an encoder that is currently encoding.");
+
+        CurrentDuration = 0;
+        State = EncodingState.Pending;
     }
 
     internal void Start(string ffmpegArguments, string outputFilePath)

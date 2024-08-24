@@ -106,7 +106,7 @@ public class BatchVideoEncoder
         {
             VideoEncoder encoder = Encoders.Forward[token];
 
-            if (encoder.State == EncodingState.Encoding)
+            if (encoder.State is EncodingState.Encoding)
                 throw new InvalidOperationException("Cannot remove an encoder that is currently encoding.");
 
             encoder.InfoUpdate -= EncoderInfoUpdate;
@@ -119,6 +119,24 @@ public class BatchVideoEncoder
             {
                 Report = report,
                 ModificationType = DataModificationType.Remove
+            });
+        }
+    }
+
+    public void ResetEntries(IEnumerable<VideoEncoderToken> tokens)
+    {
+        foreach (VideoEncoderToken token in tokens)
+        {
+            VideoEncoder encoder = Encoders.Forward[token];
+
+            if (encoder.State is EncodingState.Encoding)
+                throw new InvalidOperationException("Cannot reset an encoder that is currently encoding.");
+
+            encoder.Reset();
+            InformationUpdate?.Invoke(this, new InformationUpdateEventArgs<VideoEncoderStatusReport>
+            {
+                Report = GetReport(token),
+                ModificationType = DataModificationType.Update
             });
         }
     }

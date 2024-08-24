@@ -96,9 +96,9 @@ public partial class BatchVideoEncoderView : UserControl
         ViewModel.RemoveEncodersByRow(items);
     }
 
-    // private void ResetMenuItemClicked(object? sender, RoutedEventArgs e)
-    // {
-    //     List<EncoderTableRow> items = DataGrid.SelectedItems.Cast<EncoderTableRow>().ToList();
-    //     ViewModel.ResetEncodersByRow(items);
-    // }
+    private void ResetMenuItemClicked(object? sender, RoutedEventArgs e)
+    {
+        List<EncoderTableRow> items = DataGrid.SelectedItems.Cast<EncoderTableRow>().ToList();
+        ViewModel.ResetEncodersByRow(items);
+    }
 }

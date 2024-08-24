@@ -125,7 +125,7 @@ public class BatchVMAFTargetEncoderViewModel : ReactiveObject
                 row.Crf = report.ThisCrf.ToString();
                 row.Vmaf = report.LastVMAF?.ToString("F2") ?? "-";
                 row.Phase = report.EncodingPhase.ToString();
-                row.Status = $"{report.CurrentDuration / report.Duration * 100:F2}%";
+                row.Status = report.State is EncodingState.Encoding ? $"{report.CurrentDuration / report.Duration * 100:F2}%" : report.State.ToString();
 
                 if (report.State is EncodingState.Error or EncodingState.Success)
                 {
@@ -180,6 +180,16 @@ public class BatchVMAFTargetEncoderViewModel : ReactiveObject
             TableRows.Remove(row);
             EncoderToRow.Remove(token);
         }
+    }
+
+    public void ResetEncodersByRow(IEnumerable<VMAFTargetEncoderTableRow> rows)
+    {
+        List<VMAFTargetEncoderToken> tokens = rows
+            .Select(t => EncoderToRow.Reverse[t])
+            .Where(t => Encoder.GetReport(t).State is not EncodingState.Encoding)
+            .ToList(); // If this isn't here, the RemoveEntries call will cause an exception when enumerating in the foreach loop below.
+
+        Encoder.ResetEntries(tokens);
     }
 
     public string GetLogs(VMAFTargetEncoderToken token)

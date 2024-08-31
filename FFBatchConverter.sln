@@ -2,8 +2,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FFBatchConverter", "FFBatchConverter\FFBatchConverter.csproj", "{A9770C51-6F8F-44EF-A336-7215776BDEE0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FFBatchConverter.Terminal", "FFBatchConverter.Terminal\FFBatchConverter.Terminal.csproj", "{E0AD630C-D6EE-4D33-9948-E6E508558702}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FFBatchConverter.Avalonia", "FFBatchConverter.Avalonia\FFBatchConverter.Avalonia.csproj", "{45CEEDD6-6DD3-4621-8F80-B151A1088CCD}"
 EndProject
 Global
@@ -16,10 +14,6 @@ Global
 		{A9770C51-6F8F-44EF-A336-7215776BDEE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A9770C51-6F8F-44EF-A336-7215776BDEE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A9770C51-6F8F-44EF-A336-7215776BDEE0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E0AD630C-D6EE-4D33-9948-E6E508558702}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E0AD630C-D6EE-4D33-9948-E6E508558702}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E0AD630C-D6EE-4D33-9948-E6E508558702}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E0AD630C-D6EE-4D33-9948-E6E508558702}.Release|Any CPU.Build.0 = Release|Any CPU
 		{45CEEDD6-6DD3-4621-8F80-B151A1088CCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{45CEEDD6-6DD3-4621-8F80-B151A1088CCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{45CEEDD6-6DD3-4621-8F80-B151A1088CCD}.Release|Any CPU.ActiveCfg = Release|Any CPU

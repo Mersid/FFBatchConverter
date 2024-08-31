@@ -82,6 +82,16 @@ internal class VMAFTargetVideoEncoder
     /// </summary>
     internal double? LastVMAF { get; set; }
 
+    /// <summary>
+    /// Step 0: Run with CRF 0 to get the upper bound of the VMAF score.
+    /// Step 1: Run with max CRF to get the lower bound of the VMAF score.
+    /// Step 2: Use divide/conquer to narrow the range down to about 4 CRF values.
+    /// Step 3: Iterate across those values.
+    /// Step 4: Linearly walk in the correct direction until we find the correct CRF.
+    /// Step -1: Flag step to terminate encoding.
+    /// </summary>
+    internal int PredictionStep { get; set; } = 0;
+
     public VMAFVideoEncodingPhase EncodingPhase => VideoEncoder.EncodingPhase;
 
     public event Action<VMAFTargetVideoEncoder, DataReceivedEventArgs?>? InfoUpdate;
@@ -127,6 +137,7 @@ internal class VMAFTargetVideoEncoder
         HighCrf = MaxCrf;
         LowCrf = MinCrf;
         LastVMAF = null;
+        PredictionStep = 0;
 
         if (VideoEncoder is not null)
         {
@@ -149,7 +160,8 @@ internal class VMAFTargetVideoEncoder
         OutputFilePath = outputFilePath;
         TargetVMAF = targetVMAF;
         H265 = h265;
-        ThisCrf = H265 ? DefaultH265Crf : DefaultH264Crf;
+        ThisCrf = H265 ? DefaultH265Crf : DefaultH264Crf; // TODO Remove me
+        ThisCrf = 0;
 
         // Dot is included in Path.GetExtension.
         if (!Directory.Exists(_tempDirectory))
@@ -161,6 +173,7 @@ internal class VMAFTargetVideoEncoder
 
         VideoEncoder.Start(arguments, H265, ThisCrf, tempFile);
         State = EncodingState.Encoding;
+        PredictionStep = 0;
     }
 
     private void OnEncoderInfoUpdate(VMAFVideoEncoder encoder, DataReceivedEventArgs? args)
@@ -190,6 +203,18 @@ internal class VMAFTargetVideoEncoder
 
             LastVMAF = encoder.VMAFScore;
 
+            if      (PredictionStep is 0) Validate0();
+            else if (PredictionStep is 1) Validate1();
+            else if (PredictionStep is 2) Validate2();
+            else if (PredictionStep is 3) Validate3();
+            else if (PredictionStep is 4) Validate4();
+
+            if      (PredictionStep is 1) Step1();
+            else if (PredictionStep is 2) Step2();
+            else if (PredictionStep is 3) Step3();
+            else if (PredictionStep is 4) Step4();
+            else if (PredictionStep is -1) ErrorStep();
+
             List<CrfToVMAFMap> maps = CrfToVmafMaps.OrderBy(x => x.Crf).ToList();
             for (int i = 1; i < maps.Count; i++)
             {
@@ -201,6 +226,7 @@ internal class VMAFTargetVideoEncoder
                     File.Copy(target.FilePath, OutputFilePath, true);
                     State = EncodingState.Success;
                     LastVMAF = target.VmafScore;
+                    ThisCrf = target.Crf;
                     Cleanup();
                     InfoUpdate?.Invoke(this, args);
                     return;
@@ -211,34 +237,16 @@ internal class VMAFTargetVideoEncoder
             VideoEncoder = new VMAFVideoEncoder(FFprobePath, FFmpegPath, InputFilePath);
             VideoEncoder.InfoUpdate += OnEncoderInfoUpdate;
 
-            // Check if we overshot of undershot the target, then binary search our way down.
-            // The algorithm in the else blocks don't really work well when the CRF range begins to converge.
-            // For example, if high = 39, low = 36, this = 37, the algorithm will pick 37 - 1 = 36, leaving us in a loop.
-            if (HighCrf - LowCrf <= 4)
-            {
-                ThisCrf++;
-            }
-            else if (encoder.VMAFScore > TargetVMAF)
-            {
-                // Too high. Decrease VMAF, increase CRF range.
-                LowCrf = ThisCrf - 1;
-                ThisCrf = (LowCrf + HighCrf) / 2;
-            }
-            else
-            {
-                // Too low. Increase VMAF, decrease CRF range.
-                HighCrf = ThisCrf;
-                ThisCrf = (LowCrf + HighCrf) / 2;
-            }
-
             // We shouldn't ever encode a video twice; if we do, the algorithm probably got stuck in a loop.
-            if (CrfToVmafMaps.Any(x => x.Crf == ThisCrf))
-            {
-                Log.AppendLine("Algorithm got stuck in a loop. Aborting.");
-                State = EncodingState.Error;
-                Cleanup();
-                return;
-            }
+            // TODO: Delete/modify this.
+            // if (CrfToVmafMaps.Any(x => x.Crf == ThisCrf))
+            // {
+            //     Log.AppendLine($"Algorithm got stuck in a loop. Aborting. CRF range is {LowCrf} to {HighCrf}.");
+            //     State = EncodingState.Error;
+            //     Cleanup();
+            //     InfoUpdate?.Invoke(this, args);
+            //     return;
+            // }
 
             string tempFile = Path.Combine(_tempDirectory, $"{ThisCrf}-{Guid.NewGuid()}{Path.GetExtension(OutputFilePath)}");
             string arguments = $"{FFmpegArguments} -c:v {(H265 ? "libx265" : "libx264")} -crf {ThisCrf}";
@@ -247,6 +255,91 @@ internal class VMAFTargetVideoEncoder
         }
 
         InfoUpdate?.Invoke(this, args);
+    }
+
+    private void Validate0()
+    {
+        if (LastVMAF < TargetVMAF)
+        {
+            Log.AppendLine($"VMAF with CRF 0 is {LastVMAF}. It needs to be greater than {TargetVMAF}. Exiting.");
+            PredictionStep = -1;
+        }
+
+        PredictionStep = 1;
+    }
+
+    private void Validate1()
+    {
+        if (LastVMAF < TargetVMAF)
+        {
+            Log.AppendLine($"VMAF with max CRF ({MaxCrf}) is {LastVMAF}");
+            PredictionStep = -1;
+        }
+
+        PredictionStep = 2;
+    }
+
+    private void Validate2()
+    {
+        if (HighCrf - LowCrf <= 4)
+        {
+            PredictionStep = 3;
+        }
+    }
+
+    private void Validate3()
+    {
+        if (ThisCrf == HighCrf)
+        {
+            PredictionStep = 4;
+        }
+    }
+
+    private void Validate4()
+    {
+
+    }
+
+    private void Step1()
+    {
+        ThisCrf = MaxCrf;
+    }
+
+    private void Step2()
+    {
+        // Check if we overshot of undershot the target, then binary search our way down.
+        // The algorithm in the else blocks don't really work well when the CRF range begins to converge.
+        // For example, if high = 39, low = 36, this = 37, the algorithm will pick 37 - 1 = 36, leaving us in a loop.
+        if (VideoEncoder.VMAFScore > TargetVMAF)
+        {
+            // Too high. Decrease VMAF, increase CRF range.
+            LowCrf = ThisCrf - 1;
+            ThisCrf = (LowCrf + HighCrf) / 2;
+        }
+        else
+        {
+            // Too low. Increase VMAF, decrease CRF range.
+            HighCrf = ThisCrf;
+            ThisCrf = (LowCrf + HighCrf) / 2;
+        }
+    }
+
+    private void Step3()
+    {
+        ThisCrf++;
+    }
+
+    private void Step4()
+    {
+        if (LastVMAF < TargetVMAF)
+            ThisCrf--;
+        ThisCrf++;
+    }
+
+    private void ErrorStep()
+    {
+        Log.AppendLine("Encoding error!");
+        // TODO: Handle error.
     }
 
     private void Cleanup()

@@ -233,6 +233,10 @@ internal class VMAFTargetVideoEncoder
                 }
             }
 
+            // This could be set in ErrorStep, in which case we will need to exit processing.
+            if (State is EncodingState.Error)
+                return;
+
             // Did not find boundary. Need to adjust CRF and try again.
             VideoEncoder = new VMAFVideoEncoder(FFprobePath, FFmpegPath, InputFilePath);
             VideoEncoder.InfoUpdate += OnEncoderInfoUpdate;
@@ -264,19 +268,23 @@ internal class VMAFTargetVideoEncoder
             Log.AppendLine($"VMAF with CRF 0 is {LastVMAF}. It needs to be greater than {TargetVMAF}. Exiting.");
             PredictionStep = -1;
         }
-
-        PredictionStep = 1;
+        else
+        {
+            PredictionStep = 1;
+        }
     }
 
     private void Validate1()
     {
-        if (LastVMAF < TargetVMAF)
+        if (TargetVMAF < LastVMAF)
         {
-            Log.AppendLine($"VMAF with max CRF ({MaxCrf}) is {LastVMAF}");
+            Log.AppendLine($"VMAF with max CRF ({MaxCrf}) is {LastVMAF}. It needs to be greater than {TargetVMAF}. Exiting.");
             PredictionStep = -1;
         }
-
-        PredictionStep = 2;
+        else
+        {
+            PredictionStep = 2;
+        }
     }
 
     private void Validate2()
@@ -333,13 +341,16 @@ internal class VMAFTargetVideoEncoder
     {
         if (LastVMAF < TargetVMAF)
             ThisCrf--;
-        ThisCrf++;
+        else
+            ThisCrf++;
     }
 
     private void ErrorStep()
     {
         Log.AppendLine("Encoding error!");
-        // TODO: Handle error.
+        State = EncodingState.Error;
+        Cleanup();
+        InfoUpdate?.Invoke(this, null);
     }
 
     private void Cleanup()

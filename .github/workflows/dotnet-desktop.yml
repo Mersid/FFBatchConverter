@@ -63,7 +63,7 @@ jobs:
 
     # Build
     - name: Publish
-      run: dotnet publish -r ${{ env.rid }} --self-contained true -p:PublishTrimmed=true ${{ matrix.type == 'aot' && '-p:PublishAot=true' || matrix.type == 'singlefile' && '-p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true' }} -o build-${{ env.rid }}
+      run: dotnet publish FFBatchConverter.Avalonia -r ${{ env.rid }} --self-contained true -p:PublishTrimmed=true ${{ matrix.type == 'aot' && '-p:PublishAot=true' || matrix.type == 'singlefile' && '-p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true' }} -o build-${{ env.rid }}
 
     # Upload the build artifacts: https://github.com/marketplace/actions/upload-a-build-artifact
     - name: Upload build artifacts

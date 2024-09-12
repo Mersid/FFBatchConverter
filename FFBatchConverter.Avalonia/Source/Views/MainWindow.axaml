@@ -26,6 +26,8 @@
                 <MenuItem Header="Batch Converter" Command="{Binding MenuNavigateBatchVideoEncoder}" />
                 <MenuItem Header="VMAF Encoder" Command="{Binding MenuNavigateVMAFVideoEncoder}" />
                 <MenuItem Header="VMAF Target Encoder" Command="{Binding MenuNavigateVMAFTargetVideoEncoder}" />
+                <Separator />
+                <MenuItem Header="About" Click="MenuAboutClick" />
             </MenuItem>
         </Menu>
 

@@ -6,6 +6,7 @@
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+        <AssemblyVersion>2.0.0</AssemblyVersion>
     </PropertyGroup>
 
     <ItemGroup>
@@ -53,6 +54,10 @@
         <Compile Update="Source\Views\BatchVMAFEncoderView.axaml.cs">
             <DependentUpon>BatchVMAFEncoderView.axaml</DependentUpon>
             <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Source\Views\AboutView.axaml.cs">
+          <DependentUpon>AboutView.axaml</DependentUpon>
+          <SubType>Code</SubType>
         </Compile>
     </ItemGroup>
 

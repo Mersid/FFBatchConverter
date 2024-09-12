@@ -20,4 +20,14 @@ public partial class MainWindow : Window
 
         settingsWindow.ShowDialog(this);
     }
+
+    private void MenuAboutClick(object? sender, RoutedEventArgs e)
+    {
+        AboutView aboutView = new AboutView
+        {
+            DataContext = new AboutViewModel()
+        };
+
+        aboutView.ShowDialog(this);
+    }
 }

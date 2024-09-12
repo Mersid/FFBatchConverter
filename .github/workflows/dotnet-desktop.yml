@@ -63,14 +63,14 @@ jobs:
 
     # Build
     - name: Publish
-      run: dotnet publish FFBatchConverter.Avalonia -r ${{ env.rid }} --self-contained true -p:PublishTrimmed=true ${{ matrix.type == 'aot' && '-p:PublishAot=true' || matrix.type == 'singlefile' && '-p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true' }} -o build-${{ env.rid }}
+      run: dotnet publish FFBatchConverter.Avalonia -r ${{ env.rid }} --self-contained true -p:PublishTrimmed=true ${{ matrix.type == 'aot' && '-p:PublishAot=true' || matrix.type == 'singlefile' && '-p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true' }} -o build-${{ env.rid }}-${{ env.type }}
 
     # Upload the build artifacts: https://github.com/marketplace/actions/upload-a-build-artifact
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: Build ${{ env.rid }}
-        path: ./build-${{ env.rid }}
+        name: Build ${{ env.rid }}-${{ env.type }}
+        path: ./build-${{ env.rid }}-${{ env.type }}
 
   # https://github.com/actions/upload-artifact/blob/main/docs/MIGRATION.md
   merge:

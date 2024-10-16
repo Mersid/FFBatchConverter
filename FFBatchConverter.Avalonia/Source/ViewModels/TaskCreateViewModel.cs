@@ -1,10 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Reactive.Linq;
-using Avalonia.Controls;
-using FFBatchConverter.Avalonia.Views;
 using FFBatchConverter.Misc;
-using Metsys.Bson;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 

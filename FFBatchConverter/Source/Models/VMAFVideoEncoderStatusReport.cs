@@ -1,5 +1,4 @@
-﻿using FFBatchConverter.Encoders;
-using FFBatchConverter.Misc;
+﻿using FFBatchConverter.Misc;
 using FFBatchConverter.Tokens;
 
 namespace FFBatchConverter.Models;

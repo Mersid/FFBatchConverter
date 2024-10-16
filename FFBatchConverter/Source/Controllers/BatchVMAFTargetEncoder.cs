@@ -41,9 +41,9 @@ public class BatchVMAFTargetEncoder
     /// </summary>
     public double TargetVMAF { get; set; }
 
-    public required string FFmpegPath { get; set; } = string.Empty;
-    public required string FFprobePath { get; set; } = string.Empty;
-    public required string TempDirectory { get; set; } = string.Empty;
+    public required string FFmpegPath { get; init; } = string.Empty;
+    public required string FFprobePath { get; init; } = string.Empty;
+    public required string TempDirectory { get; init; } = string.Empty;
 
     /// <summary>
     /// FFmpeg arguments.

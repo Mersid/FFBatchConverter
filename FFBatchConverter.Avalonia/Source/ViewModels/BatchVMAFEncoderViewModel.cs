@@ -5,7 +5,6 @@ using System.Linq;
 using Avalonia.Threading;
 using BidirectionalMap;
 using FFBatchConverter.Controllers;
-using FFBatchConverter.Encoders;
 using FFBatchConverter.Misc;
 using FFBatchConverter.Models;
 using FFBatchConverter.Tokens;

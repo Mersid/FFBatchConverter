@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Text;
 using FFBatchConverter.Misc;
-using FFBatchConverter.Models;
 
 namespace FFBatchConverter.Encoders;
 

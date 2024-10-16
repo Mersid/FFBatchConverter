@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Text;
 using FFBatchConverter.Misc;
-using FFBatchConverter.Models;
 
 namespace FFBatchConverter.Encoders;
 
@@ -72,20 +71,20 @@ internal class VMAFTargetVideoEncoder
     private const int DefaultH264Crf = 23;
     private const int DefaultH265Crf = 28;
 
-    internal int HighCrf { get; set; } = MaxCrf;
-    internal int LowCrf { get; set; } = MinCrf;
+    internal int HighCrf { get; private set; } = MaxCrf;
+    internal int LowCrf { get; private set; } = MinCrf;
 
     /// <summary>
     /// The CRF value we're trying for this iteration of the VMAF encoder.
     /// </summary>
-    internal int ThisCrf { get; set; }
+    internal int ThisCrf { get; private set; }
     private double TargetVMAF { get; set; }
 
     /// <summary>
     /// The VMAF score of the last encoded video.
     /// Null if we haven't finished scoring at least one video yet.
     /// </summary>
-    internal double? LastVMAF { get; set; }
+    internal double? LastVMAF { get; private set; }
 
     /// <summary>
     /// Step 0: Run with CRF 0 to get the upper bound of the VMAF score.
@@ -95,7 +94,7 @@ internal class VMAFTargetVideoEncoder
     /// Step 4: Linearly walk in the correct direction until we find the correct CRF.
     /// Step -1: Flag step to terminate encoding.
     /// </summary>
-    internal int PredictionStep { get; set; } = 0;
+    private int PredictionStep { get; set; }
 
     public VMAFVideoEncodingPhase EncodingPhase => VideoEncoder.EncodingPhase;
 

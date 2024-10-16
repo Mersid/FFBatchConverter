@@ -40,8 +40,8 @@ public class BatchVMAFEncoder
     /// </summary>
     public int Crf { get; set; }
 
-    public required string FFmpegPath { get; set; } = string.Empty;
-    public required string FFprobePath { get; set; } = string.Empty;
+    public required string FFmpegPath { get; init; } = string.Empty;
+    public required string FFprobePath { get; init; } = string.Empty;
 
     /// <summary>
     /// FFmpeg arguments.

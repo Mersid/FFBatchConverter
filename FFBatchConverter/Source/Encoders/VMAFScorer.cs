@@ -8,8 +8,8 @@ namespace FFBatchConverter.Encoders;
 
 internal class VMAFScorer
 {
-    public string OriginalFilePath { get; }
-    public string DistortedFilePath { get; }
+    private string OriginalFilePath { get; }
+    private string DistortedFilePath { get; }
 
     private StringBuilder Log { get; } = new StringBuilder();
 

@@ -2,7 +2,6 @@
 using System.Text;
 using System.Text.Json;
 using FFBatchConverter.Misc;
-using FFBatchConverter.Models;
 
 namespace FFBatchConverter.Encoders;
 
@@ -18,14 +17,15 @@ internal class VideoEncoder
 
     /// <summary>
     /// Full path of the output file.
+    /// This is null until Start() is called.
     /// </summary>
-    public string OutputFilePath { get; private set; }
+    public string? OutputFilePath { get; private set; }
 
     internal StringBuilder Log { get; } = new StringBuilder();
     public string LogString => Log.ToString();
 
-    internal string FFprobePath { get; set; }
-    internal string FFmpegPath { get; set; }
+    private string FFprobePath { get; set; }
+    private string FFmpegPath { get; set; }
 
     /// <summary>
     /// Duration of the video in seconds. Zero if the duration could not be determined (e.g. file does not exist or is not a video).

@@ -1,15 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
-using Avalonia;
 using Avalonia.Threading;
 using BidirectionalMap;
-using DynamicData;
 using FFBatchConverter.Controllers;
-using FFBatchConverter.Encoders;
 using FFBatchConverter.Misc;
 using FFBatchConverter.Models;
 using FFBatchConverter.Tokens;

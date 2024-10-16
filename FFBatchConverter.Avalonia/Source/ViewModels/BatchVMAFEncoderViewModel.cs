@@ -54,7 +54,7 @@ public class BatchVMAFEncoderViewModel : ReactiveObject
         Encoder = new BatchVMAFEncoder
         {
             FFmpegPath = createInfo.FFmpegPath,
-            FFprobePath = createInfo.FFprobePath,
+            FFprobePath = createInfo.FFprobePath
         };
 
         Encoder.InformationUpdate += (_, args) => Dispatcher.UIThread.Invoke(() => EncoderOnInformationUpdate(args));

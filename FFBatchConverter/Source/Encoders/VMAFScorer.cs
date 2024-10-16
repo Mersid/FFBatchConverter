@@ -67,7 +67,7 @@ internal class VMAFScorer
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
-                CreateNoWindow = true,
+                CreateNoWindow = true
             },
             EnableRaisingEvents = true
         };

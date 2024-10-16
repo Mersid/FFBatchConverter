@@ -94,7 +94,7 @@ public class BatchVMAFTargetEncoder
             .WithDegreeOfParallelism(Environment.ProcessorCount)
             .Select(t => new VMAFTargetVideoEncoder(FFprobePath, FFmpegPath, t, TempDirectory))
             .OrderByDescending(t => t.Duration) // Process the longest files first. If two files are of the same length, process the largest file first.
-            .ThenByDescending(t => (new FileInfo(t.InputFilePath).Length))
+            .ThenByDescending(t => new FileInfo(t.InputFilePath).Length)
             .ToList();
 
         foreach (VMAFTargetVideoEncoder encoder in encoders)
@@ -167,7 +167,7 @@ public class BatchVMAFTargetEncoder
             LastVMAF = encoder.LastVMAF,
             HighCrf = encoder.HighCrf,
             LowCrf = encoder.LowCrf,
-            ThisCrf = encoder.ThisCrf,
+            ThisCrf = encoder.ThisCrf
         };
 
         return report;

@@ -80,7 +80,7 @@ public class MainWindowViewModel : ReactiveObject
             0 => new BatchVideoEncoderView { DataContext = new BatchVideoEncoderViewModel(createInfo) },
             1 => new BatchVMAFEncoderView { DataContext = new BatchVMAFEncoderViewModel(createInfo) },
             2 => new BatchVMAFTargetEncoderView { DataContext = new BatchVMAFTargetEncoderViewModel(createInfo) },
-            _ => throw new ArgumentOutOfRangeException()
+            _ => throw new ArgumentOutOfRangeException(nameof(createInfo), createInfo, "Invalid selection index")
         };
 
         SidePanelItems[SelectedSidePanelIndex].View = view;

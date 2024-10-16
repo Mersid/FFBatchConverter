@@ -113,7 +113,7 @@ internal class VideoEncoder
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
-                CreateNoWindow = true,
+                CreateNoWindow = true
             },
             EnableRaisingEvents = true
         };

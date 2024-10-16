@@ -45,7 +45,7 @@ public class BatchVideoEncoderViewModel : ReactiveObject
         Encoder = new BatchVideoEncoder
         {
             FFmpegPath = createInfo.FFmpegPath,
-            FFprobePath = createInfo.FFprobePath,
+            FFprobePath = createInfo.FFprobePath
         };
 
         Encoder.InformationUpdate += (_, args) => Dispatcher.UIThread.Invoke(() => EncoderOnInformationUpdate(args));

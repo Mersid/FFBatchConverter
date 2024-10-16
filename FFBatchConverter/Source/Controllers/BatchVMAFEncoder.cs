@@ -92,7 +92,7 @@ public class BatchVMAFEncoder
             .WithDegreeOfParallelism(Environment.ProcessorCount)
             .Select(t => new VMAFVideoEncoder(FFprobePath, FFmpegPath, t))
             .OrderByDescending(t => t.Duration) // Process the longest files first. If two files are of the same length, process the largest file first.
-            .ThenByDescending(t => (new FileInfo(t.InputFilePath).Length))
+            .ThenByDescending(t => new FileInfo(t.InputFilePath).Length)
             .ToList();
 
         foreach (VMAFVideoEncoder encoder in encoders)

@@ -6,7 +6,7 @@ namespace FFBatchConverter.Avalonia;
 
 public class SettingsManager
 {
-    private string SettingsPath { get; } = "settings.json";
+    private static string SettingsPath => "settings.json";
     public Settings Settings { get; private set; } = new Settings();
 
     public event Action<Settings>? SettingsChanged;

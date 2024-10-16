@@ -1,6 +1,3 @@
 ﻿namespace FFBatchConverter.Tokens;
 
-public class VideoEncoderToken
-{
-    
-}
+public class VideoEncoderToken;

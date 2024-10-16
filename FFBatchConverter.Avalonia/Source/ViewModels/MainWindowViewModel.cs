@@ -42,21 +42,6 @@ public class MainWindowViewModel : ReactiveObject
         Environment.Exit(0);
     }
 
-    public void MenuNavigateBatchVideoEncoder()
-    {
-        // CurrentView = BatchVideoEncoderView;
-    }
-
-    public void MenuNavigateVMAFVideoEncoder()
-    {
-        // CurrentView = VMAFVideoEncoderView;
-    }
-
-    public void MenuNavigateVMAFTargetVideoEncoder()
-    {
-        // CurrentView = VMAFTargetVideoEncoderView;
-    }
-
     public void AddButtonClicked()
     {
         SidePanelItems.Add(new MainWindowSidePanelItem

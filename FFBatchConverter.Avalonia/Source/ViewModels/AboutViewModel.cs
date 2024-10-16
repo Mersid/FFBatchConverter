@@ -2,7 +2,4 @@
 
 namespace FFBatchConverter.Avalonia.ViewModels;
 
-public class AboutViewModel : ReactiveObject
-{
-    
-}
+public class AboutViewModel : ReactiveObject;

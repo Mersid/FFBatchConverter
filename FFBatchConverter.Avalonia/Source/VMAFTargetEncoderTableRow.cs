@@ -6,26 +6,26 @@ namespace FFBatchConverter.Avalonia;
 public class VMAFTargetEncoderTableRow : ReactiveObject
 {
     [Reactive]
-    public string FileName { get; set; }
+    public required string FileName { get; set; }
 
     [Reactive]
-    public string Duration { get; set; }
+    public required string Duration { get; set; }
 
     [Reactive]
-    public string Size { get; set; }
+    public required string Size { get; set; }
 
     [Reactive]
-    public string Range { get; set; }
+    public required string Range { get; set; }
 
     [Reactive]
-    public string Crf { get; set; }
+    public required string Crf { get; set; }
 
     [Reactive]
-    public string Vmaf { get; set; }
+    public required string Vmaf { get; set; }
 
     [Reactive]
-    public string Phase { get; set; }
+    public required string Phase { get; set; }
 
     [Reactive]
-    public string Status { get; set; }
+    public required string Status { get; set; }
 }

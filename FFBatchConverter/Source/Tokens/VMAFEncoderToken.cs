@@ -1,6 +1,3 @@
 ﻿namespace FFBatchConverter.Tokens;
 
-public class VMAFEncoderToken
-{
-    
-}
+public class VMAFEncoderToken;

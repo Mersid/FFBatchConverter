@@ -17,9 +17,9 @@ public class TaskCreateViewModel : ReactiveObject
     [Reactive]
     public int TaskTypeSelection { get; set; } = -1;
 
-    [Reactive] public string FFmpegPath { get; set; } = Helpers.GetFFmpegPath();
+    [Reactive] public string FFmpegPath { get; set; } = Helpers.GetFFmpegPath() ?? "FFmpeg not found!";
 
-    [Reactive] public string FFprobePath { get; set; } = Helpers.GetFFprobePath();
+    [Reactive] public string FFprobePath { get; set; } = Helpers.GetFFprobePath() ?? "FFprobe not found!";
 
     public bool RequiresTempDirectory => TaskTypeSelection == 2;
 
@@ -38,7 +38,7 @@ public class TaskCreateViewModel : ReactiveObject
         // RequiresTempDirectory depends on TaskTypeSelection, so if that changes, also notify the computed property.
         this
             .WhenAnyValue(x => x.TaskTypeSelection)
-            .Subscribe(x => this.RaisePropertyChanged(nameof(RequiresTempDirectory)));
+            .Subscribe(_ => this.RaisePropertyChanged(nameof(RequiresTempDirectory)));
     }
 
     public void CreateTaskClicked()

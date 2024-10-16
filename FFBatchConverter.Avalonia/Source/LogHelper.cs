@@ -4,16 +4,16 @@ using System.IO;
 
 namespace FFBatchConverter.Avalonia;
 
-public class LogHelper
+public static class LogHelper
 {
-    private static readonly string _tempDirectory = Path.Combine(Path.GetTempPath(), "FFBatchConverter");
+    private static readonly string TempDirectory = Path.Combine(Path.GetTempPath(), "FFBatchConverter");
 
     public static void OpenLog(string log)
     {
-        if (!Directory.Exists(_tempDirectory))
-            Directory.CreateDirectory(_tempDirectory);
+        if (!Directory.Exists(TempDirectory))
+            Directory.CreateDirectory(TempDirectory);
 
-        string tempFile = Path.Combine(_tempDirectory, $"{Guid.NewGuid()}.log");
+        string tempFile = Path.Combine(TempDirectory, $"{Guid.NewGuid()}.log");
         File.WriteAllText(tempFile, log);
         Process.Start(new ProcessStartInfo(tempFile) {UseShellExecute = true});
     }

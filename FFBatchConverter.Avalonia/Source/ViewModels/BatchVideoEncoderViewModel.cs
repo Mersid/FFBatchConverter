@@ -16,7 +16,7 @@ namespace FFBatchConverter.Avalonia.ViewModels;
 public class BatchVideoEncoderViewModel : ReactiveObject
 {
 
-    public BiMap<VideoEncoderToken, EncoderTableRow> EncoderToRow { get; set; } = new BiMap<VideoEncoderToken, EncoderTableRow>();
+    public BiMap<VideoEncoderToken, EncoderTableRow> EncoderToRow { get; private set; } = new BiMap<VideoEncoderToken, EncoderTableRow>();
 
     public ObservableCollection<EncoderTableRow> TableRows { get; set; } = [];
 
@@ -38,7 +38,7 @@ public class BatchVideoEncoderViewModel : ReactiveObject
     [Reactive]
     public bool Encoding { get; set; }
 
-    private BatchVideoEncoder? Encoder { get; set; }
+    private BatchVideoEncoder Encoder { get; set; }
 
     public BatchVideoEncoderViewModel(TaskCreateInfo createInfo)
     {
@@ -48,7 +48,7 @@ public class BatchVideoEncoderViewModel : ReactiveObject
             FFprobePath = createInfo.FFprobePath,
         };
 
-        Encoder.InformationUpdate += (sender, args) => Dispatcher.UIThread.Invoke(() => EncoderOnInformationUpdate(sender, args));
+        Encoder.InformationUpdate += (_, args) => Dispatcher.UIThread.Invoke(() => EncoderOnInformationUpdate(args));
         App.Instance.EncoderRebuilt += EncoderRebuiltEvent;
 
         // If these values change in the UI/ViewModel, we want to update the encoder with the new values.
@@ -77,7 +77,7 @@ public class BatchVideoEncoderViewModel : ReactiveObject
         TableRows.Clear();
     }
 
-    private void EncoderOnInformationUpdate(object? sender, InformationUpdateEventArgs<VideoEncoderStatusReport> e)
+    private void EncoderOnInformationUpdate(InformationUpdateEventArgs<VideoEncoderStatusReport> e)
     {
         VideoEncoderToken encoder = e.Report.Token;
         VideoEncoderStatusReport report = e.Report;
@@ -112,7 +112,7 @@ public class BatchVideoEncoderViewModel : ReactiveObject
                 // Nothing to do here.
                 break;
             default:
-                throw new ArgumentOutOfRangeException(nameof(e.ModificationType), "Unknown modification type.");
+                throw new ArgumentOutOfRangeException(nameof(e), e, "Unknown modification type.");
         }
     }
 

@@ -15,7 +15,7 @@ namespace FFBatchConverter.Avalonia.ViewModels;
 
 public class BatchVMAFEncoderViewModel : ReactiveObject
 {
-    public BiMap<VMAFEncoderToken, VMAFEncoderTableRow> EncoderToRow { get; set; } = new BiMap<VMAFEncoderToken, VMAFEncoderTableRow>();
+    public BiMap<VMAFEncoderToken, VMAFEncoderTableRow> EncoderToRow { get; private set; } = new BiMap<VMAFEncoderToken, VMAFEncoderTableRow>();
 
     public ObservableCollection<VMAFEncoderTableRow> TableRows { get; set; } = [];
 
@@ -32,7 +32,7 @@ public class BatchVMAFEncoderViewModel : ReactiveObject
     /// 0 is x265, 1 is x264, since it's by index, and we put x265 at the top.
     /// </summary>
     [Reactive]
-    public int EncoderSelection { get; set; } = 0;
+    public int EncoderSelection { get; set; }
 
     // TODO: Add verification.
     [Reactive]
@@ -47,7 +47,7 @@ public class BatchVMAFEncoderViewModel : ReactiveObject
     [Reactive]
     public bool Encoding { get; set; }
 
-    private BatchVMAFEncoder? Encoder { get; set; }
+    private BatchVMAFEncoder Encoder { get; set; }
 
     public BatchVMAFEncoderViewModel(TaskCreateInfo createInfo)
     {
@@ -57,7 +57,7 @@ public class BatchVMAFEncoderViewModel : ReactiveObject
             FFprobePath = createInfo.FFprobePath,
         };
 
-        Encoder.InformationUpdate += (sender, args) => Dispatcher.UIThread.Invoke(() => EncoderOnInformationUpdate(sender, args));
+        Encoder.InformationUpdate += (_, args) => Dispatcher.UIThread.Invoke(() => EncoderOnInformationUpdate(args));
         App.Instance.EncoderRebuilt += EncoderRebuiltEvent;
 
         // If these values change in the UI/ViewModel, we want to update the encoder with the new values.
@@ -92,7 +92,7 @@ public class BatchVMAFEncoderViewModel : ReactiveObject
         TableRows.Clear();
     }
 
-    private void EncoderOnInformationUpdate(object? sender, InformationUpdateEventArgs<VMAFVideoEncoderStatusReport> e)
+    private void EncoderOnInformationUpdate(InformationUpdateEventArgs<VMAFVideoEncoderStatusReport> e)
     {
         VMAFEncoderToken token = e.Report.Token;
         VMAFVideoEncoderStatusReport report = e.Report;
@@ -131,7 +131,7 @@ public class BatchVMAFEncoderViewModel : ReactiveObject
                 // Nothing to do here.
                 break;
             default:
-                throw new NotImplementedException();
+                throw new ArgumentOutOfRangeException(nameof(e), e, "Unknown modification type.");
         }
     }
 

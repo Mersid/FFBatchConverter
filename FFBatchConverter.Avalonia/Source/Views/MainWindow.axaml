@@ -32,7 +32,21 @@
         </Menu>
 
         <!-- Thanks to https://github.com/ibram-reda/NavigationApp/tree/main -->
-        <ContentControl Content="{Binding CurrentView}" />
+        <!-- <ContentControl Content="{Binding CurrentView}" /> -->
+
+        <Grid ColumnDefinitions="320, 1, *">
+            <StackPanel Grid.Column="0">
+                <StackPanel Orientation="Horizontal">
+                    <Button Content="Add" Command="{Binding AddButtonClicked}" />
+                    <Button Content="Remove" Command="{Binding RemoveButtonClicked}" />
+                </StackPanel>
+                <ListBox SelectionChanged="SidePanelListBoxSelectionChangedEvent"
+                         ItemsSource="{Binding SidePanelItems}"
+                         DisplayMemberBinding="{Binding Name}" />
+            </StackPanel>
+            <GridSplitter Grid.Column="1" Margin="3, 0, 3, 0" Background="Gray" ResizeDirection="Columns" />
+            <ContentControl Grid.Column="2" Content="{Binding CurrentView}" />
+        </Grid>
     </DockPanel>
 
 </Window>

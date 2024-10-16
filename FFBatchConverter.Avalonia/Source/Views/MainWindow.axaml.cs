@@ -30,4 +30,9 @@ public partial class MainWindow : Window
 
         aboutView.ShowDialog(this);
     }
+
+    private void SidePanelListBoxSelectionChangedEvent(object? sender, SelectionChangedEventArgs e)
+    {
+        ((MainWindowViewModel)DataContext).SelectedSidePanelIndex = (sender as ListBox)?.SelectedIndex ?? 0;
+    }
 }

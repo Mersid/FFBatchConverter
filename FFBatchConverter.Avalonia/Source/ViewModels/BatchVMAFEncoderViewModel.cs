@@ -50,27 +50,14 @@ public class BatchVMAFEncoderViewModel : ReactiveObject
 
     private BatchVMAFEncoder? Encoder { get; set; }
 
-    public BatchVMAFEncoderViewModel()
+    public BatchVMAFEncoderViewModel(TaskCreateInfo createInfo)
     {
-        AttachEncoderEvents();
-    }
+        Encoder = new BatchVMAFEncoder
+        {
+            FFmpegPath = createInfo.FFmpegPath,
+            FFprobePath = createInfo.FFprobePath,
+        };
 
-    /// <summary>
-    /// Fired when the encoder is rebuilt; likely because of settings change.
-    /// </summary>
-    /// <exception cref="NotImplementedException"></exception>
-    private void EncoderRebuiltEvent()
-    {
-        Encoding = false;
-        EncoderToRow = new BiMap<VMAFEncoderToken, VMAFEncoderTableRow>();
-        TableRows.Clear();
-    }
-
-    private void AttachEncoderEvents()
-    {
-        if (Encoder != null)
-            Encoder.InformationUpdate -= EncoderOnInformationUpdate; // If already attached, remove the old event handler.
-        Encoder = App.Instance.VMAFEncoder;
         Encoder.InformationUpdate += (sender, args) => Dispatcher.UIThread.Invoke(() => EncoderOnInformationUpdate(sender, args));
         App.Instance.EncoderRebuilt += EncoderRebuiltEvent;
 
@@ -93,6 +80,17 @@ public class BatchVMAFEncoderViewModel : ReactiveObject
         this
             .WhenAnyValue(x => x.Arguments)
             .Subscribe(x => Encoder.Arguments = x);
+    }
+
+    /// <summary>
+    /// Fired when the encoder is rebuilt; likely because of settings change.
+    /// </summary>
+    /// <exception cref="NotImplementedException"></exception>
+    private void EncoderRebuiltEvent()
+    {
+        Encoding = false;
+        EncoderToRow = new BiMap<VMAFEncoderToken, VMAFEncoderTableRow>();
+        TableRows.Clear();
     }
 
     private void EncoderOnInformationUpdate(object? sender, InformationUpdateEventArgs<VMAFVideoEncoderStatusReport> e)

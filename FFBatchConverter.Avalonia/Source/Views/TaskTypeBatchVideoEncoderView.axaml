@@ -1,0 +1,66 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="FFBatchConverter.Avalonia.Views.TaskTypeBatchVideoEncoderView"
+             xmlns:vm="using:FFBatchConverter.Avalonia.ViewModels"
+             x:DataType="vm:TaskTypeBatchVideoEncoderViewModel">
+    <UserControl>
+        <Grid RowDefinitions="*, Auto">
+            <!-- The transparent background is necessary for drag and drop. Otherwise, one can only drop on the data grid's header. -->
+            <!-- <Panel Grid.Row="0" DragDrop.AllowDrop="True" Background="Transparent"> -->
+            <!--     <DataGrid -->
+            <!--         IsReadOnly="True" -->
+            <!--         ItemsSource="{Binding TableRows}" -->
+            <!--         AutoGenerateColumns="False" -->
+            <!--         CanUserResizeColumns="True" -->
+            <!--         CanUserSortColumns="True" -->
+            <!--         GridLinesVisibility="All" -->
+            <!--         BorderThickness="1" -->
+            <!--         BorderBrush="Gray" -->
+            <!--         x:Name="DataGrid" -->
+            <!--         > -->
+            <!--         <DataGrid.Columns> -->
+            <!--             <DataGridTextColumn Header="File Name" Binding="{Binding FileName}" /> -->
+            <!--             <DataGridTextColumn Header="Duration" Binding="{Binding Duration}" /> -->
+            <!--             <DataGridTextColumn Header="Size" Binding="{Binding Size}" /> -->
+            <!--             <DataGridTextColumn Header="Status" Binding="{Binding Status}" /> -->
+            <!--         </DataGrid.Columns> -->
+            <!-- -->
+            <!--         <DataGrid.ContextMenu> -->
+            <!--             <ContextMenu> -->
+            <!--                 <MenuItem Header="Copy log" Click="CopyLogsMenuItemClicked" /> -->
+            <!--                 <MenuItem Header="Open log in text editor" Click="OpenLogsEditorMenuItemClicked" /> -->
+            <!--                 <Separator /> -->
+            <!--                 <MenuItem Header="Remove" Click="RemoveMenuItemClicked" /> -->
+            <!--                 <MenuItem Header="Reset to pending" Click="ResetMenuItemClicked" /> -->
+            <!--             </ContextMenu> -->
+            <!--         </DataGrid.ContextMenu> -->
+            <!--     </DataGrid> -->
+            <!-- </Panel> -->
+
+            <!-- Control panel -->
+            <Panel Grid.Row="1" Margin="0, 0, 0, 5">
+                <Grid ColumnDefinitions="*,200">
+                    <StackPanel Grid.Column="0" VerticalAlignment="Bottom">
+                        <Grid ColumnDefinitions="150, 70, 126, 230, 100, 70">
+                            <Label Grid.Column="0" VerticalAlignment="Center" Content="Concurrency" />
+                            <TextBox Grid.Column="1" Text="{Binding Concurrency}" />
+
+                            <Label Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Content="Subdirectory" />
+                            <TextBox Grid.Column="3" Text="{Binding Subdirectory}" />
+
+                            <Label Grid.Column="4" HorizontalAlignment="Center" VerticalAlignment="Center" Content="Extension" />
+                            <TextBox Grid.Column="5" Text="{Binding Extension}" />
+                        </Grid>
+                        <Grid ColumnDefinitions="150, 600">
+                            <Label Grid.Column="0" VerticalAlignment="Center" Content="Arguments" />
+                            <TextBox Grid.Column="1" Text="{Binding Arguments}" />
+                        </Grid>
+                    </StackPanel>
+                </Grid>
+            </Panel>
+        </Grid>
+    </UserControl>
+</UserControl>

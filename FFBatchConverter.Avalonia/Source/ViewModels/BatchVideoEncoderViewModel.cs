@@ -45,27 +45,14 @@ public class BatchVideoEncoderViewModel : ReactiveObject
 
     private BatchVideoEncoder? Encoder { get; set; }
 
-    public BatchVideoEncoderViewModel()
+    public BatchVideoEncoderViewModel(TaskCreateInfo createInfo)
     {
-        AttachEncoderEvents();
-    }
+        Encoder = new BatchVideoEncoder
+        {
+            FFmpegPath = createInfo.FFmpegPath,
+            FFprobePath = createInfo.FFprobePath,
+        };
 
-    /// <summary>
-    /// Fired when the encoder is rebuilt; likely because of settings change.
-    /// </summary>
-    /// <exception cref="NotImplementedException"></exception>
-    private void EncoderRebuiltEvent()
-    {
-        Encoding = false;
-        EncoderToRow = new BiMap<VideoEncoderToken, EncoderTableRow>();
-        TableRows.Clear();
-    }
-
-    private void AttachEncoderEvents()
-    {
-        if (Encoder != null)
-            Encoder.InformationUpdate -= EncoderOnInformationUpdate; // If already attached, remove the old event handler.
-        Encoder = App.Instance.Encoder;
         Encoder.InformationUpdate += (sender, args) => Dispatcher.UIThread.Invoke(() => EncoderOnInformationUpdate(sender, args));
         App.Instance.EncoderRebuilt += EncoderRebuiltEvent;
 
@@ -82,6 +69,17 @@ public class BatchVideoEncoderViewModel : ReactiveObject
         this
             .WhenAnyValue(x => x.Arguments)
             .Subscribe(x => Encoder.Arguments = x);
+    }
+
+    /// <summary>
+    /// Fired when the encoder is rebuilt; likely because of settings change.
+    /// </summary>
+    /// <exception cref="NotImplementedException"></exception>
+    private void EncoderRebuiltEvent()
+    {
+        Encoding = false;
+        EncoderToRow = new BiMap<VideoEncoderToken, EncoderTableRow>();
+        TableRows.Clear();
     }
 
     private void EncoderOnInformationUpdate(object? sender, InformationUpdateEventArgs<VideoEncoderStatusReport> e)

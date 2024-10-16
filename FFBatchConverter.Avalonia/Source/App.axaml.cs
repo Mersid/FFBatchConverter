@@ -60,6 +60,7 @@ public partial class App : Application
         {
             FFprobePath = settings.ShouldOverrideFFprobePath ? settings.FFprobePath : Helpers.GetFFprobePath(),
             FFmpegPath = settings.ShouldOverrideFFmpegPath ? settings.FFmpegPath : Helpers.GetFFmpegPath(),
+            TempDirectory = "" // TODO: Remove me!
         };
 
         VMAFEncoder = new BatchVMAFEncoder

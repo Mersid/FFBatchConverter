@@ -66,10 +66,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Source\Models\" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\FFBatchConverter\FFBatchConverter.csproj" />
     </ItemGroup>
 </Project>

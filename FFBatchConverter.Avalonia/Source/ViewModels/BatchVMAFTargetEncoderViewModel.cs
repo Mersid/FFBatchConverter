@@ -50,27 +50,15 @@ public class BatchVMAFTargetEncoderViewModel : ReactiveObject
 
     private BatchVMAFTargetEncoder? Encoder { get; set; }
 
-    public BatchVMAFTargetEncoderViewModel()
+    public BatchVMAFTargetEncoderViewModel(TaskCreateInfo createInfo)
     {
-        AttachEncoderEvents();
-    }
+        Encoder = new BatchVMAFTargetEncoder
+        {
+            FFmpegPath = createInfo.FFmpegPath,
+            FFprobePath = createInfo.FFprobePath,
+            TempDirectory = createInfo.TempDirectory
+        };
 
-    /// <summary>
-    /// Fired when the encoder is rebuilt; likely because of settings change.
-    /// </summary>
-    /// <exception cref="NotImplementedException"></exception>
-    private void EncoderRebuiltEvent()
-    {
-        Encoding = false;
-        EncoderToRow = new BiMap<VMAFTargetEncoderToken, VMAFTargetEncoderTableRow>();
-        TableRows.Clear();
-    }
-
-    private void AttachEncoderEvents()
-    {
-        if (Encoder != null)
-            Encoder.InformationUpdate -= EncoderOnInformationUpdate; // If already attached, remove the old event handler.
-        Encoder = App.Instance.VMAFTargetEncoder;
         Encoder.InformationUpdate += (sender, args) => Dispatcher.UIThread.Invoke(() => EncoderOnInformationUpdate(sender, args));
         App.Instance.EncoderRebuilt += EncoderRebuiltEvent;
 
@@ -93,6 +81,17 @@ public class BatchVMAFTargetEncoderViewModel : ReactiveObject
         this
             .WhenAnyValue(x => x.Arguments)
             .Subscribe(x => Encoder.Arguments = x);
+    }
+
+    /// <summary>
+    /// Fired when the encoder is rebuilt; likely because of settings change.
+    /// </summary>
+    /// <exception cref="NotImplementedException"></exception>
+    private void EncoderRebuiltEvent()
+    {
+        Encoding = false;
+        EncoderToRow = new BiMap<VMAFTargetEncoderToken, VMAFTargetEncoderTableRow>();
+        TableRows.Clear();
     }
 
     private void EncoderOnInformationUpdate(object? sender, InformationUpdateEventArgs<VMAFTargetEncoderStatusReport> e)

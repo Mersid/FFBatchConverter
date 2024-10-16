@@ -43,6 +43,7 @@ public class BatchVMAFTargetEncoder
 
     public required string FFmpegPath { get; set; } = string.Empty;
     public required string FFprobePath { get; set; } = string.Empty;
+    public required string TempDirectory { get; set; } = string.Empty;
 
     /// <summary>
     /// FFmpeg arguments.
@@ -91,7 +92,7 @@ public class BatchVMAFTargetEncoder
             .AsParallel()
             .AsOrdered()
             .WithDegreeOfParallelism(Environment.ProcessorCount)
-            .Select(t => new VMAFTargetVideoEncoder(FFprobePath, FFmpegPath, t))
+            .Select(t => new VMAFTargetVideoEncoder(FFprobePath, FFmpegPath, t, TempDirectory))
             .OrderByDescending(t => t.Duration) // Process the longest files first. If two files are of the same length, process the largest file first.
             .ThenByDescending(t => (new FileInfo(t.InputFilePath).Length))
             .ToList();

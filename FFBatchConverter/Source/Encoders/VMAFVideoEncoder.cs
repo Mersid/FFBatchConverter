@@ -22,7 +22,7 @@ internal class VMAFVideoEncoder
     /// <summary>
     /// Duration of the video in seconds. Zero if the duration could not be determined (e.g. file does not exist or is not a video).
     /// </summary>
-    public double Duration { get; private set; }
+    public double Duration { get; }
 
     /// <summary>
     /// Gets the processed duration of the video, in seconds, for the current stage of the process.
@@ -156,6 +156,8 @@ internal class VMAFVideoEncoder
         if (encoder.State == EncodingState.Success)
         {
             VideoEncoder.InfoUpdate -= OnEncoderInfoUpdate;
+            // We shouldn't be able to receive events before Start() is called in the encoder, which is when OutputFilePath is set.
+            Debug.Assert(encoder.OutputFilePath != null, "encoder.OutputFilePath != null");
             VMAFScorer = new VMAFScorer(FFprobePath, InputFilePath, encoder.OutputFilePath);
             VMAFScorer.InfoUpdate += OnScorerInfoUpdate;
             Log.AppendLine("Encoding complete. Starting VMAF scoring.");

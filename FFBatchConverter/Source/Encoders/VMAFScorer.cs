@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Text;
-using System.Text.Json;
 using System.Text.RegularExpressions;
 using FFBatchConverter.Misc;
 
@@ -13,10 +12,6 @@ internal class VMAFScorer
 
     private StringBuilder Log { get; } = new StringBuilder();
 
-    /// <summary>
-    /// Duration of the video in seconds.
-    /// </summary>
-    public double Duration { get; }
     public double CurrentDuration { get; private set; }
     public EncodingState State { get; private set; } = EncodingState.Pending;
 
@@ -51,21 +46,8 @@ internal class VMAFScorer
 
         string probeOutput = Helpers.Probe(ffprobePath, originalFilePath);
 
-        // Json output is in probeOutput
-        JsonDocument json = JsonDocument.Parse(probeOutput);
-
         // Copy probeOutput to Log for debugging, if we need it.
         Log.AppendLine(probeOutput);
-
-        try
-        {
-            Duration = double.Parse(json.RootElement.GetProperty("format").GetProperty("duration").GetString() ?? throw new InvalidOperationException());
-        }
-        catch (Exception e)
-        {
-            Log.AppendLine(e.Message);
-            State = EncodingState.Error;
-        }
     }
 
     internal void Start(string ffmpegPath)
